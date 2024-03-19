@@ -59,7 +59,7 @@ class _SplashState extends State<Splash> {
                   //Chamando a animação do texto abaixo da imagem
                   children: [
                     AnimatedTextMove(
-                      text: 'Gestor Remoto',
+                      text: 'Pré-vendas',
                     ),
                   ],
                 ),

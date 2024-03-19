@@ -5,6 +5,7 @@ class Style {
   static const Color secondaryColor = Color(0xff42b9f0);
   static const Color tertiaryColor = Color(0xffffffff);
   static const Color quarantineColor = Color(0xffA6A6A6);
+  static const Color lightGreyColor = Color(0xffD9D9D9);
   static const Color sucefullColor = Colors.green;
   static const Color errorColor = Colors.red;
   static const Color warningColor = Color(0xffFFD700);

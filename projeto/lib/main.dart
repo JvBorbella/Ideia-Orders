@@ -11,11 +11,11 @@ class MyApp extends StatelessWidget {
       title: "Gestor Remoto",
       theme: ThemeData(
         textTheme: TextTheme(
-          // bodyText1: TextStyle(
-          //   fontFamily: 'Sifonn-Pro'
-          // ),bodyText2: TextStyle(
-          //   fontFamily: 'Sifonn-Pro'
-          // )
+          bodyText1: TextStyle(
+            fontFamily: 'Sifonn-Pro'
+          ),bodyText2: TextStyle(
+            fontFamily: 'Sifonn-Pro'
+          )
         ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
