@@ -416,6 +416,10 @@ class Style {
     return MediaQuery.of(context).size.height * 0.128;
   }
 
+  static double width_80(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.2222222222222222;
+  }
+
   static double height_100(BuildContext context) {
     return MediaQuery.of(context).size.height * 0.16;
   }
@@ -424,8 +428,20 @@ class Style {
     return MediaQuery.of(context).size.height * 0.208;
   }
 
+  static double width_130(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.3611111111111111;
+  }
+
   static double height_150(BuildContext context) {
     return MediaQuery.of(context).size.height * 0.24;
+  }
+
+  static double width_150(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.24;
+  }
+
+  static double width_280(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.456;
   }
 
   static double height_165(BuildContext context) {
@@ -436,8 +452,16 @@ class Style {
     return MediaQuery.of(context).size.height * 0.32;
   }
 
+  static double width_200(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.5555555555555556;
+  }
+
   static double height_250(BuildContext context) {
     return MediaQuery.of(context).size.height * 0.4;
+  }
+
+  static double width_250(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.6944444444444444;
   }
 
   // static const double inputSpace = 25.0;

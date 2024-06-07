@@ -17,8 +17,6 @@ class LoginFunction {
     TextEditingController userController,
     TextEditingController passwordController,
   ) async {
-    //Chamando o SharedPreferences para armazenar o token resgatado no json se a requisição post do login for bem sucedida.
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     //Tentando fazer a requisição ao servidor.
     try {
@@ -42,37 +40,41 @@ class LoginFunction {
           'auth-pass': md5Password,
         },
       );
-
+      print(md5Password);
       print(response.statusCode);
 
       //Caso o servidor aceite a conexão, o token será resgatado no json e armazenado no sharedpreferences.
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
         if (responseBody['success'] == true) {
-          var token = responseBody['data']['token'];
-          await sharedPreferences.setString(
-            'token',
-            "Token ${responseBody['data']['token']}",
-          );
-
-          // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
-          Navigator.of(context).pushReplacement(
+        var token = responseBody['data']['token'];
+        var login = responseBody['data']['login']; 
+        var image = responseBody['data']['image']; 
+        var email = responseBody['data']['email']; 
+        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        await sharedPreferences.setString('token', token);
+        await sharedPreferences.setString('login', login);
+        await sharedPreferences.setString('image', image);
+        await sharedPreferences.setString('url', '$url/ideia/secure');
+        await sharedPreferences.setString('urlBasic', url);
+        await sharedPreferences.setString('email', email);
+        print(token);
+        
+        // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
+        Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => Home(
-                url: '$url/ideia/secure', // URL montada.
-                urlBasic: url, // URL base passada na página de Config().
-                token: token, // Token resgatado após o login.
-              ),
+                builder: (context) => Home(),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
               content: Text(
                 responseBody['message'],
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: Style.SaveUrlMessageSize(context),
                   color: Style.tertiaryColor,
                 ),
               ),
@@ -84,10 +86,11 @@ class LoginFunction {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
             content: Text(
               'Sem conexão com o servidor!',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Style.SaveUrlMessageSize(context),
                 color: Style.tertiaryColor,
               ),
             ),
@@ -98,10 +101,11 @@ class LoginFunction {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
             content: Text(
               'Não foi possível conectar-se dentro do tempo limite!',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Style.SaveUrlMessageSize(context),
                 color: Style.tertiaryColor,
               ),
             ),
@@ -112,10 +116,11 @@ class LoginFunction {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
             content: Text(
               'Não foi possível conectar-se dentro do tempo limite!',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Style.SaveUrlMessageSize(context),
                 color: Style.tertiaryColor,
               ),
             ),
@@ -126,10 +131,11 @@ class LoginFunction {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
             content: Text(
               'Ocorreu um erro inesperado com o servidor!',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Style.SaveUrlMessageSize(context),
                 color: Style.tertiaryColor,
               ),
             ),
@@ -140,10 +146,11 @@ class LoginFunction {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
             content: Text(
               'Não foi possível iniciar a sessão!',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Style.SaveUrlMessageSize(context),
                 color: Style.tertiaryColor,
               ),
             ),
@@ -156,10 +163,11 @@ class LoginFunction {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
           content: Text(
             'Não foi possível iniciar a sessão',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: Style.SaveUrlMessageSize(context),
               color: Style.tertiaryColor,
             ),
           ),

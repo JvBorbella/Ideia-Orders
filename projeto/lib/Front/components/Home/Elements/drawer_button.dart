@@ -110,7 +110,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                     Text(
                                       'Olá, ' + login + '!',
                                       style: TextStyle(
-                                        fontFamily: 'Poppins-Medium',
+                                        fontFamily: 'Poppins-Regular',
                                         fontSize: Style.LoginFontSize(context),
                                         color: Style.tertiaryColor,
                                       ),
@@ -123,7 +123,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                     Text(
                                       email,
                                       style: TextStyle(
-                                        fontFamily: 'Poppins-Medium',
+                                        fontFamily: 'Poppins-Regular',
                                         fontSize: Style.EmailFontSize(context),
                                         color: Style.tertiaryColor,
                                       ),
@@ -170,7 +170,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           //               style: TextStyle(
           //                   color: Style.primaryColor,
           //                   fontSize: Style.ButtonDrawerSize(context),
-          //                   fontFamily: 'Poppins-Medium'),
+          //                   fontFamily: 'Poppins-Regular'),
           //             ),
           //           ),
           //           SizedBox(
@@ -183,7 +183,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           //               style: TextStyle(
           //                   color: Style.primaryColor,
           //                   fontSize: Style.ButtonDrawerSize(context),
-          //                   fontFamily: 'Poppins-Medium'),
+          //                   fontFamily: 'Poppins-Regular'),
           //             ),
           //           ),
           //           SizedBox(
@@ -196,7 +196,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           //               style: TextStyle(
           //                   color: Style.primaryColor,
           //                   fontSize: Style.ButtonDrawerSize(context),
-          //                   fontFamily: 'Poppins-Medium'),
+          //                   fontFamily: 'Poppins-Regular'),
           //             ),
           //           ),
           //         ],

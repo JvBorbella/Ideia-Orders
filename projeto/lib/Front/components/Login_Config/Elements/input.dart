@@ -58,6 +58,7 @@ class _InputState extends State<Input> {
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
                 decoration: InputDecoration(
+                  fillColor: Colors.transparent,
                   suffixIcon: widget.IconButton,
                   suffixIconColor: Style.primaryColor,
                   labelText: widget.text,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:projeto/Front/components/Global/Elements/text_title.dart';
 import 'package:projeto/Front/components/Global/Estructure/navbar.dart';
 import 'package:projeto/Front/components/Home/Elements/drawer_button.dart';
 import 'package:projeto/Front/components/Home/Elements/order_container.dart';
 import 'package:projeto/Front/components/Style.dart';
 import 'package:projeto/Front/pages/new_order_page.dart';
+import 'package:projeto/Front/pages/order_page.dart';
 
 class Home extends StatefulWidget {
   final token;
@@ -65,6 +67,7 @@ class _HomeState extends State<Home> {
         body: RefreshIndicator(
           onRefresh: () => _refreshData(),
           child: ListView(
+          // Column(
             children: [
               // Navbar(
               //   children: [
@@ -101,7 +104,14 @@ class _HomeState extends State<Home> {
               // SizedBox(
               //   height: Style.height_10(context),
               // ),
-              // Text('Lista de pedidos'),
+              // Text(
+              //   'Lista de pedidos',
+              //   style: TextStyle(
+              //     fontSize: Style.height_15(context),
+              //     fontWeight: FontWeight.bold, 
+              //   ),
+              //   textAlign: TextAlign.center,
+              //   ),
               // Expanded(
               //   child: Center(
               //     child: Text(
@@ -113,6 +123,7 @@ class _HomeState extends State<Home> {
               //     ),
               //   ),
               // ),
+
               Navbar(
                 children: [
                   DrawerButton(
@@ -149,30 +160,18 @@ class _HomeState extends State<Home> {
                 height: Style.height_10(context),
               ),
               Center(
-                child: Text('Lista de pedidos'),
+                child: TextTitle(text: 'Lista de pedidos')
               ),
               SizedBox(
                 height: Style.height_10(context),
               ),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-              OrderContainer(),
-
+              GestureDetector(
+                onTap: () {
+                 Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => OrderPage()));
+              }, 
+              child: OrderContainer()
+              ),
             ],
           ),
         ),
