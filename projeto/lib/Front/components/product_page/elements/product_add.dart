@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Style.dart';
+import 'package:projeto/front/components/Style.dart';
 
 class ProductAdd extends StatefulWidget {
   const ProductAdd({super.key});

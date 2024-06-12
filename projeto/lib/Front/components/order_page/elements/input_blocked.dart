@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Style.dart';
+import 'package:projeto/front/components/Style.dart';
 
 class InputBlocked extends StatefulWidget {
   final String value;
@@ -20,6 +20,8 @@ class _InputBlockedState extends State<InputBlocked> {
           initialValue: widget.value,
           readOnly: true,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.black12,
               border: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(Style.height_15(context)))),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Home/Elements/ModalButtom.dart';
-import 'package:projeto/Front/components/Style.dart';
+import 'package:projeto/front/components/Style.dart';
+import 'package:projeto/front/components/home/elements/modal_button.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -50,7 +50,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   // height: Style.DrawerHeaderSize(context),
                   decoration: BoxDecoration(color: Style.primaryColor),
                   child: Container(
-                    padding: EdgeInsets.all(Style.PaddingContainerDrawerHeader(context)),
+                    padding: EdgeInsets.all(Style.height_15(context)),
                     child: Column(
                       children: [
                         Row(
@@ -62,7 +62,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                               iconSize: Style.IconCloseDrawerSize(context),
                               alignment: Alignment.topRight,
                               style: ButtonStyle(
-                                iconColor: MaterialStatePropertyAll(
+                                iconColor: WidgetStatePropertyAll(
                                     Style.tertiaryColor),
                               ),
                             ),

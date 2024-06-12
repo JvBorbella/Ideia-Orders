@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Global/Elements/text_title.dart';
-import 'package:projeto/Front/components/Login_Config/Elements/input.dart';
-import 'package:projeto/Front/components/Style.dart';
-import 'package:projeto/Front/components/new_order/elements/register_button.dart';
-import 'package:projeto/Front/components/new_order/elements/register_icon_button.dart';
+import 'package:projeto/front/components/Global/Elements/text_title.dart';
+import 'package:projeto/front/components/Login_Config/Elements/input.dart';
+import 'package:projeto/front/components/Style.dart';
+import 'package:projeto/front/components/new_order/elements/register_button.dart';
+import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 
 class CustomerSession extends StatefulWidget {
   const CustomerSession({super.key});
@@ -18,7 +18,7 @@ class _CustomerSessionState extends State<CustomerSession> {
     return Material(
       child: Column(
         children: [
-          TextTitle(text: 'Cliente'),
+          TextTitle(text: 'Dados do cliente'),
           SizedBox(
             height: Style.height_5(context),
           ),
@@ -54,11 +54,12 @@ class _CustomerSessionState extends State<CustomerSession> {
                   height: Style.height_10(context),
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: [
                         Container(
-                          width: Style.width_250(context),
+                          width: Style.width_215(context),
                           child: Input(
                               text: 'Informe o endereço',
                               type: TextInputType.text),
@@ -68,7 +69,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                     Column(
                       children: [
                         Container(
-                          width: Style.width_80(context),
+                          width: Style.width_100(context),
                           child: Input(text: 'UF', type: TextInputType.text),
                         )
                       ],
@@ -79,11 +80,12 @@ class _CustomerSessionState extends State<CustomerSession> {
                   height: Style.height_10(context),
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: [
                         Container(
-                          width: Style.width_200(context),
+                          width: Style.width_140(context),
                           child:
                               Input(text: 'Bairro', type: TextInputType.text),
                         )
@@ -92,7 +94,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                     Column(
                       children: [
                         Container(
-                          width: Style.width_130(context),
+                          width: Style.width_180(context),
                           child:
                               Input(text: 'Cidade', type: TextInputType.text),
                         )
@@ -109,7 +111,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                     Column(
                       children: [
                         Container(
-                          width: Style.height_150(context),
+                          width: Style.width_150(context),
                           child: RegisterButton(
                             text: 'Cadastrar cliente',
                             color: Style.primaryColor,
@@ -121,10 +123,13 @@ class _CustomerSessionState extends State<CustomerSession> {
                     Column(
                       children: [
                         Container(
-                          width: Style.height_150(context),
+                          width: Style.width_150(context),
                           child: Column(
                             children: [
                               RegisterIconButton(
+                                onPressed: () {
+                                  print('teste');
+                                },
                                 text: 'Finalizar pedido',
                                 color: Style.sucefullColor,
                                 width: Style.height_150(context),

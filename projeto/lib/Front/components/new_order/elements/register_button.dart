@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Style.dart';
+import 'package:projeto/front/components/Style.dart';
 
 class RegisterButton extends StatefulWidget {
   final String text;
@@ -40,7 +40,7 @@ class _RegisterButtonState extends State<RegisterButton> {
               Text(
                 widget.text,
                 style: TextStyle(
-                    fontSize: Style.height_12(context),
+                    fontSize: Style.height_8(context),
                     color: Style.tertiaryColor),
               ),
             ],

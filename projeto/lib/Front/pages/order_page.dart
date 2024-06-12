@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Global/Elements/Navbar-Button.dart';
-import 'package:projeto/Front/components/Global/Elements/text_title.dart';
-import 'package:projeto/Front/components/Global/Estructure/navbar.dart';
-import 'package:projeto/Front/components/Style.dart';
-import 'package:projeto/Front/components/order_page/elements/input_blocked.dart';
-import 'package:projeto/Front/components/order_page/elements/products_order.dart';
-import 'package:projeto/Front/pages/home.dart';
+
+import 'package:projeto/front/components/Global/Elements/text_title.dart';
+import 'package:projeto/front/components/style.dart';
+import 'package:projeto/front/components/global/elements/navbar_button.dart';
+import 'package:projeto/front/components/global/structure/navbar.dart';
+import 'package:projeto/front/components/order_page/elements/cancel_button.dart';
+import 'package:projeto/front/components/order_page/elements/input_blocked.dart';
+import 'package:projeto/front/components/order_page/elements/products_order.dart';
+import 'package:projeto/front/pages/home.dart';
 
 class OrderPage extends StatefulWidget {
   const OrderPage({super.key});
@@ -17,7 +19,8 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       body: ListView(
         children: [
           Navbar(text: 'Pedido', children: [
@@ -51,7 +54,7 @@ class _OrderPageState extends State<OrderPage> {
           Container(
             padding: EdgeInsets.only(left: Style.height_12(context)),
             child: Text(
-              'Data - 07/06/2024',
+              'Data do pedido - 07/06/2024',
               style: TextStyle(
                   color: Style.primaryColor,
                   fontSize: Style.height_12(context),
@@ -61,7 +64,7 @@ class _OrderPageState extends State<OrderPage> {
           SizedBox(
             height: Style.height_10(context),
           ),
-          TextTitle(text: 'Produtos'),
+          TextTitle(text: 'Produto(s)'),
           SizedBox(
             height: Style.height_10(context),
           ),
@@ -80,7 +83,7 @@ class _OrderPageState extends State<OrderPage> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-          TextTitle(text: 'Clientes'),
+          TextTitle(text: 'Dados do Cliente'),
           SizedBox(
             height: Style.height_10(context),
           ),
@@ -98,13 +101,13 @@ class _OrderPageState extends State<OrderPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      width: Style.width_280(context),
+                      width: Style.width_150(context),
                       child: Column(
                         children: [InputBlocked(value: 'CPF')],
                       ),
                     ),
                     Container(
-                      width: Style.width_280(context),
+                      width: Style.width_150(context),
                       child: Column(
                         children: [InputBlocked(value: 'Telefone')],
                       ),
@@ -122,7 +125,7 @@ class _OrderPageState extends State<OrderPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      width: Style.width_250(context),
+                      width: Style.width_225(context),
                       child: Column(
                         children: [InputBlocked(value: '(Cidade)')],
                       ),
@@ -142,24 +145,31 @@ class _OrderPageState extends State<OrderPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      width: Style.width_280(context),
+                      width: Style.width_150(context),
                       child: Column(
                         children: [InputBlocked(value: '(Bairro)')],
                       ),
                     ),
                     Container(
-                      width: Style.width_280(context),
+                      width: Style.width_150(context),
                       child: Column(
                         children: [InputBlocked(value: '(CEP)')],
                       ),
                     ),
                   ],
                 ),
+                SizedBox(
+                  height: Style.height_20(context),
+                ),
+                CancelButton(),
+                SizedBox(
+                  height: Style.height_10(context),
+                )
               ],
             ),
           )
         ],
       ),
-    );
+    ));
   }
 }

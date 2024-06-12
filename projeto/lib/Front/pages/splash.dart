@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Splash/Elements/Text-Splash.dart';
-import 'package:projeto/Front/pages/login.dart';
-import 'package:projeto/front/components/Style.dart';
+import 'package:projeto/front/components/Splash/elements/text_splash_page.dart';
+import 'package:projeto/front/pages/login.dart';
+import 'package:projeto/front/components/style.dart';
 import 'dart:async';
 
 class SplashPage extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:projeto/Front/components/Style.dart';
+import 'package:projeto/front/components/Style.dart';
 
 class Input extends StatefulWidget {
   //Variável para definir o texto do input na página em que é chamado
@@ -45,7 +45,7 @@ class _InputState extends State<Input> {
     return Material(
       child: ConstrainedBox(
         constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+            BoxConstraints(maxWidth: 1200),
         child: Container(
           margin: EdgeInsets.only(left: 5.0, right: 5),
           child: Column(
@@ -53,18 +53,22 @@ class _InputState extends State<Input> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               TextField(
-                controller: _textController,
+                
+                controller: _textController, 
+                style: TextStyle(
+                  fontSize: Style.height_12(context),
+                  fontFamily: 'Poppins-Regular'
+                ),
                 keyboardType: widget.type,
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
                 decoration: InputDecoration(
-                  fillColor: Colors.transparent,
                   suffixIcon: widget.IconButton,
                   suffixIconColor: Style.primaryColor,
                   labelText: widget.text,
                   labelStyle: TextStyle(
                     color: Style.quarantineColor,
-                    fontSize: MediaQuery.of(context).size.height * 0.020,
+                    fontSize: Style.height_10(context),
                   ),
                   floatingLabelAlignment: FloatingLabelAlignment.center,
                   enabledBorder: UnderlineInputBorder(
@@ -77,9 +81,6 @@ class _InputState extends State<Input> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                // onChanged: (text) {
-                //   print('Texto digitado: $text');
-                // },
               ),
             ],
           ),

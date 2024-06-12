@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Style.dart';
+import 'package:projeto/front/components/Style.dart';
 
 class RegisterIconButton extends StatefulWidget {
   final String text;
   final Color color;
   final double width;
   final IconData icon;
+  final Function onPressed;
 
   const RegisterIconButton({
     Key? key, 
     required this.text,
     required this.color,
     required this.width,
-    required this.icon
+    required this.icon,
+    required this.onPressed,
     });
 
   @override
@@ -35,19 +37,24 @@ class _RegisterIconButtonState extends State<RegisterIconButton> {
               // minimumSize: WidgetStatePropertyAll(
               //     Size(Style.height_150(context), Style.height_45(context)))
                   ),
-          onPressed: () {},
+          onPressed: () {
+            widget.onPressed();
+          },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 widget.text,
                 style: TextStyle(
-                    fontSize: Style.height_12(context),
+                    fontSize: Style.height_8(context),
                     color: Style.tertiaryColor),
+              ),
+              SizedBox(
+                width: Style.height_2(context),
               ),
               Icon(
                 widget.icon,
-                size: Style.height_25(context),
+                size: Style.height_15(context),
                 color: Style.tertiaryColor,
                 )
             ],

@@ -8,7 +8,7 @@ class Style {
   static const Color tertiaryColor = Color(0xffffffff);
   static const Color quarantineColor = Color(0xffA6A6A6);
   static const Color sucefullColor = Colors.green;
-  static const Color errorColor = Color.fromARGB(255, 156, 30, 21);
+  static const Color errorColor = Color.fromARGB(255, 214, 38, 25);
   static const Color warningColor = Color(0xffFFD700);
 //}
 
@@ -432,12 +432,20 @@ class Style {
     return MediaQuery.of(context).size.width * 0.3611111111111111;
   }
 
+  static double width_140(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.375;
+  }
+
   static double height_150(BuildContext context) {
     return MediaQuery.of(context).size.height * 0.24;
   }
 
   static double width_150(BuildContext context) {
-    return MediaQuery.of(context).size.width * 0.24;
+    return MediaQuery.of(context).size.width * 0.4166666666666667;
+  }
+
+  static double width_180(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.5;
   }
 
   static double width_280(BuildContext context) {
@@ -452,8 +460,15 @@ class Style {
     return MediaQuery.of(context).size.height * 0.32;
   }
 
+   static double width_100(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.2777777777777778;
+  }
+
   static double width_200(BuildContext context) {
     return MediaQuery.of(context).size.width * 0.5555555555555556;
+  }
+  static double width_215(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.5972222222222222;
   }
 
   static double height_250(BuildContext context) {
@@ -462,6 +477,10 @@ class Style {
 
   static double width_250(BuildContext context) {
     return MediaQuery.of(context).size.width * 0.6944444444444444;
+  }
+
+  static double width_225(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.625;
   }
 
   // static const double inputSpace = 25.0;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/pages/splash.dart';
+import 'package:projeto/front/pages/splash.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

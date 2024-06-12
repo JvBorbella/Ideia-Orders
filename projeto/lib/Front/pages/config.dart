@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Back/SaveUrl.dart';
-import 'package:projeto/Front/components/Global/Estructure/navbar.dart';
-import 'package:projeto/Front/components/Login_Config/Elements/ButtonConfig.dart';
-import 'package:projeto/Front/components/Login_Config/Elements/input.dart';
-import 'package:projeto/Front/components/Login_Config/Estructure/form-card.dart';
-import 'package:projeto/Front/components/Style.dart';
-import 'package:projeto/Front/pages/login.dart';
+import 'package:projeto/back/save_url_function.dart';
+import 'package:projeto/front/components/Login_Config/Elements/input.dart';
+import 'package:projeto/front/components/Login_Config/elements/config_button.dart';
+import 'package:projeto/front/components/style.dart';
+import 'package:projeto/front/components/global/structure/navbar.dart';
+import 'package:projeto/front/components/login_config/structure/form_card.dart';
+import 'package:projeto/front/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigPage extends StatefulWidget {

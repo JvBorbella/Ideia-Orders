@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Front/components/Global/Elements/Navbar-Button.dart';
-import 'package:projeto/Front/components/Global/Elements/text_title.dart';
-import 'package:projeto/Front/components/Global/Estructure/navbar.dart';
-import 'package:projeto/Front/components/Style.dart';
-import 'package:projeto/Front/components/product_page/elements/product_add.dart';
-import 'package:projeto/Front/pages/new_order_page.dart';
+import 'package:projeto/front/components/Global/Elements/text_title.dart';
+import 'package:projeto/front/components/style.dart';
+import 'package:projeto/front/components/global/elements/navbar_button.dart';
+import 'package:projeto/front/components/global/structure/navbar.dart';
+import 'package:projeto/front/components/product_page/elements/product_add.dart';
+import 'package:projeto/front/pages/new_order_page.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -16,11 +16,13 @@ class ProductList extends StatefulWidget {
 class _ProductListState extends State<ProductList> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       body: ListView(
         children: [
           Navbar(text: 'Produtos', children: [
-            NavbarButton(destination: NewOrderPage(), Icons: Icons.arrow_back_ios_new)
+            NavbarButton(
+                destination: NewOrderPage(), Icons: Icons.arrow_back_ios_new)
           ]),
           SizedBox(
             height: Style.height_10(context),
@@ -34,7 +36,7 @@ class _ProductListState extends State<ProductList> {
                 Icons.search,
                 color: Style.primaryColor,
               ),
-              hintText: 'Pesquise o código do produto',
+              hintText: 'Pesquise pelo produto',
               hintStyle: WidgetStatePropertyAll(
                   TextStyle(color: Style.quarantineColor)),
               // backgroundColor:
@@ -59,6 +61,6 @@ class _ProductListState extends State<ProductList> {
           ProductAdd()
         ],
       ),
-    );
+    ));
   }
 }

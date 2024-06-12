@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/Back/Logined.dart';
-import 'package:projeto/Back/SaveUser.dart';
-import 'package:projeto/Front/components/Global/Estructure/navbar.dart';
-import 'package:projeto/Front/components/Login_Config/Elements/ButtonConfig.dart';
-import 'package:projeto/Front/components/Login_Config/Elements/buttom.dart';
-import 'package:projeto/Front/components/Login_Config/Elements/input.dart';
-import 'package:projeto/Front/components/Login_Config/Estructure/form-card.dart';
-import 'package:projeto/Front/components/Style.dart';
-import 'package:projeto/Front/pages/config.dart';
+import 'package:projeto/back/login_function.dart';
+import 'package:projeto/back/save_user_function.dart';
+import 'package:projeto/front/components/Login_Config/Elements/input.dart';
+import 'package:projeto/front/components/Login_Config/elements/button.dart';
+import 'package:projeto/front/components/Login_Config/elements/config_button.dart';
+import 'package:projeto/front/components/style.dart';
+import 'package:projeto/front/components/global/structure/navbar.dart';
+import 'package:projeto/front/components/login_config/structure/form_card.dart';
+import 'package:projeto/front/pages/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
