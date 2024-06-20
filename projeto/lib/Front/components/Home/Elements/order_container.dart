@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:projeto/front/components/Style.dart';
 
 class OrderContainer extends StatefulWidget {
-  const OrderContainer({super.key});
+  final String nomepessoa;
+  final String valortotal;
+  final String data;
+  final String numero;
+
+  const OrderContainer({
+    Key? key, 
+  required this.valortotal,
+  required this.data,
+  required this.nomepessoa,
+  required this.numero,
+  });
 
   @override
   State<OrderContainer> createState() => _OrderContainerState();
 }
 
 class _OrderContainerState extends State<OrderContainer> {
+   NumberFormat currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,7 +51,7 @@ class _OrderContainerState extends State<OrderContainer> {
                         ),
                   ),
                   Text(
-                    '000000',
+                    widget.numero,
                     style: TextStyle(
                         color: Style.primaryColor,
                         fontSize: Style.height_10(context),
@@ -60,7 +73,7 @@ class _OrderContainerState extends State<OrderContainer> {
                         ),
                   ),
                   Text(
-                    'Nome do cliente',
+                    widget.nomepessoa,
                     style: TextStyle(
                       color: Style.primaryColor,
                       fontSize: Style.height_10(context),
@@ -85,7 +98,7 @@ class _OrderContainerState extends State<OrderContainer> {
                             ),
                       ),
                       Text(
-                        'RS 000,00',
+                        widget.valortotal.toString(),
                         style: TextStyle(
                           color: Style.primaryColor,
                           fontSize: Style.height_10(context),
@@ -108,7 +121,7 @@ class _OrderContainerState extends State<OrderContainer> {
                             ),
                       ),
                       Text(
-                        'XX/XX/XXXX',
+                        widget.data.toString(),
                         style: TextStyle(
                             color: Style.primaryColor,
                             fontSize: Style.height_8(context),

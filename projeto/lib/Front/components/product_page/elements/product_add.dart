@@ -59,6 +59,8 @@ class _ProductAddState extends State<ProductAdd> {
                                     color: Style.primaryColor,
                                     fontSize: Style.height_12(context),
                                     fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.clip,
+                                softWrap: true,
                               ),
                             ],
                           ),
@@ -66,6 +68,17 @@ class _ProductAddState extends State<ProductAdd> {
                             children: [
                               Text(
                                 'Código',
+                                style: TextStyle(
+                                  fontSize: Style.height_10(context),
+                                  color: Style.primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Estoque',
                                 style: TextStyle(
                                   fontSize: Style.height_10(context),
                                   color: Style.quarantineColor,
