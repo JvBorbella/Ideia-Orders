@@ -4,8 +4,8 @@ import 'package:projeto/front/components/Style.dart';
 
 class OrderContainer extends StatefulWidget {
   final String nomepessoa;
-  final String valortotal;
-  final String data;
+  final double valortotal;
+  final DateTime data;
   final String numero;
 
   const OrderContainer({
@@ -14,7 +14,7 @@ class OrderContainer extends StatefulWidget {
   required this.data,
   required this.nomepessoa,
   required this.numero,
-  });
+  }) : super(key: key);
 
   @override
   State<OrderContainer> createState() => _OrderContainerState();
@@ -41,10 +41,10 @@ class _OrderContainerState extends State<OrderContainer> {
           Row(
             children: [
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Nº do pedido',
+                    'Número',
                     style: TextStyle(
                         color: Style.quarantineColor,
                         fontSize: Style.height_8(context),
@@ -63,9 +63,13 @@ class _OrderContainerState extends State<OrderContainer> {
                 width: Style.height_12(context),
               ),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  Container(
+                    width: Style.width_215(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                     'Cliente',
                     style: TextStyle(
                         color: Style.quarantineColor,
@@ -79,7 +83,12 @@ class _OrderContainerState extends State<OrderContainer> {
                       fontSize: Style.height_10(context),
                       fontWeight: FontWeight.bold
                     ),
+                    softWrap: true,
+                    overflow: TextOverflow.clip,
                   ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ],
@@ -91,14 +100,14 @@ class _OrderContainerState extends State<OrderContainer> {
                   Column(
                     children: [
                       Text(
-                        'Vl. do pedido',
+                        'Valor',
                         style: TextStyle(
                             color: Style.quarantineColor,
                             fontSize: Style.height_8(context),
                             ),
                       ),
                       Text(
-                        widget.valortotal.toString(),
+                        currencyFormat.format(widget.valortotal),
                         style: TextStyle(
                           color: Style.primaryColor,
                           fontSize: Style.height_10(context),
@@ -114,14 +123,14 @@ class _OrderContainerState extends State<OrderContainer> {
                   Column(
                     children: [
                       Text(
-                        'Dt. do pedido',
+                        'Data',
                         style: TextStyle(
                             color: Style.quarantineColor,
                             fontSize: Style.height_8(context),
                             ),
                       ),
                       Text(
-                        widget.data.toString(),
+                        DateFormat('dd/MM/yyyy').format(widget.data),
                         style: TextStyle(
                             color: Style.primaryColor,
                             fontSize: Style.height_8(context),

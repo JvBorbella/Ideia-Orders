@@ -1,35 +1,33 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class SalesMonitor {
+class OrdersEndpoint {
   late int numero;
   late double valortotal;
   late DateTime data;
   late String nomepessoa;
 
-  SalesMonitor({
+  OrdersEndpoint({
     required this.numero,
     required this.valortotal,
     required this.data,
     required this.nomepessoa,
   });
 
-  factory SalesMonitor.fromJson(Map<String, dynamic> json) {
-    return SalesMonitor(
+  factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
+    return OrdersEndpoint(
       numero: json['numero'] ?? 0,
-      valortotal: (json['valortotal'] ?? 0.0).toDouble(),
-      data: DateTime.parse(json['data'] ?? DateTime.now().toString()),
+      valortotal: (json['valortotal'] as num).toDouble(),
+      data: DateTime.parse(json['data']),
       nomepessoa: json['nomepessoa'] ?? '',
     );
   }
 }
 
-class DataServiceSalesMonitor {
-  static Future<Map<String?, String?>> fetchDataSalesMonitor(String urlBasic) async {
-    String? numero;
-    String? valortotal;
-    String? data;
-    String? nomepessoa;
+class DataServiceOrders {
+  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic) async {
+
+    List<OrdersEndpoint>? orders;
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/core/prevenda');
@@ -42,17 +40,9 @@ class DataServiceSalesMonitor {
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('prevenda') &&
             jsonData['data']['prevenda'].isNotEmpty) {
-          for (var item in jsonData['data']['prevenda']) {
-            numero = item['numero']?.toString();
-            valortotal = item['valortotal']?.toString();
-            data = item['data']?.toString();
-            nomepessoa = item['nomepessoa']?.toString();
+            orders = (jsonData['data']['prevenda'] as List).map((e) => OrdersEndpoint.fromJson(e)).toList();
 
-            print('Número: $numero');
-            print('Valor Total: $valortotal');
-            print('Data: $data');
-            print('Nome Pessoa: $nomepessoa');
-          }
+            print('Pedidos: $orders');
         } else {
           print('Dados não encontrados');
         }
@@ -63,11 +53,6 @@ class DataServiceSalesMonitor {
       print('Erro durante a requisição: $e');
     }
 
-    return {
-      'numero': numero,
-      'valortotal': valortotal,
-      'data': data,
-      'nomepessoa': nomepessoa,
-    };
+    return orders;
   }
 }

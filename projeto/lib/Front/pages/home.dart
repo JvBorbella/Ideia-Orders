@@ -27,13 +27,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late String numero = '';
-  late String data = '';
-  late String valortotal = '';
-  late String nomepessoa = '';
+  List<OrdersEndpoint> orders = [];
   String urlController = '';
   bool isLoading = true;
-  NumberFormat currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+  NumberFormat currencyFormat =
+      NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   String selectedOptionChild = '';
   String urlBasic = '';
 
@@ -64,7 +62,8 @@ class _HomeState extends State<Home> {
         floatingActionButton: FloatingActionButton.small(
           backgroundColor: Style.primaryColor,
           onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => NewOrderPage()));
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => NewOrderPage()));
           },
           shape: CircleBorder(),
           child: Icon(
@@ -81,9 +80,11 @@ class _HomeState extends State<Home> {
                 children: [
                   DrawerButton(
                     style: ButtonStyle(
-                      iconSize: WidgetStatePropertyAll(Style.SizeDrawerButton(context)),
+                      iconSize: WidgetStatePropertyAll(
+                          Style.SizeDrawerButton(context)),
                       iconColor: WidgetStatePropertyAll(Style.tertiaryColor),
-                      padding: WidgetStatePropertyAll(EdgeInsets.all(Style.PaddingDrawerButton(context))),
+                      padding: WidgetStatePropertyAll(
+                          EdgeInsets.all(Style.PaddingDrawerButton(context))),
                     ),
                   ),
                 ],
@@ -99,9 +100,12 @@ class _HomeState extends State<Home> {
                     color: Style.primaryColor,
                   ),
                   hintText: 'Pesquise o código do pedido',
-                  hintStyle: WidgetStatePropertyAll(TextStyle(color: Style.quarantineColor)),
+                  hintStyle: WidgetStatePropertyAll(
+                      TextStyle(color: Style.quarantineColor)),
                   padding: WidgetStatePropertyAll(
-                    EdgeInsets.only(left: Style.height_15(context), right: Style.height_15(context)),
+                    EdgeInsets.only(
+                        left: Style.height_15(context),
+                        right: Style.height_15(context)),
                   ),
                 ),
               ),
@@ -127,25 +131,30 @@ class _HomeState extends State<Home> {
                     Container(
                       height: Style.height_30(context),
                       child: PopupMenuButton<String>(
-                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<String>>[
                           PopupMenuItem(
                             enabled: false,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Container(
-                                  margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                                  margin: EdgeInsets.only(
+                                      bottom: Style.height_5(context)),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(Style.height_5(context)),
+                                    borderRadius: BorderRadius.circular(
+                                        Style.height_5(context)),
                                     color: Style.errorColor,
                                   ),
                                   child: IconButton(
                                     onPressed: () {
                                       // _closeModal();
                                     },
-                                    icon: Image.network('https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/05/icons8-excluir-20.png'),
+                                    icon: Image.network(
+                                        'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/05/icons8-excluir-20.png'),
                                     style: ButtonStyle(
-                                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor),
+                                      iconColor: WidgetStatePropertyAll(
+                                          Style.tertiaryColor),
                                     ),
                                   ),
                                 ),
@@ -207,7 +216,8 @@ class _HomeState extends State<Home> {
                             SizedBox(width: Style.height_2(context)),
                             Text(
                               'Filtrado por: ',
-                              style: TextStyle(fontSize: Style.height_12(context)),
+                              style:
+                                  TextStyle(fontSize: Style.height_12(context)),
                             ),
                             Container(
                               child: Text(
@@ -229,17 +239,25 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderPage()));
-                },
-                child: OrderContainer(
-                  numero: numero,
-                  data: data,
-                  nomepessoa: nomepessoa,
-                  valortotal: valortotal,
-                ),
-              ),
+              ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: orders.length,
+                  itemBuilder: (context, index) {
+                    return
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => OrderPage()));
+                      },
+                      child: OrderContainer(
+                        numero: orders[index].numero.toString(),
+                        valortotal: orders[index].valortotal,
+                        nomepessoa: orders[index].nomepessoa,
+                        data: orders[index].data,
+                      ),
+                    );
+                  }),
             ],
           ),
         ),
@@ -249,14 +267,10 @@ class _HomeState extends State<Home> {
 
   Future<void> loadData() async {
     // Utiliza Future.wait para buscar os dados de forma paralela
-    await Future.wait([
-      _loadSavedUrlBasic()
-      ]);
+    await Future.wait([_loadSavedUrlBasic()]);
 
     // Após carregar os dados do token e da URL, chama as funções para buscar os dados
-    await Future.wait([
-      fetchDataSalesMonitor()
-    ]);
+    await Future.wait([fetchDataOrders()]);
   }
 
   Future<void> _loadSavedUrlBasic() async {
@@ -272,24 +286,24 @@ class _HomeState extends State<Home> {
     // Aqui você pode chamar os métodos para recarregar os dados
     await loadData();
     setState(() {
-      isLoading = false; // Define isLoading como false para esconder o indicador de carregamento
+      isLoading =
+          false; // Define isLoading como false para esconder o indicador de carregamento
     });
   }
 
-  Future<void> fetchDataSalesMonitor() async {
-    Map<String?, String?> fetchData = await DataServiceSalesMonitor.fetchDataSalesMonitor(urlBasic);
-    print(fetchData);  // Verifica os dados obtidos
-    if (fetchData.isNotEmpty) {
+  Future<void> fetchDataOrders() async {
+    List<OrdersEndpoint>? fetchData =
+        await DataServiceOrders.fetchDataOrders(urlBasic);
+    print(fetchData); // Verifica os dados obtidos
+    if (fetchData != null) {
       setState(() {
-        numero = fetchData['numero'] ?? '';
-        valortotal = fetchData['valortotal'] ?? '';
-        data = fetchData['data'] ?? '';
-        nomepessoa = fetchData['nomepessoa'] ?? '';
+        orders = fetchData;
         isLoading = false;
       });
     } else {
       setState(() {
-        isLoading = false;  // Mesmo que os dados estejam vazios, para esconder o indicador
+        isLoading =
+            false; // Mesmo que os dados estejam vazios, para esconder o indicador
       });
     }
   }
