@@ -19,6 +19,9 @@ class _InputBlockedState extends State<InputBlocked> {
         child: TextFormField(
           initialValue: widget.value,
           readOnly: true,
+          style: TextStyle(
+            fontSize: Style.height_10(context)
+          ),
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.black12,

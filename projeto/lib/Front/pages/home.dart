@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/back/company_sales_monitor.dart';
+import 'package:projeto/back/order_details.dart';
+import 'package:projeto/back/orders_endpoint.dart';
+import 'package:projeto/back/products_endpoint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Home/Elements/drawer_button.dart';
 import 'package:projeto/front/components/Home/Elements/order_container.dart';
@@ -28,18 +30,32 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<OrdersEndpoint> orders = [];
+  List<ProductsEndpoint> products = [];
+  List<OrdersDetailsEndpoint> ordersDetails = [];
   String urlController = '';
   bool isLoading = true;
   NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   String selectedOptionChild = '';
   String urlBasic = '';
+  String prevendaId = '';
+
+  late String nome = '';
+  late String cpfcnpj = '';
+  late String telefonecontato = '';
+  late String endereco = '';
+  late String enderecobairro = '';
+  late String enderecocomplemento = '';
+  late String enderecocep = '';
+  late String uf = '';
 
   @override
   void initState() {
     super.initState();
     _loadSavedUrlBasic();
+    // _loadSavedPrevendaId();
     loadData();
+    // fetchDataOrdersDetails2();
   }
 
   @override
@@ -59,17 +75,21 @@ class _HomeState extends State<Home> {
           width: MediaQuery.of(context).size.width * 0.9,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: FloatingActionButton.small(
-          backgroundColor: Style.primaryColor,
-          onPressed: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => NewOrderPage()));
-          },
-          shape: CircleBorder(),
-          child: Icon(
-            Icons.add,
-            color: Style.tertiaryColor,
-            size: Style.height_15(context),
+        floatingActionButton: Container(
+          width: Style.height_40(context), // Defina a largura desejada
+          height: Style.height_40(context), // Defina a largura desejada
+          child: FloatingActionButton(
+            backgroundColor: Style.primaryColor,
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => NewOrderPage()));
+            },
+            shape: CircleBorder(),
+            child: Icon(
+              Icons.add,
+              color: Style.tertiaryColor,
+              size: Style.height_20(context),
+            ),
           ),
         ),
         body: RefreshIndicator(
@@ -244,11 +264,30 @@ class _HomeState extends State<Home> {
                   shrinkWrap: true,
                   itemCount: orders.length,
                   itemBuilder: (context, index) {
-                    return
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => OrderPage()));
+                    return GestureDetector(
+                      onTap: () async {
+                        await fetchDataOrdersDetails2(orders[index].prevendaId);
+
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => OrderPage(
+                              prevendaId: orders[index].prevendaId,
+                              numero: orders[index].numero.toString(),
+                              nome: nome,
+                              cpfcnpj: cpfcnpj,
+                              telefonecontato: telefonecontato,
+                              endereco: endereco,
+                              enderecobairro: enderecobairro,
+                              enderecocomplemento: enderecocomplemento,
+                              enderecocep: enderecocep,
+                              uf: uf,
+                              data: orders[index].data,
+                              datahora: orders[index].datahora,
+                              valorsubtotal: orders[index].valorsubtotal,
+                              // Passe outros campos conforme necessário
+                            ),
+                          ),
+                        );
                       },
                       child: OrderContainer(
                         numero: orders[index].numero.toString(),
@@ -266,11 +305,13 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> loadData() async {
-    // Utiliza Future.wait para buscar os dados de forma paralela
     await Future.wait([_loadSavedUrlBasic()]);
-
-    // Após carregar os dados do token e da URL, chama as funções para buscar os dados
-    await Future.wait([fetchDataOrders()]);
+    await Future.wait([
+      fetchDataOrders(),
+    ]);
+    await Future.wait([
+      // fetchDataOrdersDetails(),
+    ]);
   }
 
   Future<void> _loadSavedUrlBasic() async {
@@ -279,32 +320,68 @@ class _HomeState extends State<Home> {
     setState(() {
       urlBasic = savedUrlBasic;
     });
-    print(urlBasic);
   }
 
   Future<void> _refreshData() async {
-    // Aqui você pode chamar os métodos para recarregar os dados
     await loadData();
     setState(() {
-      isLoading =
-          false; // Define isLoading como false para esconder o indicador de carregamento
+      isLoading = false;
     });
   }
 
   Future<void> fetchDataOrders() async {
     List<OrdersEndpoint>? fetchData =
         await DataServiceOrders.fetchDataOrders(urlBasic);
-    print(fetchData); // Verifica os dados obtidos
     if (fetchData != null) {
       setState(() {
         orders = fetchData;
-        isLoading = false;
       });
-    } else {
-      setState(() {
-        isLoading =
-            false; // Mesmo que os dados estejam vazios, para esconder o indicador
-      });
+      // Chama fetchDataOrdersDetails para cada prevenda_id
+      // for (var order in fetchData) {
+      //   print("Fetching details for order: ${order.prevendaId}");
+      //   await fetchDataOrdersDetails(order.prevendaId);
+      // }
     }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  // Future<void> fetchDataOrdersDetails() async {
+  //   List<OrdersDetailsEndpoint>? fetchData =
+  //       await DataServiceOrdersDetails.fetchDataOrdersDetails(urlBasic, prevendaId);
+  //   if (fetchData != null) {
+  //     setState(() {
+  //       ordersDetails = fetchData;
+  //     });
+  //   }
+  // }
+
+  // Future<void> fetchDataOrdersDetails(String prevendaId) async {
+  //   print("Fetching order details for prevendaId: $prevendaId");
+  //   List<OrdersDetailsEndpoint>? fetchData =
+  //       await DataServiceOrdersDetails.fetchDataOrdersDetails(urlBasic, prevendaId);
+  //   print("Order details fetched: $fetchData");
+  //   if (fetchData != null) {
+  //     setState(() {
+  //       ordersDetails.addAll(fetchData);
+  //     });
+  //   }
+  // }
+
+  Future<void> fetchDataOrdersDetails2(String prevendaId) async {
+    final data = await DataServiceOrdersDetails2.fetchDataOrdersDetails2(
+        urlBasic, prevendaId);
+    setState(() {
+      nome = data['nome'].toString();
+      cpfcnpj = data['cpfcnpj'].toString();
+      telefonecontato = data['telefonecontato'].toString();
+      endereco = data['endereco'].toString();
+      enderecobairro = data['enderecobairro'].toString();
+      enderecocomplemento = data['enderecocomplemento'].toString();
+      enderecocep = data['enderecocep'].toString();
+      uf = data['uf'].toString();
+      //...
+    });
   }
 }

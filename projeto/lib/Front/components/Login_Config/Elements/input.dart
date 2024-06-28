@@ -74,11 +74,10 @@ class _InputState extends State<Input> {
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Style.secondaryColor),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
                       color: Style.secondaryColor,
                     ),
-                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
