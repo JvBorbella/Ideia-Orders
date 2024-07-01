@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/back/orders_endpoint.dart';
+import 'package:intl/intl.dart';
 import 'package:projeto/back/products_endpoint.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,21 +7,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProductsOrder extends StatefulWidget {
   final String urlBasic;
   final String prevenda_id;
-  final String produto_id;
+  final String produtoId;
   final String codigoproduto;
   final String nomeproduto;
   final double valorunitario;
-  final double quantidade;
+  final int quantidade;
 
   const ProductsOrder({
     Key?key, 
     this.urlBasic = '',
     this.prevenda_id = '',
-    this.produto_id = '',
-    this.codigoproduto = '',
+    this.produtoId = '',
+    required this.codigoproduto,
     this.nomeproduto = '',
     this.valorunitario = 0.0,
-    this.quantidade = 0.0,
+    this.quantidade = 0,
   });
 
   @override
@@ -30,10 +30,18 @@ class ProductsOrder extends StatefulWidget {
 
 class _MyWidgetState extends State<ProductsOrder> {
   String urlBasic = '';
+  String nome = '';
   List<ProductsEndpoint> products = [];
-  List<OrdersDetailsEndpoint> ordersDetails = [];
   bool isLoading = true;
+   NumberFormat currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: '');
 
+   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadData();
+  }
+      
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -49,18 +57,14 @@ class _MyWidgetState extends State<ProductsOrder> {
                 width: Style.height_05(context), color: Style.quarantineColor),
           ),
         ),
-        child: ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: ordersDetails.length,
-          itemBuilder: (context, index) {
-            return Row(
+       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
+                  padding: EdgeInsets.symmetric(vertical: Style.height_5(context)),
                   child: Row(
                     children: [
                       Column(
@@ -69,19 +73,25 @@ class _MyWidgetState extends State<ProductsOrder> {
                               'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/06/Barcode.png')
                         ],
                       ),
+                      SizedBox(
+                        width: Style.height_5(context),
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Text(
-                                widget.nomeproduto,
+                              Container(
+                                width: Style.width_150(context),
+                                child: Text(
+                                nome,
                                 style: TextStyle(
                                     color: Style.primaryColor,
                                     fontSize: Style.height_12(context),
                                     fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.clip,
                                 softWrap: true,
+                              ),
                               ),
                             ],
                           ),
@@ -115,7 +125,7 @@ class _MyWidgetState extends State<ProductsOrder> {
                           Row(
                             children: [
                               Text(
-                                widget.valorunitario.toString() + 'x' + widget.quantidade.toString(),
+                                currencyFormat.format(widget.valorunitario).toString() + ' x ' + widget.quantidade.toString(),
                                 style: TextStyle(
                                     fontSize: Style.height_12(context),
                                     color: Style.primaryColor),
@@ -125,7 +135,7 @@ class _MyWidgetState extends State<ProductsOrder> {
                           Row(
                             children: [
                               Text(
-                                'Subtotal - ',
+                                 'Subtotal - R\$ ' + (widget.valorunitario * widget.quantidade).toStringAsFixed(2),
                                 style: TextStyle(
                                     fontSize: Style.height_10(context),
                                     color: Style.warningColor),
@@ -134,29 +144,22 @@ class _MyWidgetState extends State<ProductsOrder> {
                           )
                         ],
                       ),
-                      // Column(
-                      //   children: [
-                      //     IconButton(
-                      //       onPressed: () {},
-                      //       icon: Icon(
-                      //         Icons.remove_circle,
-                      //         color: Style.errorColor,
-                      //         size: Style.height_35(context),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
                     ],
                   ),
                 ),
               ],
             ),
           ],
-        );
-          }
         )
       ),
     );
+  }
+
+  Future<void> loadData() async {
+    await Future.wait([_loadSavedUrlBasic()]);
+    await Future.wait([
+      fetchDataProductDetails2(widget.produtoId)
+    ]);
   }
 
    Future<void> _loadSavedUrlBasic() async {
@@ -168,27 +171,17 @@ class _MyWidgetState extends State<ProductsOrder> {
     print(urlBasic);
   }
 
-   Future<void> fetchDataOrdersDetails() async {
-    List<OrdersDetailsEndpoint>? fetchData =
-        await DataServiceOrdersDetails.fetchDataOrdersDetails(
-            urlBasic, widget.prevenda_id);
-    print(fetchData); // Verifica os dados obtidos
-    if (fetchData != null) {
-      setState(() {
-        ordersDetails = fetchData;
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        isLoading =
-            false; // Mesmo que os dados estejam vazios, para esconder o indicador
-      });
-    }
+ Future<void> fetchDataProductDetails2(String produtoId) async {
+    final data = await ProductsService2.fetchDataProductDetails2(
+        urlBasic, produtoId);
+    setState(() {
+      nome = data['nome'].toString();
+    });
   }
 
   Future<void> fetchDataProducts() async {
     List<ProductsEndpoint>? fetchData =
-        await DataServiceProducts.fetchDataProducts(urlBasic, widget.produto_id);
+        await DataServiceProducts.fetchDataProducts(urlBasic, widget.produtoId);
     print(fetchData); // Verifica os dados obtidos
     if (fetchData != null) {
       setState(() {

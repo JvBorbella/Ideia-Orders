@@ -9,7 +9,7 @@ class Style {
   static const Color quarantineColor = Color(0xffA6A6A6);
   static const Color sucefullColor = Colors.green;
   static const Color errorColor = Color.fromARGB(255, 214, 38, 25);
-  static const Color warningColor = Color(0xffFFD700);
+  static const Color warningColor = Color.fromARGB(255, 255, 140, 0);
 //}
 
 //Tamanhos dinâmicos dos elementos da tela splash_page {

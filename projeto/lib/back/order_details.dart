@@ -66,7 +66,6 @@ class DataServiceOrdersDetails2 {
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/core/prevenda/$prevendaId');
-      print('Url da prevenda com id: $urlPost');
 
       var response = await http.get(
         urlPost, 

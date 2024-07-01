@@ -48,6 +48,7 @@ class _HomeState extends State<Home> {
   late String enderecocomplemento = '';
   late String enderecocep = '';
   late String uf = '';
+  late String codigoproduto = '';
 
   @override
   void initState() {
@@ -284,6 +285,7 @@ class _HomeState extends State<Home> {
                               data: orders[index].data,
                               datahora: orders[index].datahora,
                               valorsubtotal: orders[index].valorsubtotal,
+                              codigoproduto: codigoproduto,
                               // Passe outros campos conforme necessário
                             ),
                           ),
@@ -305,12 +307,11 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> loadData() async {
-    await Future.wait([_loadSavedUrlBasic()]);
+    await Future.wait([
+      _loadSavedUrlBasic()
+      ]);
     await Future.wait([
       fetchDataOrders(),
-    ]);
-    await Future.wait([
-      // fetchDataOrdersDetails(),
     ]);
   }
 
@@ -336,38 +337,11 @@ class _HomeState extends State<Home> {
       setState(() {
         orders = fetchData;
       });
-      // Chama fetchDataOrdersDetails para cada prevenda_id
-      // for (var order in fetchData) {
-      //   print("Fetching details for order: ${order.prevendaId}");
-      //   await fetchDataOrdersDetails(order.prevendaId);
-      // }
     }
     setState(() {
       isLoading = false;
     });
   }
-
-  // Future<void> fetchDataOrdersDetails() async {
-  //   List<OrdersDetailsEndpoint>? fetchData =
-  //       await DataServiceOrdersDetails.fetchDataOrdersDetails(urlBasic, prevendaId);
-  //   if (fetchData != null) {
-  //     setState(() {
-  //       ordersDetails = fetchData;
-  //     });
-  //   }
-  // }
-
-  // Future<void> fetchDataOrdersDetails(String prevendaId) async {
-  //   print("Fetching order details for prevendaId: $prevendaId");
-  //   List<OrdersDetailsEndpoint>? fetchData =
-  //       await DataServiceOrdersDetails.fetchDataOrdersDetails(urlBasic, prevendaId);
-  //   print("Order details fetched: $fetchData");
-  //   if (fetchData != null) {
-  //     setState(() {
-  //       ordersDetails.addAll(fetchData);
-  //     });
-  //   }
-  // }
 
   Future<void> fetchDataOrdersDetails2(String prevendaId) async {
     final data = await DataServiceOrdersDetails2.fetchDataOrdersDetails2(
@@ -381,7 +355,7 @@ class _HomeState extends State<Home> {
       enderecocomplemento = data['enderecocomplemento'].toString();
       enderecocep = data['enderecocep'].toString();
       uf = data['uf'].toString();
-      //...
+      codigoproduto = data['codigoproduto'].toString();
     });
   }
 }

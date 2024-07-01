@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Login_Config/Elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
@@ -13,6 +14,25 @@ class CustomerSession extends StatefulWidget {
 }
 
 class _CustomerSessionState extends State<CustomerSession> {
+  final _cepcontroller = TextEditingController();
+  final _complementocontroller = TextEditingController();
+  final _bairrocontroller = TextEditingController();
+  final _ufcontroller = TextEditingController();
+  final _logradourocontroller = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _cepcontroller.text = '';
+    _bairrocontroller.text = '';
+    _complementocontroller.text = '';
+    _ufcontroller.text = '';
+    _logradourocontroller.text = '';
+    // _loadSavedComplemento();
+    // _loadSavedLogradouro();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -44,10 +64,19 @@ class _CustomerSessionState extends State<CustomerSession> {
                   height: Style.height_10(context),
                 ),
                 Input(
+                  controller: _cepcontroller,
                   text: 'CEP',
                   type: TextInputType.number,
                   IconButton: IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await GetCep.getcep(
+                          _cepcontroller,
+                          _logradourocontroller,
+                          _complementocontroller,
+                          _bairrocontroller,
+                          _ufcontroller,
+                        );
+                      },
                       icon: Icon(Icons.screen_search_desktop_sharp)),
                 ),
                 SizedBox(
@@ -61,6 +90,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                         Container(
                           width: Style.width_215(context),
                           child: Input(
+                              controller: _logradourocontroller,
                               text: 'Informe o endereço',
                               type: TextInputType.text),
                         )
@@ -70,7 +100,10 @@ class _CustomerSessionState extends State<CustomerSession> {
                       children: [
                         Container(
                           width: Style.width_100(context),
-                          child: Input(text: 'UF', type: TextInputType.text),
+                          child: Input(
+                              controller: _ufcontroller,
+                              text: 'UF',
+                              type: TextInputType.text),
                         )
                       ],
                     )
@@ -86,8 +119,10 @@ class _CustomerSessionState extends State<CustomerSession> {
                       children: [
                         Container(
                           width: Style.width_140(context),
-                          child:
-                              Input(text: 'Bairro', type: TextInputType.text),
+                          child: Input(
+                              controller: _bairrocontroller,
+                              text: 'Bairro',
+                              type: TextInputType.text),
                         )
                       ],
                     ),
@@ -95,8 +130,10 @@ class _CustomerSessionState extends State<CustomerSession> {
                       children: [
                         Container(
                           width: Style.width_180(context),
-                          child:
-                              Input(text: 'Cidade', type: TextInputType.text),
+                          child: Input(
+                              controller: _complementocontroller,
+                              text: 'Cidade',
+                              type: TextInputType.text),
                         )
                       ],
                     )
