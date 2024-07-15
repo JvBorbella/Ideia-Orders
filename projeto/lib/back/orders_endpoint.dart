@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class OrdersEndpoint {
+  late String usuarioId;
   late String prevendaId;
   late int numero;
   late double valorsubtotal;
@@ -14,6 +15,7 @@ class OrdersEndpoint {
   late int flagcancelado;
 
   OrdersEndpoint({
+    required this.usuarioId,
     required this.prevendaId,
     required this.numero,
     required this.valorsubtotal,
@@ -28,6 +30,7 @@ class OrdersEndpoint {
 
   factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
     return OrdersEndpoint(
+      usuarioId: json['usuario_id'] ?? '',
       prevendaId: json['prevenda_id'] ?? '',
       numero: json['numero'] ?? 0,
       valorsubtotal: (json['valorsubtotal'] as num).toDouble(),
@@ -43,7 +46,7 @@ class OrdersEndpoint {
 }
 
 class DataServiceOrders {
-  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic) async {
+  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic, String id) async {
     List<OrdersEndpoint>? orders;
 
     try {
@@ -54,20 +57,22 @@ class DataServiceOrders {
         var jsonData = json.decode(response.body);
 
         if (jsonData.containsKey('data') &&
-            jsonData['data'].containsKey('prevenda') &&
-            jsonData['data']['prevenda'].isNotEmpty) {
+            jsonData['data'].containsKey('prevenda')) {
           orders = (jsonData['data']['prevenda'] as List)
               .map((e) => OrdersEndpoint.fromJson(e))
               .toList();
+
+              orders = orders.where((order) =>
+              order.usuarioId == id).toList();
 
           // Filtra os pedidos com flagprocessado e flagcancelado igual a 0
           orders = orders.where((order) =>
               order.flagprocessado == 0 && order.flagcancelado == 0).toList();
 
           // Filtra os pedidos dos últimos 3 dias
-          // DateTime threeDaysAgo = DateTime.now().subtract(Duration(days: 3));
-          // orders = orders.where((order) =>
-          //     order.data.isAfter(threeDaysAgo)).toList();
+          DateTime threeDaysAgo = DateTime.now().subtract(Duration(days: 7));
+          orders = orders.where((order) =>
+              order.data.isAfter(threeDaysAgo)).toList();
         } else {
           print('Dados não encontrados - orders');
         }

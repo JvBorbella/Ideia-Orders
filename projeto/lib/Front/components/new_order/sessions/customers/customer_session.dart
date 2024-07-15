@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/back/get_cep.dart';
+import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Login_Config/Elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerSession extends StatefulWidget {
   const CustomerSession({super.key});
@@ -14,21 +16,31 @@ class CustomerSession extends StatefulWidget {
 }
 
 class _CustomerSessionState extends State<CustomerSession> {
+  String urlBasic = '';
+  
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
   final _bairrocontroller = TextEditingController();
   final _ufcontroller = TextEditingController();
   final _logradourocontroller = TextEditingController();
 
+  final _cpfcontroller = TextEditingController();
+  final _nomecontroller = TextEditingController();
+  final _telefonecontatocontroller = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _loadSavedUrlBasic();
     _cepcontroller.text = '';
     _bairrocontroller.text = '';
     _complementocontroller.text = '';
     _ufcontroller.text = '';
     _logradourocontroller.text = '';
+    _nomecontroller.text = '';
+    _cpfcontroller.text = '';
+    _telefonecontatocontroller.text = '';
     // _loadSavedComplemento();
     // _loadSavedLogradouro();
   }
@@ -47,19 +59,42 @@ class _CustomerSessionState extends State<CustomerSession> {
             child: Column(
               children: [
                 Input(
-                  text: 'Informe o CPF',
-                  type: TextInputType.number,
+                  text: 'CPF',
+                  type: TextInputType.text,
+                  controller: _cpfcontroller,
                   IconButton: IconButton(
-                      onPressed: () {}, icon: Icon(Icons.person_search)),
+                      onPressed: () async {
+                        await GetCliente.getcliente(
+                          context,
+                          urlBasic,
+                          _nomecontroller,
+                          _cpfcontroller,
+                          _telefonecontatocontroller,
+                          _cepcontroller,
+                          _logradourocontroller,
+                          _complementocontroller,
+                          _bairrocontroller,
+                          _ufcontroller,
+                        );
+                      },
+                       icon: Icon(Icons.person_search)),
                 ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
-                Input(text: 'Informe o tel.', type: TextInputType.number),
+                Input(
+                  text: 'Telefone', 
+                  type: TextInputType.text,
+                  controller: _telefonecontatocontroller,
+                  ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
-                Input(text: 'Nome do cliente', type: TextInputType.text),
+                Input(
+                  text: 'Nome do cliente', 
+                  type: TextInputType.text,
+                  controller: _nomecontroller,
+                  ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
@@ -91,7 +126,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           width: Style.width_215(context),
                           child: Input(
                               controller: _logradourocontroller,
-                              text: 'Informe o endereço',
+                              text: 'Endereço',
                               type: TextInputType.text),
                         )
                       ],
@@ -132,7 +167,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           width: Style.width_180(context),
                           child: Input(
                               controller: _complementocontroller,
-                              text: 'Cidade',
+                              text: 'Complemento',
                               type: TextInputType.text),
                         )
                       ],
@@ -185,5 +220,13 @@ class _CustomerSessionState extends State<CustomerSession> {
         ],
       ),
     );
+  }
+
+  Future<void> _loadSavedUrlBasic() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedUrlBasic = sharedPreferences.getString('urlBasic') ?? '';
+    setState(() {
+      urlBasic = savedUrlBasic;
+    });
   }
 }

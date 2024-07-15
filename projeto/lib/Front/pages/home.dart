@@ -38,6 +38,7 @@ class _HomeState extends State<Home> {
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   String selectedOptionChild = '';
   String urlBasic = '';
+  String id = '';
   String prevendaId = '';
 
   late String nome = '';
@@ -53,6 +54,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    _loadSavedId();
     _loadSavedUrlBasic();
     // _loadSavedPrevendaId();
     loadData();
@@ -267,7 +269,9 @@ class _HomeState extends State<Home> {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () async {
-                        await fetchDataOrdersDetails2(orders[index].prevendaId);
+                        await fetchDataOrdersDetails2(
+                          orders[index].prevendaId,
+                          );
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -323,6 +327,14 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<void> _loadSavedId() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedId = sharedPreferences.getString('id') ?? '';
+    setState(() {
+      id = savedId;
+    });
+  }
+
   Future<void> _refreshData() async {
     await loadData();
     setState(() {
@@ -332,7 +344,7 @@ class _HomeState extends State<Home> {
 
   Future<void> fetchDataOrders() async {
     List<OrdersEndpoint>? fetchData =
-        await DataServiceOrders.fetchDataOrders(urlBasic);
+        await DataServiceOrders.fetchDataOrders(urlBasic, id);
     if (fetchData != null) {
       setState(() {
         orders = fetchData;

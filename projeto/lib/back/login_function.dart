@@ -47,18 +47,19 @@ class LoginFunction {
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
         if (responseBody['success'] == true) {
+        var id = responseBody['data']['id'];
         var token = responseBody['data']['token'];
         var login = responseBody['data']['login']; 
         var image = responseBody['data']['image']; 
         var email = responseBody['data']['email']; 
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        await sharedPreferences.setString('id', id);
         await sharedPreferences.setString('token', token);
         await sharedPreferences.setString('login', login);
         await sharedPreferences.setString('image', image);
         await sharedPreferences.setString('url', '$url/ideia/secure');
         await sharedPreferences.setString('urlBasic', url);
         await sharedPreferences.setString('email', email);
-        print(token);
         
         // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
         Navigator.of(context).pushReplacement(
