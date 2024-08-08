@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GetCep {
-  static Future<void> getcep(TextEditingController cepController, TextEditingController logradouroController,
-      TextEditingController complementoController, TextEditingController bairroController, TextEditingController ufController) async {
+  static Future<void> getcep(
+      TextEditingController cepController,
+      TextEditingController logradouroController,
+      TextEditingController complementoController,
+      TextEditingController bairroController,
+      TextEditingController ufController,
+      TextEditingController localidadeController,
+      TextEditingController ibgeController) async {
     try {
       var cep = cepController.text;
       var authorization = Uri.parse('https://viacep.com.br/ws/$cep/json/');
@@ -16,18 +22,25 @@ class GetCep {
         var logradouro = responseBody['logradouro'];
         var complemento = responseBody['complemento'];
         var bairro = responseBody['bairro'];
+        var localidade = responseBody['localidade'];
+        var ibge = responseBody['ibge'];
         var uf = responseBody['uf'];
 
-        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
         await sharedPreferences.setString('logradouro', logradouro);
         await sharedPreferences.setString('complemento', complemento);
         await sharedPreferences.setString('bairro', bairro);
+        await sharedPreferences.setString('localidade', localidade);
+        await sharedPreferences.setString('ibge', ibge);
         await sharedPreferences.setString('uf', uf);
 
         // Atualiza os controllers
         logradouroController.text = logradouro ?? '';
         complementoController.text = complemento ?? '';
         bairroController.text = bairro ?? '';
+        localidadeController.text = localidade ?? '';
+        ibgeController.text = ibge ?? '';
         ufController.text = uf ?? '';
       } else {
         print('Erro ao consultar o CEP. Status Code: ${response.statusCode}');

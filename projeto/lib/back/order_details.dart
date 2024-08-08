@@ -4,47 +4,54 @@ import 'package:http/http.dart' as http;
 
 class OrdersDetailsEndpoint2 {
   late String produtoId;
-  late String nome;
+  late String pessoanome;
+  late String nomeproduto;
+  late String imagemurl;
   late String codigoproduto;
   late double valorunitario;
   late double quantidade;
+  late double valortotalitem;
   late String cpfcnpj;
-  late String telefonecontato;
-  late String endereco;
-  late String uf;
-  late String enderecobairro;
-  late String enderecocomplemento;
-  late String enderecocep;
+  late String telefone;
+  // late String endereco;
+  // late String uf;
+  // late String enderecobairro;
+  // late String enderecocomplemento;
+  // late String enderecocep;
+  late String pessoaid;
 
   OrdersDetailsEndpoint2({
     required this.produtoId,
-    required this.nome,
+    required this.pessoanome,
+    required this.nomeproduto,
+    required this.imagemurl,
     required this.codigoproduto,
     required this.valorunitario,
     required this.quantidade,
+    required this.valortotalitem,
     required this.cpfcnpj,
-    required this.telefonecontato,
-    required this.endereco,
-    required this.uf,
-    required this.enderecobairro,
-    required this.enderecocomplemento,
-    required this.enderecocep,
+    required this.telefone,
+    // required this.endereco,
+    // required this.uf,
+    // required this.enderecobairro,
+    // required this.enderecocomplemento,
+    // required this.enderecocep,
+    required this.pessoaid,
   });
 
   factory OrdersDetailsEndpoint2.fromJson(Map<String, dynamic> json) {
     return OrdersDetailsEndpoint2(
       produtoId: json['produto_id'] ?? '',
-      nome: json['nome'] ?? '',
-      codigoproduto: json['valorsubtotal'] ?? 0,
+      pessoanome: json['pessoa_nome'] ?? '',
+      codigoproduto: json['codigo'] ?? '',
+      nomeproduto: json['nome'] ?? 0,
       valorunitario: (json['valorunitario'] as num).toDouble(),
       quantidade: json['quanridade'] ?? 0,
+      valortotalitem: json['valortotalitem'] ?? 0.0,
+      imagemurl: json['imagem_url'] ?? '',
       cpfcnpj: json['cpfcnpj'] ?? 0,
-      telefonecontato: json['telefonecontato'] ?? 0,
-      endereco: json['endereco'] ?? '',
-      uf: json['uf'] ?? '',
-      enderecocomplemento: json['enderecocomplemento'] ?? '',
-      enderecobairro: json['enderecobairro'] ?? '',
-      enderecocep: json['enderecocep'] ?? '',
+      telefone: json['telefone'] ?? 0,
+      pessoaid: json['pessoa_id'] ?? '',
     );
   }
 }
@@ -52,25 +59,28 @@ class OrdersDetailsEndpoint2 {
 class DataServiceOrdersDetails2 {
   static Future<Map<String?, String?>> fetchDataOrdersDetails2(String urlBasic, String prevendaId) async {
     String? produtoId;
-    String? nome;
+    String? pessoaid;
+    String? pessoanome;
+    String? nomeproduto;
     String? codigoproduto;
+    String? imagemurl;
     // double? valorunitario;
     // double? quantidade;
     String? cpfcnpj;
-    String? telefonecontato;
-    String? endereco;
-    String? uf;
-    String? enderecocomplemento;
-    String? enderecobairro;
-    String? enderecocep;
+    String? telefone;
+    // String? endereco;
+    // String? uf;
+    // String? enderecocomplemento;
+    // String? enderecobairro;
+    // String? enderecocep;
 
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/core/prevenda/$prevendaId');
+      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/pedido/$prevendaId');
 
       var response = await http.get(
         urlPost, 
         headers: {
-          'Accept': 'text/html',
+          // 'Accept': 'text/html',
           });
 
       if (response.statusCode == 200) {
@@ -81,19 +91,18 @@ class DataServiceOrdersDetails2 {
             jsonData['data']['prevenda'].isNotEmpty) {
           
           var prevendaData = jsonData['data']['prevenda'][0];
+          var produtoPrevenda = jsonData['data']['prevendaproduto'][0];
 
-          produtoId = prevendaData['produto_id'];
-          nome = prevendaData['nome'];
-          codigoproduto = prevendaData['codigoproduto'];
+          produtoId = produtoPrevenda['produto_id'];
+          pessoaid = prevendaData['pessoa_id'];
+          pessoanome = prevendaData['pessoa_nome'];
+          nomeproduto = produtoPrevenda['nome'];
+          imagemurl = produtoPrevenda['imagem_url'];
+          codigoproduto = prevendaData['codigo'];
           // valorunitario = double.parse(prevendaData['valorunitario'].toString());
           // quantidade = double.parse(prevendaData['quantidade'].toString());
           cpfcnpj = prevendaData['cpfcnpj'];
-          telefonecontato = prevendaData['telefonecontato'];
-          endereco = prevendaData['endereco'];
-          uf = prevendaData['uf'];
-          enderecocomplemento = prevendaData['enderecocomplemento'];
-          enderecobairro = prevendaData['enderecobairro'];
-          enderecocep = prevendaData['enderecocep'];
+          telefone = prevendaData['telefone'];
 
         } else {
           print('Dados não encontrados');
@@ -107,17 +116,15 @@ class DataServiceOrdersDetails2 {
 
     return {
       'produto_id' : produtoId,
-      'nome' : nome,
-      'codigoproduto' : codigoproduto,
+      'pessoa_id' : pessoaid,
+      'pessoa_nome' : pessoanome,
+      'nome' : nomeproduto,
+      'codigo' : codigoproduto,
+      'imagem_url' : imagemurl,
       // 'valorunitario' : valorunitario.toString(),
       // 'quantidade' : quantidade.toString(),
       'cpfcnpj' : cpfcnpj,
-      'telefonecontato' : telefonecontato,
-      'endereco' : endereco,
-      'uf' : uf,
-      'enderecocomplemento' : enderecocomplemento,
-      'enderecobairro' : enderecobairro,
-      'enderecocep' : enderecocep,
+      'telefone' : telefone,
     };
   }
 }

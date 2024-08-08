@@ -12,6 +12,7 @@ class Input extends StatefulWidget {
   final obscureText;
   final controller;
   final validator;
+  final TextAlign textAlign;
 
   const Input(
       {Key? key,
@@ -20,7 +21,8 @@ class Input extends StatefulWidget {
       this.obscureText,
       this.controller,
       this.validator,
-      this.IconButton
+      this.IconButton,
+      required this.textAlign,
       })
       : super(key: key);
 
@@ -53,13 +55,13 @@ class _InputState extends State<Input> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               TextField(
-                
                 controller: _textController, 
                 style: TextStyle(
                   fontSize: Style.height_12(context),
                   fontFamily: 'Poppins-Regular'
                 ),
                 keyboardType: widget.type,
+                textAlign: widget.textAlign,
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
                 decoration: InputDecoration(
@@ -88,10 +90,10 @@ class _InputState extends State<Input> {
     );
   }
 
-  @override
-  void dispose() {
-    // Certifique-se de liberar o controlador ao destruir o widget.
-    _textController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // Certifique-se de liberar o controlador ao destruir o widget.
+  //   _textController.dispose();
+  //   super.dispose();
+  // }
 }

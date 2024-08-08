@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/back/save_url_function.dart';
-import 'package:projeto/front/components/Login_Config/Elements/input.dart';
+
 import 'package:projeto/front/components/Login_Config/elements/config_button.dart';
+import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/login_config/structure/form_card.dart';
@@ -70,6 +71,7 @@ class _ConfigPageState extends State<ConfigPage> {
                           text: 'Configuração de IP',
                           obscureText: false,
                           controller: urlController,
+                          textAlign: TextAlign.start,
                         ),
                         SizedBox(
                           height: Style.height_50(context),

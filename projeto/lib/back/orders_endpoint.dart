@@ -5,27 +5,19 @@ class OrdersEndpoint {
   late String usuarioId;
   late String prevendaId;
   late int numero;
-  late double valorsubtotal;
   late double valortotal;
-  late DateTime data;
   late DateTime datahora;
   late String nomepessoa;
-  late String entrega_enderecocidade;
-  late int flagprocessado;
-  late int flagcancelado;
+  late String operador;
 
   OrdersEndpoint({
     required this.usuarioId,
     required this.prevendaId,
     required this.numero,
-    required this.valorsubtotal,
     required this.valortotal,
-    required this.data,
     required this.datahora,
     required this.nomepessoa,
-    required this.entrega_enderecocidade,
-    required this.flagprocessado,
-    required this.flagcancelado,
+    required this.operador,
   });
 
   factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
@@ -33,25 +25,29 @@ class OrdersEndpoint {
       usuarioId: json['usuario_id'] ?? '',
       prevendaId: json['prevenda_id'] ?? '',
       numero: json['numero'] ?? 0,
-      valorsubtotal: (json['valorsubtotal'] as num).toDouble(),
       valortotal: (json['valortotal'] as num).toDouble(),
-      data: DateTime.parse(json['data']),
       datahora: DateTime.parse(json['datahora']),
-      nomepessoa: json['nomepessoa'] ?? '',
-      entrega_enderecocidade: json['entrega_enderecocidade'] ?? '',
-      flagprocessado: json['flagprocessado'] ?? 0,
-      flagcancelado: json['flagcancelado'] ?? 0,
+      nomepessoa: json['pessoa_nome'] ?? '',
+      operador: json['operador'] ?? '',
     );
   }
 }
 
 class DataServiceOrders {
-  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic, String id) async {
+  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic, String id, String token) async {
     List<OrdersEndpoint>? orders;
 
+    print('token: $token');
+
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/core/prevenda');
-      var response = await http.get(urlPost, headers: {'Accept': 'text/html'});
+      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/pedidos');
+      print(urlPost);
+      var response = await http.get(
+        urlPost, 
+        headers: {
+          // 'auth-token': token,
+          }
+        );
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -66,13 +62,13 @@ class DataServiceOrders {
               order.usuarioId == id).toList();
 
           // Filtra os pedidos com flagprocessado e flagcancelado igual a 0
-          orders = orders.where((order) =>
-              order.flagprocessado == 0 && order.flagcancelado == 0).toList();
+          // orders = orders.where((order) =>
+          //     order.flagprocessado == 0 && order.flagcancelado == 0).toList();
 
           // Filtra os pedidos dos últimos 3 dias
           DateTime threeDaysAgo = DateTime.now().subtract(Duration(days: 7));
           orders = orders.where((order) =>
-              order.data.isAfter(threeDaysAgo)).toList();
+              order.datahora.isAfter(threeDaysAgo)).toList();
         } else {
           print('Dados não encontrados - orders');
         }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
+import 'package:projeto/back/new_customer.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Login_Config/Elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
@@ -9,7 +10,30 @@ import 'package:projeto/front/components/new_order/elements/register_icon_button
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerSession extends StatefulWidget {
-  const CustomerSession({super.key});
+  final pessoanome;
+  final cpfcnpj;
+  final telefone;
+  final cep;
+  final bairro;
+  final localidade;
+  final ibge;
+  final endereco;
+  final complemento;
+  final numero;
+
+  const CustomerSession({
+    Key? key,
+    this.pessoanome,
+    this.cpfcnpj,
+    this.telefone,
+    this.cep,
+    this.bairro,
+    this.localidade,
+    this.ibge,
+    this.endereco,
+    this.complemento,
+    this.numero,
+  });
 
   @override
   State<CustomerSession> createState() => _CustomerSessionState();
@@ -17,13 +41,30 @@ class CustomerSession extends StatefulWidget {
 
 class _CustomerSessionState extends State<CustomerSession> {
   String urlBasic = '';
-  
+  String token = '';
+  String cpf = '';
+
+  // late String pessoaid = '';
+  // late String nome = '';
+  // late String codigo = '';
+  // late String cpfcliente = '';
+  // late String telefone = '';
+  // late String enderecocep = '';
+  // late String endereco = '';
+  // late String enderecobairro = '';
+  // late String enderecocomplemento = '';
+  // late String uf = '';
+
+  bool isLoading = true;
+
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
   final _bairrocontroller = TextEditingController();
+  final _numerocontroller = TextEditingController();
+  final _localidadecontroller = TextEditingController();
+  final _ibgecontroller = TextEditingController();
   final _ufcontroller = TextEditingController();
   final _logradourocontroller = TextEditingController();
-
   final _cpfcontroller = TextEditingController();
   final _nomecontroller = TextEditingController();
   final _telefonecontatocontroller = TextEditingController();
@@ -33,20 +74,34 @@ class _CustomerSessionState extends State<CustomerSession> {
     // TODO: implement initState
     super.initState();
     _loadSavedUrlBasic();
-    _cepcontroller.text = '';
-    _bairrocontroller.text = '';
-    _complementocontroller.text = '';
+    _loadSavedToken();
+    // loadData();
+    // cpf = widget.cpfcnpj;
+    _cepcontroller.text = widget.cep;
+    _bairrocontroller.text = widget.bairro.toString();
+    _localidadecontroller.text = widget.localidade ?? '';
+    _numerocontroller.text = widget.numero ?? '';
+    _ibgecontroller.text = widget.ibge.toString();
+    _complementocontroller.text = widget.complemento.toString();
     _ufcontroller.text = '';
-    _logradourocontroller.text = '';
-    _nomecontroller.text = '';
-    _cpfcontroller.text = '';
-    _telefonecontatocontroller.text = '';
+    _logradourocontroller.text = widget.endereco.toString();
+    _nomecontroller.text = widget.pessoanome;
+    _cpfcontroller.text = widget.cpfcnpj;
+    _telefonecontatocontroller.text = widget.telefone;
+    // print(widget.cpfcnpj);
     // _loadSavedComplemento();
     // _loadSavedLogradouro();
   }
 
   @override
   Widget build(BuildContext context) {
+    //  if (isLoading) {
+    //   return Material(
+    //     child:  Center(
+    //       child: CircularProgressIndicator(),
+    //     ),
+    //   );
+    // }
     return Material(
       child: Column(
         children: [
@@ -62,6 +117,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   text: 'CPF',
                   type: TextInputType.text,
                   controller: _cpfcontroller,
+                  textAlign: TextAlign.start,
                   IconButton: IconButton(
                       onPressed: () async {
                         await GetCliente.getcliente(
@@ -72,29 +128,32 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _telefonecontatocontroller,
                           _cepcontroller,
                           _logradourocontroller,
-                          _complementocontroller,
-                          _bairrocontroller,
                           _ufcontroller,
+                          _bairrocontroller,
+                          _numerocontroller,
+                          _complementocontroller,
                         );
                       },
-                       icon: Icon(Icons.person_search)),
+                      icon: Icon(Icons.person_search)),
                 ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
                 Input(
-                  text: 'Telefone', 
+                  text: 'Telefone',
                   type: TextInputType.text,
                   controller: _telefonecontatocontroller,
-                  ),
+                  textAlign: TextAlign.start,
+                ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
                 Input(
-                  text: 'Nome do cliente', 
+                  text: 'Nome do cliente',
                   type: TextInputType.text,
                   controller: _nomecontroller,
-                  ),
+                  textAlign: TextAlign.start,
+                ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
@@ -102,6 +161,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   controller: _cepcontroller,
                   text: 'CEP',
                   type: TextInputType.number,
+                  textAlign: TextAlign.start,
                   IconButton: IconButton(
                       onPressed: () async {
                         await GetCep.getcep(
@@ -110,6 +170,8 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _complementocontroller,
                           _bairrocontroller,
                           _ufcontroller,
+                          _localidadecontroller,
+                          _ibgecontroller,
                         );
                       },
                       icon: Icon(Icons.screen_search_desktop_sharp)),
@@ -126,6 +188,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           width: Style.width_215(context),
                           child: Input(
                               controller: _logradourocontroller,
+                              textAlign: TextAlign.start,
                               text: 'Endereço',
                               type: TextInputType.text),
                         )
@@ -137,6 +200,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           width: Style.width_100(context),
                           child: Input(
                               controller: _ufcontroller,
+                              textAlign: TextAlign.start,
                               text: 'UF',
                               type: TextInputType.text),
                         )
@@ -156,6 +220,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           width: Style.width_140(context),
                           child: Input(
                               controller: _bairrocontroller,
+                              textAlign: TextAlign.start,
                               text: 'Bairro',
                               type: TextInputType.text),
                         )
@@ -166,8 +231,41 @@ class _CustomerSessionState extends State<CustomerSession> {
                         Container(
                           width: Style.width_180(context),
                           child: Input(
+                              controller: _localidadecontroller,
+                              textAlign: TextAlign.start,
+                              text: 'Cidade',
+                              type: TextInputType.text),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: Style.height_10(context),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: Style.width_215(context),
+                          child: Input(
                               controller: _complementocontroller,
+                              textAlign: TextAlign.start,
                               text: 'Complemento',
+                              type: TextInputType.text),
+                        )
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                          width: Style.width_100(context),
+                          child: Input(
+                              controller: _numerocontroller,
+                              textAlign: TextAlign.start,
+                              text: 'Número',
                               type: TextInputType.text),
                         )
                       ],
@@ -188,6 +286,20 @@ class _CustomerSessionState extends State<CustomerSession> {
                             text: 'Cadastrar cliente',
                             color: Style.primaryColor,
                             width: Style.width_150(context),
+                            onPressed: () async {
+                              await NewCustomer.getcliente(
+                                  context,
+                                  urlBasic,
+                                  token,
+                                  _nomecontroller.text,
+                                  _cpfcontroller.text,
+                                  _telefonecontatocontroller.text,
+                                  _cepcontroller.text,
+                                  _bairrocontroller.text,
+                                  _logradourocontroller.text,
+                                  _complementocontroller.text,
+                                  );
+                            },
                           ),
                         ),
                       ],
@@ -229,4 +341,62 @@ class _CustomerSessionState extends State<CustomerSession> {
       urlBasic = savedUrlBasic;
     });
   }
+
+  Future<void> _loadSavedToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedToken = sharedPreferences.getString('token') ?? '';
+    setState(() {
+      token = savedToken;
+    });
+  }
+
+  // Future<void> initializer() async {
+  //   setState(() {
+  //     _cepcontroller.text = enderecocep;
+  //   });
+  // }
+
+  Future<void> loadData() async {
+    await Future.wait([
+      _loadSavedUrlBasic(),
+    ]);
+    await Future.wait([
+      // fetchDataCliente2(),
+      // initializer(),
+    ]);
+  }
+
+  Future<void> _refreshData() async {
+    await loadData();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+//   Future<void> fetchDataCliente2() async {
+//   final data = await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj);
+//   setState(() {
+//     pessoaid = data['pessoa_id'].toString();
+//     nome = data['nome'].toString();
+//     cpfcliente = data['cpf'].toString();
+//     telefone = data['telefone'].toString();
+//     endereco = data['endereco'].toString();
+//     enderecobairro = data['enderecobairro'].toString();
+//     enderecocomplemento = data['enderecocomplemento'].toString();
+//     enderecocep = data['enderecocep'].toString();
+//     uf = data['uf'].toString();
+//     codigo = data['codigo'].toString();
+
+//     // Atualiza os controladores com os novos valores
+//     _cepcontroller.text = enderecocep;
+//     _bairrocontroller.text = enderecobairro;
+//     _complementocontroller.text = enderecocomplemento;
+//     _ufcontroller.text = uf;
+//     _logradourocontroller.text = endereco;
+//     _nomecontroller.text = nome;
+//     _cpfcontroller.text = cpfcliente ;
+//     _telefonecontatocontroller.text = telefone;
+//   });
+// }
+
 }

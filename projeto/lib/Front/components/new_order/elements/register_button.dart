@@ -5,12 +5,14 @@ class RegisterButton extends StatefulWidget {
   final String text;
   final Color color;
   final double width;
+  final onPressed;
 
   const RegisterButton({
     Key? key, 
     required this.text,
     required this.color,
     required this.width,
+    this.onPressed,
     });
 
   @override
@@ -33,7 +35,7 @@ class _RegisterButtonState extends State<RegisterButton> {
               // minimumSize: WidgetStatePropertyAll(
               //     Size(Style.height_150(context), Style.height_45(context)))
                   ),
-          onPressed: () {},
+          onPressed: widget.onPressed,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

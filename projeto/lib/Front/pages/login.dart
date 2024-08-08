@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/back/login_function.dart';
 import 'package:projeto/back/save_user_function.dart';
-import 'package:projeto/front/components/Login_Config/Elements/input.dart';
+
 import 'package:projeto/front/components/Login_Config/elements/button.dart';
 import 'package:projeto/front/components/Login_Config/elements/config_button.dart';
+import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/login_config/structure/form_card.dart';
@@ -89,6 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                           type: TextInputType.text,
                           obscureText: false,
                           controller: _userController,
+                          textAlign: TextAlign.start,
                           validator: (user) {
                             if (user == null || user.isEmpty) {
                               saveUserService.saveUser(context, _userController.text);
@@ -103,6 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                           type: TextInputType.text,
                           obscureText: true,
                           controller: _passwordController,
+                          textAlign: TextAlign.start,
                         ),
                         SizedBox(
                           height: Style.InputToButtonSpace(context),

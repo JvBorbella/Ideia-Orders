@@ -2,36 +2,59 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ProductsEndpoint {
+  late String produtoid;
   late String nome;
+  late String codigo;
+  late String codigoean;
+  late String unidade;
+  late double precopromocional;
+  late double precotabela;
 
   ProductsEndpoint({
+    required this.produtoid,
     required this.nome,
+    required this.codigo,
+    required this.codigoean,
+    required this.unidade,
+    required this.precopromocional,
+    required this.precotabela,
   });
 
   factory ProductsEndpoint.fromJson(Map<String, dynamic> json) {
     return ProductsEndpoint(
+      produtoid: json['produtoid'] ?? '',
       nome: json['nome'] ?? '',
+      codigo: json['codigo'] ?? '',
+      codigoean: json['codigoean'] ?? '',
+      unidade: json['unidade'] ?? '',
+      precopromocional: (json['precopromocional'] as num).toDouble(),
+      precotabela: (json['precotabela'] as num).toDouble(),
     );
   }
 }
 
 class DataServiceProducts {
-  static Future<List<ProductsEndpoint>?> fetchDataProducts(String urlBasic, produtoId) async {
+  static Future<List<ProductsEndpoint>?> fetchDataProducts(String urlBasic, String token, String text) async {
 
     List<ProductsEndpoint>? products;
 
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/core/produto/$produtoId');
+      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/listaprodutos?busca=$text');
 
-      var response = await http.get(urlPost, headers: {'Accept': 'text/html'});
+      var response = await http.get(
+      urlPost,
+      //  headers: {
+      //   // 'auth-token': token,
+      //   });
+      );
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
 
         if (jsonData.containsKey('data') &&
-            jsonData['data'].containsKey('prevenda') &&
-            jsonData['data']['prevenda'].isNotEmpty) {
-            products = (jsonData['data']['prevenda'] as List).map((e) => ProductsEndpoint.fromJson(e)).toList();
+            jsonData['data'].containsKey('produtos') &&
+            jsonData['data']['produtos'].isNotEmpty) {
+            products = (jsonData['data']['produtos'] as List).map((e) => ProductsEndpoint.fromJson(e)).toList();
         } else {
           print('Dados não encontrados');
         }

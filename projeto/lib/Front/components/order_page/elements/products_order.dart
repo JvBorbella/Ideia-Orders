@@ -179,20 +179,20 @@ class _MyWidgetState extends State<ProductsOrder> {
     });
   }
 
-  Future<void> fetchDataProducts() async {
-    List<ProductsEndpoint>? fetchData =
-        await DataServiceProducts.fetchDataProducts(urlBasic, widget.produtoId);
-    print(fetchData); // Verifica os dados obtidos
-    if (fetchData != null) {
-      setState(() {
-        products = fetchData;
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        isLoading =
-            false; // Mesmo que os dados estejam vazios, para esconder o indicador
-      });
-    }
-  }
+  // Future<void> fetchDataProducts() async {
+  //   List<ProductsEndpoint>? fetchData =
+  //       await DataServiceProducts.fetchDataProducts(urlBasic, widget.produtoId,);
+  //   print(fetchData); // Verifica os dados obtidos
+  //   if (fetchData != null) {
+  //     setState(() {
+  //       products = fetchData;
+  //       isLoading = false;
+  //     });
+  //   } else {
+  //     setState(() {
+  //       isLoading =
+  //           false; // Mesmo que os dados estejam vazios, para esconder o indicador
+  //     });
+  //   }
+  // }
 }
