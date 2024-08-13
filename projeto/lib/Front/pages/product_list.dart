@@ -9,6 +9,7 @@ import 'package:projeto/front/pages/new_order_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductList extends StatefulWidget {
+  final prevendaid;
   final String? pessoanome;
   final String? cpfcnpj;
   final String? telefone;
@@ -19,6 +20,7 @@ class ProductList extends StatefulWidget {
 
   const ProductList({
     Key? key,
+    this.prevendaid,
     this.pessoanome,
     this.cpfcnpj,
     this.telefone,
@@ -66,6 +68,7 @@ class _ProductListState extends State<ProductList> {
                 children: [
                   NavbarButton(
                     destination: NewOrderPage(
+                      prevendaId: widget.prevendaid,
                       pessoanome: widget.pessoanome,
                       cpfcnpj: widget.cpfcnpj,
                       telefone: widget.telefone,
@@ -121,6 +124,7 @@ class _ProductListState extends State<ProductList> {
                   return Column(
                     children: [
                       ProductAdd(
+                        prevendaid: widget.prevendaid,
                         produtoid: products[index].produtoid.toString(),
                         nomeproduto: products[index].nome.toString(),
                         codigoproduto: products[index].codigo.toString(),

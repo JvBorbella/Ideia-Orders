@@ -9,6 +9,7 @@ class OrdersEndpoint {
   late DateTime datahora;
   late String nomepessoa;
   late String operador;
+  late String flagprocessado;
 
   OrdersEndpoint({
     required this.usuarioId,
@@ -18,6 +19,7 @@ class OrdersEndpoint {
     required this.datahora,
     required this.nomepessoa,
     required this.operador,
+    required this.flagprocessado,
   });
 
   factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
@@ -29,12 +31,13 @@ class OrdersEndpoint {
       datahora: DateTime.parse(json['datahora']),
       nomepessoa: json['pessoa_nome'] ?? '',
       operador: json['operador'] ?? '',
+      flagprocessado: json['flagprocessado'] ?? '',
     );
   }
 }
 
 class DataServiceOrders {
-  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic, String id, String token) async {
+  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic, String prevendaid, String token) async {
     List<OrdersEndpoint>? orders;
 
     print('token: $token');
@@ -59,11 +62,10 @@ class DataServiceOrders {
               .toList();
 
               orders = orders.where((order) =>
-              order.usuarioId == id).toList();
+              order.usuarioId == prevendaid).toList();
 
-          // Filtra os pedidos com flagprocessado e flagcancelado igual a 0
-          // orders = orders.where((order) =>
-          //     order.flagprocessado == 0 && order.flagcancelado == 0).toList();
+          orders = orders.where((order) =>
+              order.flagprocessado == '0' || order.flagprocessado.isEmpty).toList();
 
           // Filtra os pedidos dos últimos 3 dias
           DateTime threeDaysAgo = DateTime.now().subtract(Duration(days: 7));
@@ -84,67 +86,65 @@ class DataServiceOrders {
 
 
 class OrdersDetailsEndpoint {
-  late String produtoId;
-  late String nome;
+ late String prevendaprodutoid;
+ late String produtoid;
+  late String nomeproduto;
+  late String imagemurl;
   late String codigoproduto;
   late double valorunitario;
   late double quantidade;
-  late String cpfcnpj;
-  late String telefonecontato;
-  late String endereco;
-  late String uf;
-  late String enderecobairro;
-  late String enderecocep;
+  late double valortotalitem;
 
   OrdersDetailsEndpoint({
-    required this.produtoId,
-    required this.nome,
+    required this.prevendaprodutoid,
+    required this.produtoid,
+    required this.nomeproduto,
+    required this.imagemurl,
     required this.codigoproduto,
     required this.valorunitario,
     required this.quantidade,
-    required this.cpfcnpj,
-    required this.telefonecontato,
-    required this.endereco,
-    required this.uf,
-    required this.enderecobairro,
-    required this.enderecocep,
+    required this.valortotalitem,
   });
 
   factory OrdersDetailsEndpoint.fromJson(Map<String, dynamic> json) {
     return OrdersDetailsEndpoint(
-      produtoId: json['produto_id'] ?? '',
-      nome: json['nome'] ?? '',
-      codigoproduto: json['codigoproduto'] ?? '',
-      valorunitario: (json['valorunitario'] as num).toDouble(),
-      quantidade: (json['quantidade'] as num).toDouble(),
-      cpfcnpj: json['cpfcnpj'] ?? '',
-      telefonecontato: json['telefonecontato'] ?? '',
-      endereco: json['endereco'] ?? '',
-      uf: json['uf'] ?? '',
-      enderecobairro: json['enderecobairro'] ?? '',
-      enderecocep: json['enderecocep'] ?? '',
+      produtoid: json['produto_id'] ?? '',
+      prevendaprodutoid: json['prevendaproduto_id'] ?? '',
+      codigoproduto: json['codigo'] ?? '',
+      nomeproduto: json['nome'] ?? '',
+      valorunitario: (json['valorunitario'] as num).toDouble(),  // Convertendo para double
+      quantidade: (json['quantidade'] as num).toDouble(),  // Convertendo para double e corrigindo o nome da chave
+      valortotalitem: (json['valortotalitem'] as num).toDouble(),  // Convertendo para double
+      imagemurl: json['imagem_url'] ?? '',
     );
   }
 }
 
 class DataServiceOrdersDetails {
-  static Future<List<OrdersDetailsEndpoint>?> fetchDataOrdersDetails(String urlBasic, String prevendaId) async {
+  static Future<List<OrdersDetailsEndpoint>?> fetchDataOrdersDetails(String urlBasic, String prevendaid, String token) async {
 
     List<OrdersDetailsEndpoint>? ordersDetails;
 
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/core/prevenda/$prevendaId');
-      print('Url da prevenda com id: $urlPost');
+      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/pedido/$prevendaid');
+      print('Url da prevenda com id OrderDetails: $urlPost');
 
-      var response = await http.get(urlPost, headers: {'Accept': 'text/html'});
+      var response = await http.get(
+        urlPost,
+         headers: {
+          'auth-token': token
+          });
+
+          print(response.body);
+          print('Token: '+token);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
 
         if (jsonData.containsKey('data') &&
-            jsonData['data'].containsKey('prevenda') &&
-            jsonData['data']['prevenda'].isNotEmpty) {
-            ordersDetails = (jsonData['data']['prevenda'] as List).map((e) => OrdersDetailsEndpoint.fromJson(e)).toList();
+            jsonData['data'].containsKey('prevendaproduto') &&
+            jsonData['data']['prevendaproduto'].isNotEmpty) {
+            ordersDetails = (jsonData['data']['prevendaproduto'] as List).map((e) => OrdersDetailsEndpoint.fromJson(e)).toList();
 
             // print('Pedidos: '+response.body);
         } else {

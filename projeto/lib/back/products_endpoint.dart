@@ -22,7 +22,7 @@ class ProductsEndpoint {
 
   factory ProductsEndpoint.fromJson(Map<String, dynamic> json) {
     return ProductsEndpoint(
-      produtoid: json['produtoid'] ?? '',
+      produtoid: json['produto_id'] ?? '',
       nome: json['nome'] ?? '',
       codigo: json['codigo'] ?? '',
       codigoean: json['codigoean'] ?? '',

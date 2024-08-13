@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto/back/finish_order.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/new_customer.dart';
@@ -7,9 +8,11 @@ import 'package:projeto/front/components/Login_Config/Elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
+import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerSession extends StatefulWidget {
+  final prevendaid;
   final pessoanome;
   final cpfcnpj;
   final telefone;
@@ -20,20 +23,28 @@ class CustomerSession extends StatefulWidget {
   final endereco;
   final complemento;
   final numero;
+  final cidade;
+  final uf;
 
-  const CustomerSession({
-    Key? key,
-    this.pessoanome,
-    this.cpfcnpj,
-    this.telefone,
-    this.cep,
-    this.bairro,
-    this.localidade,
-    this.ibge,
-    this.endereco,
-    this.complemento,
-    this.numero,
-  });
+  final numpedido;
+
+  const CustomerSession(
+      {Key? key,
+      this.prevendaid,
+      this.pessoanome,
+      this.cpfcnpj,
+      this.telefone,
+      this.cep,
+      this.bairro,
+      this.localidade,
+      this.ibge,
+      this.endereco,
+      this.complemento,
+      this.numero,
+      this.cidade,
+      this.uf,
+      
+      this.numpedido});
 
   @override
   State<CustomerSession> createState() => _CustomerSessionState();
@@ -42,6 +53,7 @@ class CustomerSession extends StatefulWidget {
 class _CustomerSessionState extends State<CustomerSession> {
   String urlBasic = '';
   String token = '';
+  String ibge = '';
   String cpf = '';
 
   // late String pessoaid = '';
@@ -60,6 +72,7 @@ class _CustomerSessionState extends State<CustomerSession> {
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
   final _bairrocontroller = TextEditingController();
+  final _cidadecontroller = TextEditingController();
   final _numerocontroller = TextEditingController();
   final _localidadecontroller = TextEditingController();
   final _ibgecontroller = TextEditingController();
@@ -79,15 +92,16 @@ class _CustomerSessionState extends State<CustomerSession> {
     // cpf = widget.cpfcnpj;
     _cepcontroller.text = widget.cep;
     _bairrocontroller.text = widget.bairro.toString();
-    _localidadecontroller.text = widget.localidade ?? '';
+    _localidadecontroller.text = widget.cidade ?? '';
     _numerocontroller.text = widget.numero ?? '';
     _ibgecontroller.text = widget.ibge.toString();
     _complementocontroller.text = widget.complemento.toString();
-    _ufcontroller.text = '';
+    _ufcontroller.text = widget.uf.toString();
     _logradourocontroller.text = widget.endereco.toString();
     _nomecontroller.text = widget.pessoanome;
     _cpfcontroller.text = widget.cpfcnpj;
     _telefonecontatocontroller.text = widget.telefone;
+    print(widget.prevendaid);
     // print(widget.cpfcnpj);
     // _loadSavedComplemento();
     // _loadSavedLogradouro();
@@ -132,6 +146,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _bairrocontroller,
                           _numerocontroller,
                           _complementocontroller,
+                          _cidadecontroller,
                         );
                       },
                       icon: Icon(Icons.person_search)),
@@ -298,7 +313,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   _bairrocontroller.text,
                                   _logradourocontroller.text,
                                   _complementocontroller.text,
-                                  );
+                                  _numerocontroller.text,
+                                  ibge,
+                                  _ufcontroller.text);
                             },
                           ),
                         ),
@@ -311,8 +328,17 @@ class _CustomerSessionState extends State<CustomerSession> {
                           child: Column(
                             children: [
                               RegisterIconButton(
-                                onPressed: () {
-                                  print('teste');
+                                onPressed: () async {
+                                  await DataServiceFinishOrder
+                                      .fetchDataFinishOrder(
+                                    context,
+                                    urlBasic,
+                                    token,
+                                    widget.prevendaid.toString(),
+                                    widget.numpedido.toString(),
+                                  );
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => Home()));
                                 },
                                 text: 'Finalizar pedido',
                                 color: Style.sucefullColor,
@@ -347,6 +373,14 @@ class _CustomerSessionState extends State<CustomerSession> {
     String savedToken = sharedPreferences.getString('token') ?? '';
     setState(() {
       token = savedToken;
+    });
+  }
+
+  Future<void> _loadSavedIbge() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedIbge = sharedPreferences.getString('ibge') ?? '';
+    setState(() {
+      ibge = savedIbge;
     });
   }
 
@@ -398,5 +432,4 @@ class _CustomerSessionState extends State<CustomerSession> {
 //     _telefonecontatocontroller.text = telefone;
 //   });
 // }
-
 }

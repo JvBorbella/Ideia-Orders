@@ -15,6 +15,9 @@ class NewCustomer {
     String bairroController,
     String logradouroController,
     String complementoController,
+    String numeroController,
+    String ibge,
+    String uf
   ) async {
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/novocliente');
 
@@ -27,14 +30,15 @@ class NewCustomer {
       'nome': nomeController,
       'telefone': telefonecontatoController,
       'cep': cepController,
-      'endereço': logradouroController,
-      'endereconumero': '0',
+      'endereco': logradouroController,
+      'endereconumero': numeroController,
       'complemento': complementoController,
       'bairro': bairroController,
-      'codigocidade': '99999',
+      'codigocidade': ibge,
+      'uf': uf,
     });
 
-    print(headers);
+    print(body);
 
     try {
       var response = await http.post(

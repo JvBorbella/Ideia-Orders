@@ -51,6 +51,7 @@ class _HomeState extends State<Home> {
   late String telefone = '';
   late String endereco = '';
   late String enderecobairro = '';
+  late String enderecocidade = '';
   late String endereconumero = '';
   late String enderecocomplemento = '';
   late String enderecocep = '';
@@ -60,6 +61,7 @@ class _HomeState extends State<Home> {
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
   final _bairrocontroller = TextEditingController();
+  final _cidadecontroller = TextEditingController();
   final _numerocontroller = TextEditingController();
   final _ufcontroller = TextEditingController();
   final _logradourocontroller = TextEditingController();
@@ -127,6 +129,7 @@ class _HomeState extends State<Home> {
                         _bairrocontroller,
                         _numerocontroller,
                         _complementocontroller,
+                        _cidadecontroller,
                       );
                     },
                     icon: Icon(Icons.person_search),
@@ -421,6 +424,7 @@ class _HomeState extends State<Home> {
                               telefone: telefone.toString(),
                               endereco: _logradourocontroller.text,
                               bairro: _bairrocontroller.text,
+                              cidade: _cidadecontroller.text,
                               complemento: _complementocontroller.text,
                               cep: _cepcontroller.text,
                               uf: _ufcontroller.text,

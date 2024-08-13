@@ -15,6 +15,7 @@ class GetCliente {
     TextEditingController logradouroController, 
     TextEditingController ufController, 
     TextEditingController bairroController, 
+    TextEditingController cidadeController, 
     TextEditingController numeroController, 
     TextEditingController complementoController,
   ) async {
@@ -46,6 +47,7 @@ class GetCliente {
           var enderecocep = pessoaData['enderecocep']?.toString() ?? '';
           var uf = pessoaData['uf']?.toString() ?? '';
           var enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
+          var enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           var endereconumero = pessoaData['endereconumero']?.toString() ?? '';
           var enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
 
@@ -57,6 +59,7 @@ class GetCliente {
           await sharedPreferences.setString('endereco', endereco);
           await sharedPreferences.setString('uf', uf);
           await sharedPreferences.setString('enderecobairro', enderecobairro);
+          await sharedPreferences.setString('enderecocidade', enderecocidade);
           await sharedPreferences.setString('endereconumero', endereconumero);
           await sharedPreferences.setString('enderecocomplemento', enderecocomplemento);
 
@@ -68,6 +71,7 @@ class GetCliente {
           logradouroController.text = endereco;
           ufController.text = uf;
           bairroController.text = enderecobairro;
+          cidadeController.text = enderecocidade;
           numeroController.text = endereconumero;
           complementoController.text = enderecocomplemento;
         } else {
@@ -105,6 +109,7 @@ class GetCliente2 {
   late String endereco;
   late String uf;
   late String enderecobairro;
+  late String enderecocidade;
   late String endereconumero;
   late String enderecocomplemento;
   late String enderecocep;
@@ -119,6 +124,7 @@ class GetCliente2 {
     required this.endereco,
     required this.uf,
     required this.enderecobairro,
+    required this.enderecocidade,
     required this.endereconumero,
     required this.enderecocomplemento,
     required this.enderecocep,
@@ -134,6 +140,7 @@ class GetCliente2 {
       endereco: json['endereco'] ?? '',
       enderecocep: json['enderecocep'] ?? '',
       enderecobairro: json['enderecobairro'] ?? '',
+      enderecocidade: json['enderecocidade'] ?? '',
       endereconumero: json['endereconumero'] ?? '',
       enderecocomplemento: json['enderecocomplemento'] ?? '',
       uf: json['uf'] ?? '',
@@ -152,6 +159,7 @@ class DataServiceCliente2 {
     String uf = '';
     String enderecocomplemento = '';
     String enderecobairro = '';
+    String enderecocidade = '';
     String endereconumero = '';
     String enderecocep = '';
 
@@ -178,6 +186,7 @@ class DataServiceCliente2 {
           endereco = pessoaData['endereco']?.toString() ?? '';
           enderecocep = pessoaData['enderecocep']?.toString() ?? '';
           enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
+          enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           endereconumero = pessoaData['endereconumero']?.toString() ?? '';
           enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
@@ -200,6 +209,7 @@ class DataServiceCliente2 {
       'endereco': endereco,
       'enderecocep': enderecocep,
       'enderecobairro': enderecobairro,
+      'enderecocidade': enderecocidade,
       'endereconumero': endereconumero,
       'enderecocomplemento': enderecocomplemento,
       'uf': uf,

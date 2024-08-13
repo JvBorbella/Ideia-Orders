@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/back/get_cliente.dart';
+import 'package:projeto/back/order_details.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/elements/navbar_button.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
@@ -16,6 +17,7 @@ class NewOrderPage extends StatefulWidget {
   final telefone;
   final endereco;
   final bairro;
+  final cidade;
   final cep;
   final complemento;
   final uf;
@@ -33,10 +35,10 @@ class NewOrderPage extends StatefulWidget {
     this.telefone,
     this.endereco,
     this.bairro,
+    this.cidade,
     this.cep,
     this.complemento,
     this.uf,
-
     this.datahora,
     this.valortotal,
     this.codigoproduto,
@@ -53,14 +55,26 @@ class _NewOrderPageState extends State<NewOrderPage> {
   late String pessoaid = '';
   late String nome = '';
   late String codigo = '';
+  late String pessoanome = '';
   late String cpfcliente = '';
   late String telefone = '';
   late String enderecocep = '';
   late String endereco = '';
   late String enderecobairro = '';
+  late String enderecocidade = '';
   late String endereconumero = '';
   late String enderecocomplemento = '';
   late String uf = '';
+
+  late String nomeproduto = '';
+  late String codigoproduto = '';
+  late String imagemurl = '';
+  late String prevendaprodutoid = '';
+  late String produtoid = '';
+  late double valorunitario = 0.0;
+  late double valortotalitem = 0.0;
+  late double valortotal = 0.0;
+  late double quantidade = 0.0;
 
   bool isLoading = true;
 
@@ -76,7 +90,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-     _loadSavedUrlBasic();
+    _loadSavedUrlBasic();
     _loadSavedToken();
     // print(widget.cpfcnpj);
     loadData();
@@ -85,9 +99,9 @@ class _NewOrderPageState extends State<NewOrderPage> {
 
   @override
   Widget build(BuildContext context) {
-      if (isLoading) {
+    if (isLoading) {
       return Scaffold(
-        body:  Center(
+        body: Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -103,14 +117,24 @@ class _NewOrderPageState extends State<NewOrderPage> {
             height: Style.height_10(context),
           ),
           ProductSession(
-            pessoanome: widget.pessoanome.toString(),
-            cpfcnpj: widget.cpfcnpj.toString(),
-            telefone: widget.telefone.toString(),
-            cep: widget.cep.toString(),
-            bairro: widget.bairro.toString(),
-            endereco: widget.endereco.toString(),
-            complemento: widget.complemento.toString(),
-          ),
+              prevendaid: widget.prevendaId.toString(),
+              pessoanome: widget.pessoanome.toString(),
+              cpfcnpj: widget.cpfcnpj.toString(),
+              telefone: widget.telefone.toString(),
+              cep: widget.cep.toString(),
+              bairro: widget.bairro.toString(),
+              cidade: widget.cidade.toString(),
+              endereco: widget.endereco.toString(),
+              complemento: widget.complemento.toString(),
+              produtoid: produtoid.toString(),
+              prevendaprodutoid: prevendaprodutoid.toString(),
+              nomeproduto: nomeproduto.toString(),
+              codigoproduto: codigoproduto.toString(),
+              valorunitario: valorunitario.toDouble(),
+              valortotalitem: valortotalitem.toDouble(),
+              valortotal: valortotal.toDouble(),
+              quantidade: quantidade.toDouble(),
+              imagemurl: imagemurl.toString()),
           SizedBox(
             height: Style.height_30(context),
           ),
@@ -123,6 +147,11 @@ class _NewOrderPageState extends State<NewOrderPage> {
             numero: endereconumero,
             endereco: endereco,
             complemento: enderecocomplemento,
+            cidade: enderecocidade,
+            uf: uf,
+
+            prevendaid: widget.prevendaId,
+            numpedido: widget.numero
           ),
           SizedBox(
             height: Style.height_30(context),
@@ -131,6 +160,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
       ),
     ));
   }
+
   Future<void> _loadSavedUrlBasic() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String savedUrlBasic = sharedPreferences.getString('urlBasic') ?? '';
@@ -166,6 +196,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
     ]);
     await Future.wait([
       fetchDataCliente2(),
+      fetchDataOrdersDetails2(widget.prevendaId)
       // initializer(),
     ]);
   }
@@ -176,30 +207,52 @@ class _NewOrderPageState extends State<NewOrderPage> {
       isLoading = false;
     });
   }
-  Future<void> fetchDataCliente2() async {
-  final data = await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj);
-  setState(() {
-    pessoaid = data['pessoa_id'].toString();
-    nome = data['nome'].toString();
-    cpfcliente = data['cpf'].toString();
-    telefone = data['telefone'].toString();
-    endereco = data['endereco'].toString();
-    enderecobairro = data['enderecobairro'].toString();
-    endereconumero = data['endereconumero'].toString();
-    enderecocomplemento = data['enderecocomplemento'].toString();
-    enderecocep = data['enderecocep'].toString();
-    uf = data['uf'].toString();
-    codigo = data['codigo'].toString();
 
-    // Atualiza os controladores com os novos valores
-    // _cepcontroller.text = enderecocep;
-    // _bairrocontroller.text = enderecobairro;
-    // _complementocontroller.text = enderecocomplemento;
-    // _ufcontroller.text = uf;
-    // _logradourocontroller.text = endereco;
-    // _nomecontroller.text = nome;
-    // _cpfcontroller.text = cpfcliente;
-    // _telefonecontatocontroller.text = telefone;
-  });
-}
+  Future<void> fetchDataCliente2() async {
+    final data =
+        await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj);
+    setState(() {
+      pessoaid = data['pessoa_id'].toString();
+      nome = data['nome'].toString();
+      cpfcliente = data['cpf'].toString();
+      telefone = data['telefone'].toString();
+      endereco = data['endereco'].toString();
+      enderecobairro = data['enderecobairro'].toString();
+      endereconumero = data['endereconumero'].toString();
+      enderecocomplemento = data['enderecocomplemento'].toString();
+      enderecocep = data['enderecocep'].toString();
+      enderecocidade = data['enderecocidade'].toString();
+      uf = data['uf'].toString();
+      codigo = data['codigo'].toString();
+
+      // Atualiza os controladores com os novos valores
+      // _cepcontroller.text = enderecocep;
+      // _bairrocontroller.text = enderecobairro;
+      // _complementocontroller.text = enderecocomplemento;
+      // _ufcontroller.text = uf;
+      // _logradourocontroller.text = endereco;
+      // _nomecontroller.text = nome;
+      // _cpfcontroller.text = cpfcliente;
+      // _telefonecontatocontroller.text = telefone;
+    });
+  }
+
+  Future<void> fetchDataOrdersDetails2(String prevendaId) async {
+    final data = await DataServiceOrdersDetails2.fetchDataOrdersDetails2(
+        urlBasic, prevendaId);
+    setState(() {
+      pessoanome = data['pessoa_nome'].toString();
+      cpfcliente = data['cpfcnpj'].toString();
+      telefone = data['telefone'].toString();
+      codigoproduto = data['codigo'].toString();
+      nomeproduto = data['nome'].toString();
+      imagemurl = data['imagem_url'].toString();
+      prevendaprodutoid = data['prevendaproduto_id'].toString();
+      produtoid = data['produto_id'].toString();
+      valorunitario = double.parse(data['valorunitario'] ?? '0.0');
+      valortotalitem = double.parse(data['valortotalitem'] ?? '0.0');
+      valortotal = double.parse(data['valortotal'] ?? '0.0');
+      quantidade = double.parse(data['quantidade'] ?? '0.0');
+    });
+  }
 }

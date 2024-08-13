@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:projeto/back/add_product.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductAdd extends StatefulWidget {
+  final prevendaid;
   final produtoid;
   final nomeproduto;
   final codigoproduto;
@@ -16,6 +18,7 @@ class ProductAdd extends StatefulWidget {
 
   const ProductAdd({
     Key? key,
+    this.prevendaid,
     this.produtoid,
     this.nomeproduto,
     this.codigoproduto,
@@ -39,9 +42,30 @@ class ProductAdd extends StatefulWidget {
 //   value--;
 // }
 
+String urlBasic = '';
+String token = '';
+
 class _ProductAddState extends State<ProductAdd> {
+  late TextEditingController _complementocontroller;
+  late TextEditingController _quantidadecontroller;
   NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: '');
+
+  @override
+  void initState() {
+    super.initState();
+    _complementocontroller = TextEditingController();
+    _quantidadecontroller = TextEditingController();
+    _loadSavedUrlBasic();
+    _loadSavedToken();
+  }
+
+  @override
+  void dispose() {
+    _complementocontroller.dispose();
+    _quantidadecontroller.dispose();
+    super.dispose();
+  }
 
   void _openModal(BuildContext context) {
     showDialog(
@@ -80,169 +104,225 @@ class _ProductAddState extends State<ProductAdd> {
                       SizedBox(
                         height: Style.height_5(context),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        child: Text(widget.codigoproduto),
-                      ),
-                      SizedBox(
-                        height: Style.height_20(context),
-                      ),
-                      Column(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          Column(
                             children: [
                               Text(
-                                'Ean',
+                                'Código',
+                                style: TextStyle(
+                                  fontSize: Style.height_8(context),
+                                  color: Style.quarantineColor
+                                ),
+                                ),
+                              Text(
+                                widget.codigoproduto,
                                 style: TextStyle(
                                     fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          Column(
                             children: [
                               Text(
-                                widget.codigoean,
+                                'Pr. Tabela',
                                 style: TextStyle(
-                                    fontSize: Style.height_20(context),
-                                    color: Style.primaryColor),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: Style.height_10(context),
-                      ),
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Qtde em Estoque',
-                                style: TextStyle(
-                                    fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '50',
-                                style: TextStyle(
-                                    fontSize: Style.height_20(context),
-                                    color: Style.primaryColor),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: Style.height_10(context),
-                      ),
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Preço Tabela',
-                                style: TextStyle(
-                                    fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
+                                  fontSize: Style.height_8(context),
+                                  color: Style.quarantineColor
+                                ),),
                               Text(
                                 currencyFormat
                                     .format(widget.precotabela)
                                     .toString(),
                                 style: TextStyle(
-                                    fontSize: Style.height_20(context),
-                                    color: Style.primaryColor),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: Style.height_10(context),
-                      ),
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Preço Promocional',
-                                style: TextStyle(
                                     fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
-                              ),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
+                              )
                             ],
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                currencyFormat
-                                    .format(widget.precopromocional)
-                                    .toString(),
-                                style: TextStyle(
-                                    fontSize: Style.height_20(context),
-                                    color: Style.primaryColor),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: Style.height_10(context),
-                      ),
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          Column(
                             children: [
                               Text(
                                 'Unidade',
                                 style: TextStyle(
-                                    fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
+                                  fontSize: Style.height_8(context),
+                                  color: Style.quarantineColor
+                                ),),
                               Text(
                                 widget.unidade,
                                 style: TextStyle(
-                                    fontSize: Style.height_20(context),
-                                    color: Style.primaryColor),
+                                    fontSize: Style.height_15(context),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
                               )
                             ],
-                          )
+                          ),
                         ],
                       ),
+                      // Container(
+                      //   alignment: Alignment.center,
+                      //   child: Text(widget.codigoproduto),
+                      // ),
+                      // Column(
+                      //   children: [
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           'Ean',
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_15(context),
+                      //               color: Style.warningColor),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           widget.codigoean,
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_20(context),
+                      //               color: Style.primaryColor),
+                      //         )
+                      //       ],
+                      //     )
+                      //   ],
+                      // ),
+                      // SizedBox(
+                      //   height: Style.height_10(context),
+                      // ),
+                      // Column(
+                      //   children: [
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           'Qtde em Estoque',
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_15(context),
+                      //               color: Style.warningColor),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           '50',
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_20(context),
+                      //               color: Style.primaryColor),
+                      //         )
+                      //       ],
+                      //     )
+                      //   ],
+                      // ),
+                      // SizedBox(
+                      //   height: Style.height_10(context),
+                      // ),
+                      // Column(
+                      //   children: [
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           'Preço Tabela',
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_15(context),
+                      //               color: Style.warningColor),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           currencyFormat
+                      //               .format(widget.precotabela)
+                      //               .toString(),
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_20(context),
+                      //               color: Style.primaryColor),
+                      //         )
+                      //       ],
+                      //     )
+                      //   ],
+                      // ),
+                      // SizedBox(
+                      //   height: Style.height_10(context),
+                      // ),
+                      // Column(
+                      //   children: [
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           'Preço Promocional',
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_15(context),
+                      //               color: Style.warningColor),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           currencyFormat
+                      //               .format(widget.precopromocional)
+                      //               .toString(),
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_20(context),
+                      //               color: Style.primaryColor),
+                      //         )
+                      //       ],
+                      //     )
+                      //   ],
+                      // ),
+                      // SizedBox(
+                      //   height: Style.height_10(context),
+                      // ),
+                      // Column(
+                      //   children: [
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           'Unidade',
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_15(context),
+                      //               color: Style.warningColor),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Text(
+                      //           widget.unidade,
+                      //           style: TextStyle(
+                      //               fontSize: Style.height_20(context),
+                      //               color: Style.primaryColor),
+                      //         )
+                      //       ],
+                      //     )
+                      //   ],
+                      // ),
                       SizedBox(
                         height: Style.height_10(context),
                       ),
@@ -268,6 +348,7 @@ class _ProductAddState extends State<ProductAdd> {
                               Container(
                                 width: Style.width_130(context),
                                 child: Input(
+                                  controller: _quantidadecontroller,
                                   text: 'Informe a quantidade',
                                   type: TextInputType.number,
                                   textAlign: TextAlign.center,
@@ -302,6 +383,7 @@ class _ProductAddState extends State<ProductAdd> {
                               Container(
                                 width: Style.width_180(context),
                                 child: TextFormField(
+                                  controller: _complementocontroller,
                                   textAlign: TextAlign.start,
                                   textAlignVertical: TextAlignVertical
                                       .top, // Alinha o cursor ao topo
@@ -341,9 +423,25 @@ class _ProductAddState extends State<ProductAdd> {
                                 text: 'Adicionar produto',
                                 color: Style.primaryColor,
                                 width: Style.width_100(context),
-                                onPressed: () {
-                                  //  Navigator.of(context).push(MaterialPageRoute(
-                                  //     builder: (context) => NewOrderPage()));
+                                onPressed: () async {
+                                  // Adiciona o produto ao pedido
+                                  await DataServiceAddProduct.sendDataOrder(
+                                    context,
+                                    urlBasic,
+                                    token,
+                                    widget.prevendaid,
+                                    widget.produtoid,
+                                    _complementocontroller.text,
+                                    _quantidadecontroller.text,
+                                  );
+
+                                  // Verifica se o widget ainda está montado antes de fechar o modal
+                                  if (mounted) {
+                                    _closeModal();
+                                    // Limpa os campos após adicionar o produto
+                                    _quantidadecontroller.clear();
+                                    _complementocontroller.clear();
+                                  }
                                 },
                               ),
                             ],
@@ -525,5 +623,21 @@ class _ProductAddState extends State<ProductAdd> {
         ),
       ),
     );
+  }
+
+  Future<void> _loadSavedUrlBasic() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedUrlBasic = sharedPreferences.getString('urlBasic') ?? '';
+    setState(() {
+      urlBasic = savedUrlBasic;
+    });
+  }
+
+  Future<void> _loadSavedToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedToken = sharedPreferences.getString('token') ?? '';
+    setState(() {
+      token = savedToken;
+    });
   }
 }
