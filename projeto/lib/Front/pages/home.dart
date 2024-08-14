@@ -99,9 +99,9 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   child: Text(
-                    'Abrir pedido',
+                    'Abertura do pedido',
                     style: TextStyle(
-                      fontSize: Style.height_20(context),
+                      fontSize: Style.height_15(context),
                       fontWeight: FontWeight.bold,
                       color: Style.tertiaryColor,
                     ),
@@ -414,7 +414,7 @@ class _HomeState extends State<Home> {
                           orders[index].prevendaId,
                         );
 
-                        Navigator.of(context).push(
+                       Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
                             builder: (context) => NewOrderPage(
                               prevendaId: orders[index].prevendaId,

@@ -64,11 +64,13 @@ class _ProductSessionState extends State<ProductSession> {
   String urlBasic = '';
   String token = '';
 
+  double totalValue = 0.0;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadData();
+    totalValue = widget.valortotal; // Inicializa com o valor total original
   }
 
   @override
@@ -88,7 +90,6 @@ class _ProductSessionState extends State<ProductSession> {
               return Column(
                 children: [
                   Container(
-                    // width: Style.height_100(context),
                     child: Column(
                       children: [
                         Container(
@@ -96,7 +97,6 @@ class _ProductSessionState extends State<ProductSession> {
                             left: Style.height_2(context),
                             top: Style.height_5(context),
                             bottom: Style.height_5(context),
-                            // right: Style.height_15(context)
                           ),
                           decoration: BoxDecoration(
                             color: Style.defaultColor,
@@ -240,12 +240,11 @@ class _ProductSessionState extends State<ProductSession> {
                                                             .prevendaprodutoid);
 
                                                 setState(() {
-                                                  fetchDataOrders();
+                                                  orders.removeAt(index);
+                                                  totalValue =
+                                                      _calculateTotal(); // Recalcula o valor total
                                                 });
-                                                setState(() {
-                                                  orders.removeAt(
-                                                      index); // Remove o item localmente
-                                                });
+
                                                 if (orders.isEmpty) {
                                                   setState(
                                                       () {}); // Força uma atualização da UI quando a lista estiver vazia
@@ -278,7 +277,7 @@ class _ProductSessionState extends State<ProductSession> {
         ),
         Center(
           child: Text(
-            'Total - ' + currencyFormat.format(widget.valortotal).toString(),
+            'Total - ' + currencyFormat.format(totalValue).toString(),
             style: TextStyle(
                 color: Style.primaryColor,
                 fontSize: Style.height_15(context),
@@ -294,7 +293,7 @@ class _ProductSessionState extends State<ProductSession> {
             width: Style.height_150(context),
             icon: Icons.add_circle,
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => ProductList(
                         prevendaid: widget.prevendaid.toString(),
                         pessoanome: widget.pessoanome.toString(),
@@ -308,6 +307,14 @@ class _ProductSessionState extends State<ProductSession> {
             }),
       ],
     ));
+  }
+
+  double _calculateTotal() {
+    double total = 0.0;
+    for (var order in orders) {
+      total += order.valortotalitem;
+    }
+    return total;
   }
 
   Future<void> loadData() async {

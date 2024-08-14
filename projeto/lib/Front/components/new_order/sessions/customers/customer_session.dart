@@ -337,7 +337,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                     widget.prevendaid.toString(),
                                     widget.numpedido.toString(),
                                   );
-                                  Navigator.of(context).push(MaterialPageRoute(
+                                 Navigator.of(context).pushReplacement(MaterialPageRoute(
                                       builder: (context) => Home()));
                                 },
                                 text: 'Finalizar pedido',

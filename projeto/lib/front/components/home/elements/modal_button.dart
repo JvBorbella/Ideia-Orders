@@ -116,7 +116,7 @@ class _ModalButtonState extends State<ModalButton> {
   }
 
   void _sair() {
-    Navigator.of(context).pushAndRemoveUntil(
+   Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) => LoginPage(),
         ),

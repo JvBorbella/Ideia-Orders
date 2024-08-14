@@ -29,7 +29,7 @@ class _NavbarButtonState extends State<NavbarButton> {
             GestureDetector(
               //Função que está sendo definida na página em que este código está sendo chamado
               onTap: () {
-                Navigator.of(context).push(
+               Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => widget.destination),
                 );
               },

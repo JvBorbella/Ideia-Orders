@@ -92,25 +92,25 @@ class _ProductListState extends State<ProductList> {
                   // onChanged: (value) async {
                   //   await fetchDataProducts();
                   // },
+                  onSubmitted: (value) async {
+                    await fetchDataProducts(); // Chama a função de pesquisa ao pressionar "Enter"
+                  },
                   constraints: BoxConstraints(),
                   leading: IconButton(
-                    padding: EdgeInsets.only(
-                      bottom: Style.height_1(context)
-                    ),
+                    padding: EdgeInsets.only(bottom: Style.height_1(context)),
                     onPressed: () async {
-                    await fetchDataProducts();
-                  },
+                      await fetchDataProducts();
+                    },
                     icon: Icon(Icons.search),
                     color: Style.primaryColor,
-                    ),
+                  ),
                   hintText: 'Pesquise pelo produto',
                   hintStyle: WidgetStatePropertyAll(
                       TextStyle(color: Style.quarantineColor)),
                   padding: WidgetStatePropertyAll(EdgeInsets.only(
                     left: Style.height_15(context),
                     right: Style.height_15(context),
-                  )
-                  ),
+                  )),
                 ),
               ),
               SizedBox(height: Style.height_10(context)),

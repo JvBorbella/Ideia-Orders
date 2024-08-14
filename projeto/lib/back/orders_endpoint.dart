@@ -112,9 +112,9 @@ class OrdersDetailsEndpoint {
       prevendaprodutoid: json['prevendaproduto_id'] ?? '',
       codigoproduto: json['codigo'] ?? '',
       nomeproduto: json['nome'] ?? '',
-      valorunitario: (json['valorunitario'] as num).toDouble(),  // Convertendo para double
-      quantidade: (json['quantidade'] as num).toDouble(),  // Convertendo para double e corrigindo o nome da chave
-      valortotalitem: (json['valortotalitem'] as num).toDouble(),  // Convertendo para double
+      valorunitario: (json['valorunitario'] as num).toDouble(),  
+      quantidade: (json['quantidade'] as num).toDouble(),  
+      valortotalitem: (json['valortotalitem'] as num).toDouble(),  
       imagemurl: json['imagem_url'] ?? '',
     );
   }

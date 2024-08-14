@@ -55,7 +55,7 @@ class _ProductAddState extends State<ProductAdd> {
   void initState() {
     super.initState();
     _complementocontroller = TextEditingController();
-    _quantidadecontroller = TextEditingController();
+    _quantidadecontroller = TextEditingController(text: '1.0');
     _loadSavedUrlBasic();
     _loadSavedToken();
   }
@@ -163,166 +163,6 @@ class _ProductAddState extends State<ProductAdd> {
                           ),
                         ],
                       ),
-                      // Container(
-                      //   alignment: Alignment.center,
-                      //   child: Text(widget.codigoproduto),
-                      // ),
-                      // Column(
-                      //   children: [
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           'Ean',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_15(context),
-                      //               color: Style.warningColor),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           widget.codigoean,
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_20(context),
-                      //               color: Style.primaryColor),
-                      //         )
-                      //       ],
-                      //     )
-                      //   ],
-                      // ),
-                      // SizedBox(
-                      //   height: Style.height_10(context),
-                      // ),
-                      // Column(
-                      //   children: [
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           'Qtde em Estoque',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_15(context),
-                      //               color: Style.warningColor),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           '50',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_20(context),
-                      //               color: Style.primaryColor),
-                      //         )
-                      //       ],
-                      //     )
-                      //   ],
-                      // ),
-                      // SizedBox(
-                      //   height: Style.height_10(context),
-                      // ),
-                      // Column(
-                      //   children: [
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           'Preço Tabela',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_15(context),
-                      //               color: Style.warningColor),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           currencyFormat
-                      //               .format(widget.precotabela)
-                      //               .toString(),
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_20(context),
-                      //               color: Style.primaryColor),
-                      //         )
-                      //       ],
-                      //     )
-                      //   ],
-                      // ),
-                      // SizedBox(
-                      //   height: Style.height_10(context),
-                      // ),
-                      // Column(
-                      //   children: [
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           'Preço Promocional',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_15(context),
-                      //               color: Style.warningColor),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           currencyFormat
-                      //               .format(widget.precopromocional)
-                      //               .toString(),
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_20(context),
-                      //               color: Style.primaryColor),
-                      //         )
-                      //       ],
-                      //     )
-                      //   ],
-                      // ),
-                      // SizedBox(
-                      //   height: Style.height_10(context),
-                      // ),
-                      // Column(
-                      //   children: [
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           'Unidade',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_15(context),
-                      //               color: Style.warningColor),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           widget.unidade,
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_20(context),
-                      //               color: Style.primaryColor),
-                      //         )
-                      //       ],
-                      //     )
-                      //   ],
-                      // ),
                       SizedBox(
                         height: Style.height_10(context),
                       ),
@@ -336,7 +176,9 @@ class _ProductAddState extends State<ProductAdd> {
                                 'Qtde a adicionar',
                                 style: TextStyle(
                                     fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold
+                                    ),
                               ),
                             ],
                           ),
@@ -371,7 +213,9 @@ class _ProductAddState extends State<ProductAdd> {
                                 'Complemento',
                                 style: TextStyle(
                                     fontSize: Style.height_15(context),
-                                    color: Style.warningColor),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold
+                                    ),
                               ),
                             ],
                           ),
