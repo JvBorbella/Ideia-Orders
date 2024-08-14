@@ -175,21 +175,6 @@ class _HomeState extends State<Home> {
                       _closeModal();
                     },
                     child: Text('Abrir pedido'))
-                // RegisterButton(
-                //   text: 'Abrir Pedido',
-                //   color: Style.primaryColor,
-                //   width: Style.width_100(context),
-                //   onPressed: () async {
-                //     await DataServiceNewOrder.sendDataOrder(
-                //       urlBasic,
-                //       _nomecontroller,
-                //       _cpfcontroller,
-                //       _telefonecontatocontroller,
-                //       token,
-                //     );
-                //     _closeModal();
-                //   },
-                // ),
               ],
             ),
           ),
@@ -254,155 +239,28 @@ class _HomeState extends State<Home> {
                 ],
                 text: 'Pedidos',
               ),
-              Container(
-                height: Style.height_60(context),
-                padding: EdgeInsets.all(Style.height_12(context)),
-                child: SearchBar(
-                  constraints: BoxConstraints(),
-                  leading: const Icon(
-                    Icons.search,
-                    color: Style.primaryColor,
-                  ),
-                  hintText: 'Pesquise o código do pedido',
-                  hintStyle: WidgetStatePropertyAll(
-                      TextStyle(color: Style.quarantineColor)),
-                  padding: WidgetStatePropertyAll(
-                    EdgeInsets.only(
-                        left: Style.height_15(context),
-                        right: Style.height_15(context)),
-                  ),
-                ),
-              ),
+              // Container(
+              //   height: Style.height_60(context),
+              //   padding: EdgeInsets.all(Style.height_12(context)),
+              //   child: SearchBar(
+              //     constraints: BoxConstraints(),
+              //     leading: const Icon(
+              //       Icons.search,
+              //       color: Style.primaryColor,
+              //     ),
+              //     hintText: 'Pesquise o código do pedido',
+              //     hintStyle: WidgetStatePropertyAll(
+              //         TextStyle(color: Style.quarantineColor)),
+              //     padding: WidgetStatePropertyAll(
+              //       EdgeInsets.only(
+              //           left: Style.height_15(context),
+              //           right: Style.height_15(context)),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: Style.height_10(context)),
               Center(child: TextTitle(text: 'Lista de pedidos')),
               SizedBox(height: Style.height_10(context)),
-              // Container(
-              //   padding: EdgeInsets.all(Style.height_12(context)),
-              //   margin: EdgeInsets.only(bottom: Style.height_10(context)),
-              //   decoration: BoxDecoration(
-              //     color: Style.defaultColor,
-              //     boxShadow: [
-              //       BoxShadow(
-              //         color: Colors.grey.withOpacity(0.15),
-              //         spreadRadius: 5,
-              //         blurRadius: 7,
-              //         offset: Offset(0, 3),
-              //       ),
-              //     ],
-              //   ),
-              //   child: Row(
-              //     children: [
-              //       Container(
-              //         height: Style.height_30(context),
-              //         // child: PopupMenuButton<String>(
-              //         //   itemBuilder: (BuildContext context) =>
-              //         //       <PopupMenuEntry<String>>[
-              //         //     PopupMenuItem(
-              //         //       enabled: false,
-              //         //       child: Row(
-              //         //         mainAxisAlignment: MainAxisAlignment.end,
-              //         //         children: [
-              //         //           Container(
-              //         //             margin: EdgeInsets.only(
-              //         //                 bottom: Style.height_5(context)),
-              //         //             decoration: BoxDecoration(
-              //         //               borderRadius: BorderRadius.circular(
-              //         //                   Style.height_5(context)),
-              //         //               color: Style.errorColor,
-              //         //             ),
-              //         //             child: IconButton(
-              //         //               onPressed: () {
-              //         //                 // _closeModal();
-              //         //               },
-              //         //               icon: Image.network(
-              //         //                   'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/05/icons8-excluir-20.png'),
-              //         //               style: ButtonStyle(
-              //         //                 iconColor: WidgetStatePropertyAll(
-              //         //                     Style.tertiaryColor),
-              //         //               ),
-              //         //             ),
-              //         //           ),
-              //         //         ],
-              //         //       ),
-              //         //     ),
-              //         //     PopupMenuDivider(height: Style.height_1(context)),
-              //         //     const PopupMenuItem<String>(
-              //         //       labelTextStyle: WidgetStatePropertyAll(TextStyle(
-              //         //         fontSize: 20,
-              //         //         fontFamily: 'Poppins-Medium',
-              //         //         color: Style.primaryColor,
-              //         //       )),
-              //         //       value: 'Todos',
-              //         //       child: Text('Todos'),
-              //         //     ),
-              //         //     PopupMenuDivider(height: Style.height_1(context)),
-              //         //     const PopupMenuItem<String>(
-              //         //       labelTextStyle: WidgetStatePropertyAll(TextStyle(
-              //         //         fontSize: 20,
-              //         //         fontFamily: 'Poppins-Medium',
-              //         //         color: Style.primaryColor,
-              //         //       )),
-              //         //       value: 'Faturados',
-              //         //       child: Text('Faturados'),
-              //         //     ),
-              //         //     PopupMenuDivider(height: Style.height_1(context)),
-              //         //     const PopupMenuItem<String>(
-              //         //       labelTextStyle: WidgetStatePropertyAll(TextStyle(
-              //         //         fontSize: 20,
-              //         //         fontFamily: 'Poppins-Medium',
-              //         //         color: Style.primaryColor,
-              //         //       )),
-              //         //       value: 'Cancelados',
-              //         //       child: Text('Cancelados'),
-              //         //     ),
-              //         //   ],
-              //         //   onSelected: (String value) async {
-              //         //     if (value == 'Todos') {
-              //         //       // Filtrar por todos
-              //         //     } else if (value == 'Faturados') {
-              //         //       // Filtrar por faturados
-              //         //     } else if (value == 'Cancelados') {
-              //         //       // Filtrar por cancelados
-              //         //     }
-              //         //     setState(() {
-              //         //       selectedOptionChild = value;
-              //         //     });
-              //         //   },
-              //         //   child: Row(
-              //         //     mainAxisAlignment: MainAxisAlignment.center,
-              //         //     crossAxisAlignment: CrossAxisAlignment.center,
-              //         //     children: [
-              //         //       Icon(
-              //         //         Icons.filter_list_outlined,
-              //         //         color: Style.primaryColor,
-              //         //         size: Style.height_20(context),
-              //         //       ),
-              //         //       SizedBox(width: Style.height_2(context)),
-              //         //       Text(
-              //         //         'Filtrado por: ',
-              //         //         style:
-              //         //             TextStyle(fontSize: Style.height_12(context)),
-              //         //       ),
-              //         //       Container(
-              //         //         child: Text(
-              //         //           '',
-              //         //           style: TextStyle(
-              //         //             color: Style.secondaryColor,
-              //         //             fontWeight: FontWeight.bold,
-              //         //             fontSize: Style.height_12(context),
-              //         //           ),
-              //         //           textAlign: TextAlign.center,
-              //         //           overflow: TextOverflow.clip,
-              //         //           softWrap: true,
-              //         //         ),
-              //         //       ),
-              //         //     ],
-              //         //   ),
-              //         // ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
               ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
@@ -414,7 +272,7 @@ class _HomeState extends State<Home> {
                           orders[index].prevendaId,
                         );
 
-                       Navigator.of(context).pushReplacement(
+                       Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => NewOrderPage(
                               prevendaId: orders[index].prevendaId,
@@ -444,7 +302,6 @@ class _HomeState extends State<Home> {
                       ),
                     );
                   }),
-              
             ],
           ),
         ),
@@ -505,18 +362,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-  // Future<void> fetchDataNewOrder() async {
-  //   final newOrder = NewOrder(
-  //     nome: _nomecontroller.text,
-  //     cpf: _cpfcontroller.text,
-  //     telefone: _telefonecontatocontroller.text,
-  //   );
-
-  //   await DataServiceNewOrder.sendDataOrder();
-
-  //   // Adicione qualquer lógica adicional aqui, se necessário
-  // }
-
   Future<void> fetchDataOrdersDetails2(String prevendaId) async {
     final data = await DataServiceOrdersDetails2.fetchDataOrdersDetails2(
         urlBasic, prevendaId);
@@ -524,11 +369,6 @@ class _HomeState extends State<Home> {
       pessoanome = data['pessoa_nome'].toString();
       cpfcnpj = data['cpfcnpj'].toString();
       telefone = data['telefone'].toString();
-      // endereco = data['endereco'].toString();
-      // enderecobairro = data['enderecobairro'].toString();
-      // enderecocomplemento = data['enderecocomplemento'].toString();
-      // enderecocep = data['enderecocep'].toString();
-      // uf = data['uf'].toString();
       codigoproduto = data['codigo'].toString();
     });
   }

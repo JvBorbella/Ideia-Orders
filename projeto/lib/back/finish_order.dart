@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/style.dart';
+import 'package:projeto/front/pages/home.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 
 class FinishOrder {
@@ -70,15 +71,30 @@ class DataServiceFinishOrder {
             ),
           );
 
+          Navigator.of(context)
+              .pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+
           await SunmiPrinter.bindingPrinter();
           await SunmiPrinter.startTransactionPrint(true);
           await SunmiPrinter.printText(jsonData['message']);
           await SunmiPrinter.printBarCode('PV$numpedido');
           await SunmiPrinter.submitTransactionPrint();
           await SunmiPrinter.exitTransactionPrint(true);
-
         } else {
-          print('Dados não encontrado para impressão');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Este pedido já foi finalizado ⚠️',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.warningColor,
+            ),
+          );
         }
       } else {
         print('Erro ao carregar dados: ${response.statusCode}');

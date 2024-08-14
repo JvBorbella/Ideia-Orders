@@ -77,22 +77,13 @@ class _NewOrderPageState extends State<NewOrderPage> {
   late double quantidade = 0.0;
 
   bool isLoading = true;
-
-  // final _cepcontroller = TextEditingController();
-  // final _complementocontroller = TextEditingController();
-  // final _bairrocontroller = TextEditingController();
-  // final _ufcontroller = TextEditingController();
-  // final _logradourocontroller = TextEditingController();
-  // final _cpfcontroller = TextEditingController();
-  // final _nomecontroller = TextEditingController();
-  // final _telefonecontatocontroller = TextEditingController();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _loadSavedUrlBasic();
     _loadSavedToken();
-    // print(widget.cpfcnpj);
+    print('endereço: '+endereco);
     loadData();
     _refreshData();
   }
@@ -177,19 +168,6 @@ class _NewOrderPageState extends State<NewOrderPage> {
     });
   }
 
-  // Future<void> initializer() async {
-  //   setState(() {
-  //   _cepcontroller.text = widget.cep;
-  //   _bairrocontroller.text = widget.bairro.toString();
-  //   _complementocontroller.text = widget.complemento.toString();
-  //   _ufcontroller.text = '';
-  //   _logradourocontroller.text = widget.endereco.toString();
-  //   _nomecontroller.text = widget.pessoanome.toString();
-  //   _cpfcontroller.text = cpf;
-  //   _cepcontroller.text = enderecocep;
-  //   });
-  // }
-
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
@@ -224,16 +202,6 @@ class _NewOrderPageState extends State<NewOrderPage> {
       enderecocidade = data['enderecocidade'].toString();
       uf = data['uf'].toString();
       codigo = data['codigo'].toString();
-
-      // Atualiza os controladores com os novos valores
-      // _cepcontroller.text = enderecocep;
-      // _bairrocontroller.text = enderecobairro;
-      // _complementocontroller.text = enderecocomplemento;
-      // _ufcontroller.text = uf;
-      // _logradourocontroller.text = endereco;
-      // _nomecontroller.text = nome;
-      // _cpfcontroller.text = cpfcliente;
-      // _telefonecontatocontroller.text = telefone;
     });
   }
 

@@ -8,7 +8,6 @@ import 'package:projeto/front/components/Login_Config/Elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
-import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerSession extends StatefulWidget {
@@ -56,17 +55,6 @@ class _CustomerSessionState extends State<CustomerSession> {
   String ibge = '';
   String cpf = '';
 
-  // late String pessoaid = '';
-  // late String nome = '';
-  // late String codigo = '';
-  // late String cpfcliente = '';
-  // late String telefone = '';
-  // late String enderecocep = '';
-  // late String endereco = '';
-  // late String enderecobairro = '';
-  // late String enderecocomplemento = '';
-  // late String uf = '';
-
   bool isLoading = true;
 
   final _cepcontroller = TextEditingController();
@@ -84,12 +72,10 @@ class _CustomerSessionState extends State<CustomerSession> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _loadSavedUrlBasic();
     _loadSavedToken();
-    // loadData();
-    // cpf = widget.cpfcnpj;
+    print(widget.cidade);
     _cepcontroller.text = widget.cep;
     _bairrocontroller.text = widget.bairro.toString();
     _localidadecontroller.text = widget.cidade ?? '';
@@ -101,10 +87,6 @@ class _CustomerSessionState extends State<CustomerSession> {
     _nomecontroller.text = widget.pessoanome;
     _cpfcontroller.text = widget.cpfcnpj;
     _telefonecontatocontroller.text = widget.telefone;
-    print(widget.prevendaid);
-    // print(widget.cpfcnpj);
-    // _loadSavedComplemento();
-    // _loadSavedLogradouro();
   }
 
   @override
@@ -312,6 +294,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   _cepcontroller.text,
                                   _bairrocontroller.text,
                                   _logradourocontroller.text,
+                                  _localidadecontroller.text,
                                   _complementocontroller.text,
                                   _numerocontroller.text,
                                   ibge,
@@ -337,12 +320,10 @@ class _CustomerSessionState extends State<CustomerSession> {
                                     widget.prevendaid.toString(),
                                     widget.numpedido.toString(),
                                   );
-                                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                      builder: (context) => Home()));
                                 },
                                 text: 'Finalizar pedido',
                                 color: Style.sucefullColor,
-                                width: Style.height_150(context),
+                                width: Style.width_150(context),
                                 icon: Icons.check_rounded,
                               ),
                             ],
@@ -384,12 +365,6 @@ class _CustomerSessionState extends State<CustomerSession> {
     });
   }
 
-  // Future<void> initializer() async {
-  //   setState(() {
-  //     _cepcontroller.text = enderecocep;
-  //   });
-  // }
-
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
@@ -406,30 +381,4 @@ class _CustomerSessionState extends State<CustomerSession> {
       isLoading = false;
     });
   }
-
-//   Future<void> fetchDataCliente2() async {
-//   final data = await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj);
-//   setState(() {
-//     pessoaid = data['pessoa_id'].toString();
-//     nome = data['nome'].toString();
-//     cpfcliente = data['cpf'].toString();
-//     telefone = data['telefone'].toString();
-//     endereco = data['endereco'].toString();
-//     enderecobairro = data['enderecobairro'].toString();
-//     enderecocomplemento = data['enderecocomplemento'].toString();
-//     enderecocep = data['enderecocep'].toString();
-//     uf = data['uf'].toString();
-//     codigo = data['codigo'].toString();
-
-//     // Atualiza os controladores com os novos valores
-//     _cepcontroller.text = enderecocep;
-//     _bairrocontroller.text = enderecobairro;
-//     _complementocontroller.text = enderecocomplemento;
-//     _ufcontroller.text = uf;
-//     _logradourocontroller.text = endereco;
-//     _nomecontroller.text = nome;
-//     _cpfcontroller.text = cpfcliente ;
-//     _telefonecontatocontroller.text = telefone;
-//   });
-// }
 }

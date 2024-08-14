@@ -62,7 +62,7 @@ class LoginFunction {
         await sharedPreferences.setString('email', email);
         
         // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
-       Navigator.of(context).pushReplacement(
+       Navigator.of(context).push(
             MaterialPageRoute(
                 builder: (context) => Home(),
             ),

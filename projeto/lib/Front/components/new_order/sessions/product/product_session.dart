@@ -73,6 +73,11 @@ class _ProductSessionState extends State<ProductSession> {
     totalValue = widget.valortotal; // Inicializa com o valor total original
   }
 
+  void _closeModal() {
+    // Função para fechar o modal
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -230,25 +235,159 @@ class _ProductSessionState extends State<ProductSession> {
                                           children: [
                                             IconButton(
                                               onPressed: () async {
-                                                await DataServiceRmProduct
-                                                    .sendDataOrder(
-                                                        context,
-                                                        urlBasic,
-                                                        token,
-                                                        widget.prevendaid,
-                                                        orders[index]
-                                                            .prevendaprodutoid);
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      content: Container(
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Deseja remover este item?',
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          Style.height_15(
+                                                                              context),
+                                                                      color: Style
+                                                                          .primaryColor,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .clip,
+                                                                  softWrap:
+                                                                      true,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                              height: Style
+                                                                  .height_30(
+                                                                      context),
+                                                            ),
+                                                            Row(
+                                                              //Espaçamento entre os Buttons
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceAround,
+                                                              children: [
+                                                                //Buttom de sair
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () async {
+                                                                    await DataServiceRmProduct.sendDataOrder(
+                                                                        context,
+                                                                        urlBasic,
+                                                                        token,
+                                                                        widget
+                                                                            .prevendaid,
+                                                                        orders[index]
+                                                                            .prevendaprodutoid);
+                                                                    _closeModal();
 
-                                                setState(() {
-                                                  orders.removeAt(index);
-                                                  totalValue =
-                                                      _calculateTotal(); // Recalcula o valor total
-                                                });
+                                                                    setState(
+                                                                        () {
+                                                                      orders.removeAt(
+                                                                          index);
+                                                                      totalValue =
+                                                                          _calculateTotal(); // Recalcula o valor total
+                                                                    });
 
-                                                if (orders.isEmpty) {
-                                                  setState(
-                                                      () {}); // Força uma atualização da UI quando a lista estiver vazia
-                                                }
+                                                                    if (orders
+                                                                        .isEmpty) {
+                                                                      setState(
+                                                                          () {}); // Força uma atualização da UI quando a lista estiver vazia
+                                                                    }
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    width: Style
+                                                                        .ButtonExitWidth(
+                                                                            context),
+                                                                    // height: Style.ButtonExitHeight(context),
+                                                                    padding: EdgeInsets.all(
+                                                                        Style.ButtonExitPadding(
+                                                                            context)),
+                                                                    decoration: BoxDecoration(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(Style.ButtonExitBorderRadius(
+                                                                                context)),
+                                                                        color: Style
+                                                                            .errorColor),
+                                                                    child: Text(
+                                                                      'Remover',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Style
+                                                                            .tertiaryColor,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        fontSize:
+                                                                            Style.height_10(context),
+                                                                      ),
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                //Buttom para fechar o modal
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    _closeModal();
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    // width: Style.ButtonCancelWidth(context),
+                                                                    // height: Style.ButtonCancelHeight(context),
+                                                                    padding: EdgeInsets.all(
+                                                                        Style.ButtonCancelPadding(
+                                                                            context)),
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              Style.ButtonExitBorderRadius(context)),
+                                                                      border: Border.all(
+                                                                          width: Style.WidthBorderImageContainer(
+                                                                              context),
+                                                                          color:
+                                                                              Style.secondaryColor),
+                                                                      color: Style
+                                                                          .tertiaryColor,
+                                                                    ),
+                                                                    child: Text(
+                                                                      'Cancelar',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Style
+                                                                            .secondaryColor,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        fontSize:
+                                                                            Style.height_10(context),
+                                                                      ),
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
                                               },
                                               icon: Icon(
                                                 Icons.remove_circle,
@@ -293,7 +432,7 @@ class _ProductSessionState extends State<ProductSession> {
             width: Style.height_150(context),
             icon: Icons.add_circle,
             onPressed: () {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
+              Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => ProductList(
                         prevendaid: widget.prevendaid.toString(),
                         pessoanome: widget.pessoanome.toString(),

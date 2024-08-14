@@ -13,6 +13,7 @@ class Input extends StatefulWidget {
   final controller;
   final validator;
   final TextAlign textAlign;
+  final TextInputAction? textInputAction;
 
   const Input(
       {Key? key,
@@ -23,6 +24,7 @@ class Input extends StatefulWidget {
       this.validator,
       this.IconButton,
       required this.textAlign,
+      this.textInputAction
       })
       : super(key: key);
 
@@ -60,10 +62,14 @@ class _InputState extends State<Input> {
                   fontSize: Style.height_12(context),
                   fontFamily: 'Poppins-Regular'
                 ),
+                onSubmitted: (value) {
+                  FocusScope.of(context).nextFocus(); // Avança para o próximo campo ao pressionar Enter
+                },
                 keyboardType: widget.type,
                 textAlign: widget.textAlign,
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
+                textInputAction: widget.textInputAction ?? TextInputAction.next,
                 decoration: InputDecoration(
                   suffixIcon: widget.IconButton,
                   suffixIconColor: Style.primaryColor,

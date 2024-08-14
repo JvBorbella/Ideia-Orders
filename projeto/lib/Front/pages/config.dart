@@ -100,7 +100,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                   text: 'Voltar',
                                   onPressed: () async {
                                     String url = urlController.text;
-                                   Navigator.of(context).pushReplacement(
+                                   Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             LoginPage(url: url),
