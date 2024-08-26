@@ -39,7 +39,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: Drawer(
+      child: WillPopScope(
+        child: Drawer(
           // width: MediaQuery.of(context).size.width * 0.8,
           child: Column(
         children: [
@@ -205,7 +206,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
           //   ],
           // )
         ],
-      )),
+      )
+      ), 
+        onWillPop: () async {
+          _closeDrawer();
+          return true;
+        }
+        ) 
+        
     );
   }
 

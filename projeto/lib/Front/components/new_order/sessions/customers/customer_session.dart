@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:projeto/back/finish_order.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/new_customer.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
-import 'package:projeto/front/components/Login_Config/Elements/input.dart';
+import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
@@ -42,7 +43,6 @@ class CustomerSession extends StatefulWidget {
       this.numero,
       this.cidade,
       this.uf,
-      
       this.numpedido});
 
   @override
@@ -50,6 +50,8 @@ class CustomerSession extends StatefulWidget {
 }
 
 class _CustomerSessionState extends State<CustomerSession> {
+  late BuildContext modalContext;
+
   String urlBasic = '';
   String token = '';
   String ibge = '';
@@ -84,7 +86,7 @@ class _CustomerSessionState extends State<CustomerSession> {
     _complementocontroller.text = widget.complemento.toString();
     _ufcontroller.text = widget.uf.toString();
     _logradourocontroller.text = widget.endereco.toString();
-    _nomecontroller.text = widget.pessoanome;
+    _nomecontroller.text = widget.pessoanome == null ? '' : widget.pessoanome;
     _cpfcontroller.text = widget.cpfcnpj;
     _telefonecontatocontroller.text = widget.telefone;
   }
@@ -112,7 +114,8 @@ class _CustomerSessionState extends State<CustomerSession> {
                 Input(
                   text: 'CPF',
                   type: TextInputType.text,
-                  controller: _cpfcontroller,
+                  controller: _cpfcontroller == null ? '' : _cpfcontroller,
+                  inputFormatters: [MaskedInputFormatter('000.000.000-00')],
                   textAlign: TextAlign.start,
                   IconButton: IconButton(
                       onPressed: () async {
@@ -139,8 +142,11 @@ class _CustomerSessionState extends State<CustomerSession> {
                 Input(
                   text: 'Telefone',
                   type: TextInputType.text,
-                  controller: _telefonecontatocontroller,
+                  controller: _telefonecontatocontroller == null
+                      ? ''
+                      : _telefonecontatocontroller,
                   textAlign: TextAlign.start,
+                  inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
                 ),
                 SizedBox(
                   height: Style.height_10(context),
@@ -148,7 +154,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                 Input(
                   text: 'Nome do cliente',
                   type: TextInputType.text,
-                  controller: _nomecontroller,
+                  controller: _nomecontroller.text.isEmpty ? '' : _nomecontroller,
                   textAlign: TextAlign.start,
                 ),
                 SizedBox(
@@ -159,6 +165,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   text: 'CEP',
                   type: TextInputType.number,
                   textAlign: TextAlign.start,
+                  inputFormatters: [MaskedInputFormatter('00000-000')],
                   IconButton: IconButton(
                       onPressed: () async {
                         await GetCep.getcep(
@@ -312,14 +319,63 @@ class _CustomerSessionState extends State<CustomerSession> {
                             children: [
                               RegisterIconButton(
                                 onPressed: () async {
-                                  await DataServiceFinishOrder
-                                      .fetchDataFinishOrder(
-                                    context,
-                                    urlBasic,
-                                    token,
-                                    widget.prevendaid.toString(),
-                                    widget.numpedido.toString(),
-                                  );
+                                  if (_cpfcontroller.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        padding: EdgeInsets.all(
+                                            Style.SaveUrlMessagePadding(
+                                                context)),
+                                        content: Text(
+                                          'Por favor, preencha o CPF do cliente',
+                                          style: TextStyle(
+                                            fontSize: Style.SaveUrlMessageSize(
+                                                context),
+                                            color: Style.tertiaryColor,
+                                          ),
+                                        ),
+                                        backgroundColor: Style.errorColor,
+                                      ),
+                                    );
+                                  } else if (_telefonecontatocontroller.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        padding: EdgeInsets.all(
+                                            Style.SaveUrlMessagePadding(
+                                                context)),
+                                        content: Text(
+                                          'Por favor, preencha o telefone do cliente',
+                                          style: TextStyle(
+                                            fontSize: Style.SaveUrlMessageSize(
+                                                context),
+                                            color: Style.tertiaryColor,
+                                          ),
+                                        ),
+                                        backgroundColor: Style.errorColor,
+                                      ),
+                                    );
+                                  } else if (_nomecontroller.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        padding: EdgeInsets.all(
+                                            Style.SaveUrlMessagePadding(
+                                                context)),
+                                        content: Text(
+                                          'Por favor, preencha o nome do cliente',
+                                          style: TextStyle(
+                                            fontSize: Style.SaveUrlMessageSize(
+                                                context),
+                                            color: Style.tertiaryColor,
+                                          ),
+                                        ),
+                                        backgroundColor: Style.errorColor,
+                                      ),
+                                    );
+                                  } else {
+                                     _openModal(context);
+                                  }
                                 },
                                 text: 'Finalizar pedido',
                                 color: Style.sucefullColor,
@@ -339,6 +395,176 @@ class _CustomerSessionState extends State<CustomerSession> {
         ],
       ),
     );
+  }
+
+  void _openModal(BuildContext context) {
+    //Código para abrir modal
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        modalContext = context;
+        return Container(
+            //Configurações de tamanho e espaçamento do modal
+            height: Style.height_300(context),
+            child: WillPopScope(
+                child: Container(
+                  //Tamanho e espaçamento interno do modal
+                  height: Style.InternalModalSize(context),
+                  margin: EdgeInsets.only(
+                      left: Style.ModalMargin(context),
+                      right: Style.ModalMargin(context)),
+                  padding: EdgeInsets.all(Style.InternalModalPadding(context)),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                          Style.ModalBorderRadius(context))),
+                  child: Column(
+                    //Conteúdo interno do modal
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Como deseja finalizar este pedido?',
+                            style: TextStyle(
+                              fontSize: Style.height_15(context),
+                              color: Style.primaryColor,
+                            ),
+                            overflow: TextOverflow.clip,
+                            softWrap: true,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: Style.height_30(context),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              await DataServiceFinishOrder.fetchDataFinishOrder(
+                                  context,
+                                  urlBasic,
+                                  token,
+                                  widget.prevendaid,
+                                  widget.numpedido);
+                            },
+                            child: Container(
+                              // width: Style.width_200(context),
+                              // height: Style.ButtonExitHeight(context),
+                              padding: EdgeInsets.all(
+                                  Style.ButtonExitPadding(context)),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      Style.ButtonExitBorderRadius(context)),
+                                  color: Style.primaryColor),
+                              child: Text(
+                                'Apenas Finalizar ✅',
+                                style: TextStyle(
+                                  color: Style.tertiaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Style.height_10(context),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        //Espaçamento entre os Buttons
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              await DataServiceFinishOrderPrintLocal
+                                  .fetchDataFinishOrderPrintLocal(
+                                      context,
+                                      urlBasic,
+                                      token,
+                                      widget.prevendaid,
+                                      widget.numpedido);
+                            },
+                            child: Container(
+                              // width: Style.ButtonCancelWidth(context),
+                              // height: Style.ButtonCancelHeight(context),
+                              padding: EdgeInsets.all(
+                                  Style.ButtonCancelPadding(context)),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    Style.ButtonExitBorderRadius(context)),
+                                border: Border.all(
+                                    width: Style.WidthBorderImageContainer(
+                                        context),
+                                    color: Style.tertiaryColor),
+                                color: Style.primaryColor,
+                              ),
+                              child: Text(
+                                'Finalizar e imprimir local 🖨️',
+                                style: TextStyle(
+                                  color: Style.tertiaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Style.height_10(context),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              await DataServiceFinishOrderPrintNetwork
+                                  .fetchDataFinishOrderPrintNetwork(
+                                      context,
+                                      urlBasic,
+                                      token,
+                                      widget.prevendaid,
+                                      widget.numpedido);
+                            },
+                            child: Container(
+                              // width: Style.ButtonCancelWidth(context),
+                              // height: Style.ButtonCancelHeight(context),
+                              padding: EdgeInsets.all(
+                                  Style.ButtonCancelPadding(context)),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    Style.ButtonExitBorderRadius(context)),
+                                border: Border.all(
+                                    width: Style.WidthBorderImageContainer(
+                                        context),
+                                    color: Style.primaryColor),
+                                color: Style.primaryColor,
+                              ),
+                              child: Text(
+                                'Finalizar e imprimir na rede ⇅',
+                                style: TextStyle(
+                                  color: Style.tertiaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Style.height_10(context),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+                onWillPop: () async {
+                  _closeModal();
+                  return true;
+                }));
+      },
+    );
+  }
+
+  void _closeModal() {
+    //Função para fechar o modal
+    Navigator.of(modalContext).pop();
   }
 
   Future<void> _loadSavedUrlBasic() async {

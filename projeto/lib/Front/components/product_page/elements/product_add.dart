@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:projeto/back/add_product.dart';
 import 'package:projeto/front/components/style.dart';
@@ -15,6 +16,8 @@ class ProductAdd extends StatefulWidget {
   final unidade;
   final precopromocional;
   final precotabela;
+  final flagunidadefracionada;
+  final VoidCallback? onProductAdded;
 
   const ProductAdd({
     Key? key,
@@ -26,6 +29,8 @@ class ProductAdd extends StatefulWidget {
     this.unidade,
     this.precopromocional,
     this.precotabela,
+    this.flagunidadefracionada,
+    this.onProductAdded,
   });
 
   @override
@@ -45,6 +50,8 @@ class ProductAdd extends StatefulWidget {
 String urlBasic = '';
 String token = '';
 
+String text = '';
+
 class _ProductAddState extends State<ProductAdd> {
   late TextEditingController _complementocontroller;
   late TextEditingController _quantidadecontroller;
@@ -55,7 +62,13 @@ class _ProductAddState extends State<ProductAdd> {
   void initState() {
     super.initState();
     _complementocontroller = TextEditingController();
-    _quantidadecontroller = TextEditingController(text: '1.0');
+    // _quantidadecontroller = TextEditingController();
+    if (widget.flagunidadefracionada == 0) {
+      _quantidadecontroller = TextEditingController(text: '1');
+    } else {
+      _quantidadecontroller = TextEditingController(text: '1,0');
+    }
+    print(widget.flagunidadefracionada);
     _loadSavedUrlBasic();
     _loadSavedToken();
   }
@@ -71,6 +84,11 @@ class _ProductAddState extends State<ProductAdd> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        // if (widget.flagunidadefracionada == 0) {
+        //   _quantidadecontroller = TextEditingController(text: '1');
+        // } else {
+        //   _quantidadecontroller = TextEditingController(text: '1,0');
+        // }
         return Center(
             child: SingleChildScrollView(
                 child: AlertDialog(
@@ -112,10 +130,9 @@ class _ProductAddState extends State<ProductAdd> {
                               Text(
                                 'Código',
                                 style: TextStyle(
-                                  fontSize: Style.height_8(context),
-                                  color: Style.quarantineColor
-                                ),
-                                ),
+                                    fontSize: Style.height_8(context),
+                                    color: Style.quarantineColor),
+                              ),
                               Text(
                                 widget.codigoproduto,
                                 style: TextStyle(
@@ -130,9 +147,9 @@ class _ProductAddState extends State<ProductAdd> {
                               Text(
                                 'Pr. Tabela',
                                 style: TextStyle(
-                                  fontSize: Style.height_8(context),
-                                  color: Style.quarantineColor
-                                ),),
+                                    fontSize: Style.height_8(context),
+                                    color: Style.quarantineColor),
+                              ),
                               Text(
                                 currencyFormat
                                     .format(widget.precotabela)
@@ -149,9 +166,9 @@ class _ProductAddState extends State<ProductAdd> {
                               Text(
                                 'Unidade',
                                 style: TextStyle(
-                                  fontSize: Style.height_8(context),
-                                  color: Style.quarantineColor
-                                ),),
+                                    fontSize: Style.height_8(context),
+                                    color: Style.quarantineColor),
+                              ),
                               Text(
                                 widget.unidade,
                                 style: TextStyle(
@@ -177,8 +194,7 @@ class _ProductAddState extends State<ProductAdd> {
                                 style: TextStyle(
                                     fontSize: Style.height_15(context),
                                     color: Style.primaryColor,
-                                    fontWeight: FontWeight.bold
-                                    ),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -194,8 +210,9 @@ class _ProductAddState extends State<ProductAdd> {
                                   text: 'Informe a quantidade',
                                   type: TextInputType.number,
                                   textAlign: TextAlign.center,
+                                  onTap: () => _quantidadecontroller.clear(),
                                 ),
-                              )
+                              ),
                             ],
                           )
                         ],
@@ -214,8 +231,7 @@ class _ProductAddState extends State<ProductAdd> {
                                 style: TextStyle(
                                     fontSize: Style.height_15(context),
                                     color: Style.primaryColor,
-                                    fontWeight: FontWeight.bold
-                                    ),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -269,7 +285,8 @@ class _ProductAddState extends State<ProductAdd> {
                                 width: Style.width_100(context),
                                 onPressed: () async {
                                   // Adiciona o produto ao pedido
-                                  await DataServiceAddProduct.sendDataOrder(
+                                  bool success =
+                                      await DataServiceAddProduct.sendDataOrder(
                                     context,
                                     urlBasic,
                                     token,
@@ -277,11 +294,18 @@ class _ProductAddState extends State<ProductAdd> {
                                     widget.produtoid,
                                     _complementocontroller.text,
                                     _quantidadecontroller.text,
+                                    widget.flagunidadefracionada,
                                   );
+
+                                  // Só chama o callback se o produto foi adicionado com sucesso
+                                  if (success &&
+                                      widget.onProductAdded != null) {
+                                    widget.onProductAdded!();
+                                  }
 
                                   // Verifica se o widget ainda está montado antes de fechar o modal
                                   if (mounted) {
-                                    _closeModal();
+                                    _closeModal(success);
                                     // Limpa os campos após adicionar o produto
                                     _quantidadecontroller.clear();
                                     _complementocontroller.clear();
@@ -309,9 +333,8 @@ class _ProductAddState extends State<ProductAdd> {
     );
   }
 
-  void _closeModal() {
-    // Função para fechar o modal
-    Navigator.of(context).pop();
+  void _closeModal([bool updateList = false]) {
+    Navigator.of(context).pop(updateList);
   }
 
   @override

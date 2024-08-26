@@ -432,7 +432,7 @@ class _ProductSessionState extends State<ProductSession> {
             width: Style.height_150(context),
             icon: Icons.add_circle,
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => ProductList(
                         prevendaid: widget.prevendaid.toString(),
                         pessoanome: widget.pessoanome.toString(),

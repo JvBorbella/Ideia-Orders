@@ -24,7 +24,7 @@ class SaveUrlService {
       ),
     );
     //E o usuário será redirecionado para a tela de Login().
-   Navigator.of(context).push(
+   Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => LoginPage(url: url), //No redirecionamento será passada a url armazenada.
       ),

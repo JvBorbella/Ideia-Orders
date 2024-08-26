@@ -14,6 +14,8 @@ class Input extends StatefulWidget {
   final validator;
   final TextAlign textAlign;
   final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final onTap;
 
   const Input(
       {Key? key,
@@ -24,7 +26,9 @@ class Input extends StatefulWidget {
       this.validator,
       this.IconButton,
       required this.textAlign,
-      this.textInputAction
+      this.textInputAction,
+      this.inputFormatters,
+      this.onTap
       })
       : super(key: key);
 
@@ -70,6 +74,8 @@ class _InputState extends State<Input> {
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
                 textInputAction: widget.textInputAction ?? TextInputAction.next,
+                inputFormatters: widget.inputFormatters,
+                onTap: widget.onTap,
                 decoration: InputDecoration(
                   suffixIcon: widget.IconButton,
                   suffixIconColor: Style.primaryColor,

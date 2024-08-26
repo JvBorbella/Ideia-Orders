@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:projeto/front/components/Style.dart';
@@ -7,37 +8,44 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GetCliente {
   static Future<void> getcliente(
     BuildContext context,
-    String urlBasic, 
-    TextEditingController nomeController, 
+    String urlBasic,
+    TextEditingController nomeController,
     TextEditingController cpfController,
-    TextEditingController telefonecontatoController, 
-    TextEditingController cepController, 
-    TextEditingController logradouroController, 
-    TextEditingController ufController, 
-    TextEditingController bairroController, 
-    TextEditingController cidadeController, 
-    TextEditingController numeroController, 
+    TextEditingController telefonecontatoController,
+    TextEditingController cepController,
+    TextEditingController logradouroController,
+    TextEditingController ufController,
+    TextEditingController bairroController,
+    TextEditingController cidadeController,
+    TextEditingController numeroController,
     TextEditingController complementoController,
   ) async {
     try {
+      String getUnmaskedText(String maskedText) {
+        // Remove todos os caracteres não numéricos
+        return maskedText.replaceAll(RegExp(r'\D'), '');
+      }
+
       var cpf = cpfController.text;
-      var authorization = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpf');
+      var cpfdefault = getUnmaskedText(cpf);
+      var authorization = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpfdefault');
       var response = await http.get(
         authorization,
         headers: {
           // 'auth-token': token, // Solicita JSON
         },
       );
+      print(cpfdefault);
+      print(authorization);
 
       if (response.statusCode == 200) {
-
         var jsonData = json.decode(response.body);
 
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('pessoa') &&
             jsonData['data']['pessoa'].isNotEmpty) {
-          
-          var pessoaData = jsonData['data']['pessoa'][0]; // Alterado para acessar o primeiro item da lista
+          var pessoaData = jsonData['data']['pessoa']
+              [0]; // Alterado para acessar o primeiro item da lista
 
           // Garantindo que os dados são convertidos para String
           var nome = pessoaData['nome']?.toString() ?? '';
@@ -49,9 +57,11 @@ class GetCliente {
           var enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           var enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           var endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          var enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
+          var enderecocomplemento =
+              pessoaData['enderecocomplemento']?.toString() ?? '';
 
-          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+          SharedPreferences sharedPreferences =
+              await SharedPreferences.getInstance();
           await sharedPreferences.setString('nome', nome);
           await sharedPreferences.setString('cpf', cpfcliente);
           await sharedPreferences.setString('telefone', telefonecontato);
@@ -61,13 +71,29 @@ class GetCliente {
           await sharedPreferences.setString('enderecobairro', enderecobairro);
           await sharedPreferences.setString('enderecocidade', enderecocidade);
           await sharedPreferences.setString('endereconumero', endereconumero);
-          await sharedPreferences.setString('enderecocomplemento', enderecocomplemento);
+          await sharedPreferences.setString(
+              'enderecocomplemento', enderecocomplemento);
+
+          var cpfFormatado = MaskedInputFormatter('###.###.###-##').formatEditUpdate(
+            TextEditingValue.empty,
+            TextEditingValue(text: cpfcliente),
+          ).text;
+
+          var telFormatado = MaskedInputFormatter('(##) #####-####').formatEditUpdate(
+            TextEditingValue.empty,
+            TextEditingValue(text: telefonecontato),
+          ).text;
+
+          var cepFormatado = MaskedInputFormatter('#####-###').formatEditUpdate(
+            TextEditingValue.empty,
+            TextEditingValue(text: enderecocep),
+          ).text;
 
           // Atualiza os controllers
           nomeController.text = nome;
-          cpfController.text = cpfcliente;
-          telefonecontatoController.text = telefonecontato;
-          cepController.text = enderecocep;
+          cpfController.text = cpfFormatado;
+          telefonecontatoController.text = telFormatado;
+          cepController.text = cepFormatado;
           logradouroController.text = endereco;
           ufController.text = uf;
           bairroController.text = enderecobairro;
@@ -92,7 +118,8 @@ class GetCliente {
         }
       } else {
         print('Erro ao consultar o CPF. Status Code: ${response.statusCode}');
-        print('Resposta: ${response.body}'); // Verifique a resposta em caso de erro
+        print(
+            'Resposta: ${response.body}'); // Verifique a resposta em caso de erro
       }
     } catch (e) {
       print('Erro durante a solicitação HTTP: $e');
@@ -115,7 +142,6 @@ class GetCliente2 {
   late String enderecocep;
 
   GetCliente2({
-   
     required this.pessoaid,
     required this.nome,
     required this.cpf,
@@ -149,7 +175,8 @@ class GetCliente2 {
 }
 
 class DataServiceCliente2 {
-  static Future<Map<String, String>> fetchDataCliente2(String urlBasic, String cpfcnpj) async {
+  static Future<Map<String, String>> fetchDataCliente2(
+      String urlBasic, String cpfcnpj, String token) async {
     String pessoaid = '';
     String nome = '';
     String codigo = '';
@@ -164,7 +191,16 @@ class DataServiceCliente2 {
     String enderecocep = '';
 
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpfcnpj');
+
+       String getUnmaskedText(String maskedText) {
+        // Remove todos os caracteres não numéricos
+        return maskedText.replaceAll(RegExp(r'\D'), '');
+      }
+
+      var cpf = cpfcnpj;
+      var cpfdefault = getUnmaskedText(cpf);
+
+      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpfdefault');
       var response = await http.get(urlPost, headers: {
         // 'Accept': 'text/html',
       });
@@ -175,7 +211,6 @@ class DataServiceCliente2 {
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('pessoa') &&
             jsonData['data']['pessoa'].isNotEmpty) {
-          
           var pessoaData = jsonData['data']['pessoa'][0];
 
           pessoaid = pessoaData['pessoa_id']?.toString() ?? '';
@@ -188,8 +223,10 @@ class DataServiceCliente2 {
           enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
+          enderecocomplemento =
+              pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
+          
         } else {
           print('Dados não encontrados');
         }

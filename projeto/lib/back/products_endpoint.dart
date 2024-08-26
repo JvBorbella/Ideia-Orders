@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:projeto/front/components/style.dart';
 
 class ProductsEndpoint {
   late String produtoid;
@@ -7,6 +9,7 @@ class ProductsEndpoint {
   late String codigo;
   late String codigoean;
   late String unidade;
+  late int flagunidadefracionada;
   late double precopromocional;
   late double precotabela;
 
@@ -16,6 +19,7 @@ class ProductsEndpoint {
     required this.codigo,
     required this.codigoean,
     required this.unidade,
+    required this.flagunidadefracionada,
     required this.precopromocional,
     required this.precotabela,
   });
@@ -27,6 +31,7 @@ class ProductsEndpoint {
       codigo: json['codigo'] ?? '',
       codigoean: json['codigoean'] ?? '',
       unidade: json['unidade'] ?? '',
+      flagunidadefracionada: json['flagunidadefracionada'] ?? 0,
       precopromocional: (json['precopromocional'] as num).toDouble(),
       precotabela: (json['precotabela'] as num).toDouble(),
     );
@@ -34,18 +39,19 @@ class ProductsEndpoint {
 }
 
 class DataServiceProducts {
-  static Future<List<ProductsEndpoint>?> fetchDataProducts(String urlBasic, String token, String text) async {
-
+  static Future<List<ProductsEndpoint>?> fetchDataProducts(
+      BuildContext context, String urlBasic, String token, String text) async {
     List<ProductsEndpoint>? products;
 
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/listaprodutos?busca=$text');
+      var urlPost =
+          Uri.parse('$urlBasic/ideia/prevenda/listaprodutos?busca=$text');
 
       var response = await http.get(
-      urlPost,
-      //  headers: {
-      //   // 'auth-token': token,
-      //   });
+        urlPost,
+        //  headers: {
+        //   // 'auth-token': token,
+        //   });
       );
 
       if (response.statusCode == 200) {
@@ -54,9 +60,26 @@ class DataServiceProducts {
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('produtos') &&
             jsonData['data']['produtos'].isNotEmpty) {
-            products = (jsonData['data']['produtos'] as List).map((e) => ProductsEndpoint.fromJson(e)).toList();
+          products = (jsonData['data']['produtos'] as List)
+              .map((e) => ProductsEndpoint.fromJson(e))
+              .toList();
         } else {
-          print('Dados não encontrados');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Produto não encontrado',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.errorColor,
+            ),
+          );
+          print(
+              'Dados não encontrados ProductsEndpoints - ${response.statusCode} ${response.body}');
         }
       } else {
         print('Erro ao carregar dados: ${response.statusCode}');
@@ -84,17 +107,16 @@ class ProductsEndpoint2 {
 }
 
 class ProductsService2 {
-  static Future<Map<String?, String?>> fetchDataProductDetails2(String urlBasic, String produtoId) async {
+  static Future<Map<String?, String?>> fetchDataProductDetails2(
+      String urlBasic, String produtoId) async {
     String? nome;
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/core/produto/$produtoId');
 
-      var response = await http.get(
-        urlPost, 
-        headers: {
-          'Accept': 'text/html',
-          });
+      var response = await http.get(urlPost, headers: {
+        'Accept': 'text/html',
+      });
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -102,11 +124,9 @@ class ProductsService2 {
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('produto') &&
             jsonData['data']['produto'].isNotEmpty) {
-          
           var prevendaData = jsonData['data']['produto'][0];
 
           nome = prevendaData['nome'];
-
         } else {
           print('Dados não encontrados');
         }
@@ -118,7 +138,7 @@ class ProductsService2 {
     }
 
     return {
-      'nome' : nome,
+      'nome': nome,
     };
   }
 }

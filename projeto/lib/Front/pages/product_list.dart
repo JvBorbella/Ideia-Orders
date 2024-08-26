@@ -41,6 +41,8 @@ class _ProductListState extends State<ProductList> {
   final text = TextEditingController();
   bool isLoading = true;
 
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -58,91 +60,113 @@ class _ProductListState extends State<ProductList> {
     }
 
     return SafeArea(
-      child: Scaffold(
-        body: RefreshIndicator(
-          onRefresh: _refreshData,
-          child: ListView(
-            children: [
-              Navbar(
-                text: 'Produtos',
-                children: [
-                  NavbarButton(
-                    destination: NewOrderPage(
-                      prevendaId: widget.prevendaid,
-                      pessoanome: widget.pessoanome,
-                      cpfcnpj: widget.cpfcnpj,
-                      telefone: widget.telefone,
-                      cep: widget.cep,
-                      bairro: widget.bairro,
-                      endereco: widget.endereco,
-                      complemento: widget.complemento,
+        child: WillPopScope(
+            child: Scaffold(
+              body: RefreshIndicator(
+                onRefresh: _refreshData,
+                child: ListView(
+                  children: [
+                    Navbar(
+                      text: 'Produtos',
+                      children: [
+                        NavbarButton(
+                          destination: NewOrderPage(
+                            prevendaId: widget.prevendaid,
+                            pessoanome: widget.pessoanome,
+                            cpfcnpj: widget.cpfcnpj,
+                            telefone: widget.telefone,
+                            cep: widget.cep,
+                            bairro: widget.bairro,
+                            endereco: widget.endereco,
+                            complemento: widget.complemento,
+                          ),
+                          Icons: Icons.arrow_back_ios_new,
+                        )
+                      ],
                     ),
-                    Icons: Icons.arrow_back_ios_new,
-                  )
-                ],
-              ),
-              SizedBox(height: Style.height_10(context)),
-              Container(
-                height: Style.height_60(context),
-                padding: EdgeInsets.all(Style.height_12(context)),
-                child: SearchBar(
-                  textStyle: WidgetStatePropertyAll(
-                      TextStyle(fontSize: Style.height_10(context))),
-                  controller: text,
-                  // onChanged: (value) async {
-                  //   await fetchDataProducts();
-                  // },
-                  onSubmitted: (value) async {
-                    await fetchDataProducts(); // Chama a função de pesquisa ao pressionar "Enter"
-                  },
-                  constraints: BoxConstraints(),
-                  leading: IconButton(
-                    padding: EdgeInsets.only(bottom: Style.height_1(context)),
-                    onPressed: () async {
-                      await fetchDataProducts();
-                    },
-                    icon: Icon(Icons.search),
-                    color: Style.primaryColor,
-                  ),
-                  hintText: 'Pesquise pelo produto',
-                  hintStyle: WidgetStatePropertyAll(
-                      TextStyle(color: Style.quarantineColor)),
-                  padding: WidgetStatePropertyAll(EdgeInsets.only(
-                    left: Style.height_15(context),
-                    right: Style.height_15(context),
-                  )),
+                    SizedBox(height: Style.height_10(context)),
+                    Container(
+                      height: Style.height_60(context),
+                      padding: EdgeInsets.all(Style.height_12(context)),
+                      child: SearchBar(
+                        focusNode: _focusNode,
+                        textStyle: WidgetStatePropertyAll(
+                            TextStyle(fontSize: Style.height_10(context))),
+                        controller: text,
+                        onSubmitted: (value) async {
+                          await fetchDataProducts(); // Chama a função de pesquisa ao pressionar "Enter"
+                        },
+                        constraints: BoxConstraints(),
+                        leading: IconButton(
+                          padding:
+                              EdgeInsets.only(bottom: Style.height_1(context)),
+                          onPressed: () async {
+                            await fetchDataProducts();
+                          },
+                          icon: Icon(Icons.search),
+                          color: Style.primaryColor,
+                        ),
+                        hintText: 'Pesquise pelo produto',
+                        hintStyle: WidgetStatePropertyAll(
+                            TextStyle(color: Style.quarantineColor)),
+                        padding: WidgetStatePropertyAll(EdgeInsets.only(
+                          left: Style.height_15(context),
+                          right: Style.height_15(context),
+                        )),
+                      ),
+                    ),
+                    SizedBox(height: Style.height_10(context)),
+                    TextTitle(text: 'Lista de produtos'),
+                    SizedBox(height: Style.height_10(context)),
+                    ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: [
+                            ProductAdd(
+                              prevendaid: widget.prevendaid,
+                              produtoid: products[index].produtoid.toString(),
+                              nomeproduto: products[index].nome.toString(),
+                              codigoproduto: products[index].codigo.toString(),
+                              codigoean: products[index].codigoean.toString(),
+                              unidade: products[index].unidade.toString(),
+                              precopromocional:
+                                  products[index].precopromocional.toDouble(),
+                              precotabela:
+                                  products[index].precotabela.toDouble(),
+                              flagunidadefracionada:
+                                  products[index].flagunidadefracionada,
+                              onProductAdded:
+                                  _onProductAdded, // Chama a função ao adicionar o produto
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: Style.height_10(context)),
-              TextTitle(text: 'Lista de produtos'),
-              SizedBox(height: Style.height_10(context)),
-              ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      ProductAdd(
-                        prevendaid: widget.prevendaid,
-                        produtoid: products[index].produtoid.toString(),
-                        nomeproduto: products[index].nome.toString(),
-                        codigoproduto: products[index].codigo.toString(),
-                        codigoean: products[index].codigoean.toString(),
-                        unidade: products[index].unidade.toString(),
-                        precopromocional:
-                            products[index].precopromocional.toDouble(),
-                        precotabela: products[index].precotabela.toDouble(),
-                      )
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+            onWillPop: () async {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => NewOrderPage(
+                    prevendaId: widget.prevendaid.toString(),
+                    pessoanome: widget.pessoanome.toString(),
+                    cpfcnpj: widget.cpfcnpj.toString(),
+                    telefone: widget.telefone.toString(),
+                    cep: widget.cep.toString(),
+                    bairro: widget.bairro.toString(),
+                    endereco: widget.endereco.toString(),
+                    complemento: widget.complemento.toString(),
+                    // Passe outros campos conforme necessário
+                  ),
+                ),
+              );
+              return true;
+            }));
   }
 
   Future<void> loadData() async {
@@ -151,6 +175,10 @@ class _ProductListState extends State<ProductList> {
       _loadSavedToken(),
     ]);
     await fetchDataProducts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_focusNode);
+      print('Foco solicitado: ${_focusNode.hasFocus}');
+    });
   }
 
   Future<void> _loadSavedUrlBasic() async {
@@ -178,7 +206,8 @@ class _ProductListState extends State<ProductList> {
 
   Future<void> fetchDataProducts() async {
     List<ProductsEndpoint>? fetchData =
-        await DataServiceProducts.fetchDataProducts(urlBasic, token, text.text);
+        await DataServiceProducts.fetchDataProducts(
+            context, urlBasic, token, text.text);
     if (fetchData != null) {
       setState(() {
         products = fetchData;
@@ -187,5 +216,13 @@ class _ProductListState extends State<ProductList> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  // Função que é chamada quando um produto é adicionado
+  void _onProductAdded() {
+    setState(() {
+      text.clear(); // Limpa a SearchBar
+    });
+    fetchDataProducts(); // Atualiza a lista de produtos
   }
 }

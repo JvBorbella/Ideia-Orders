@@ -27,7 +27,7 @@ class _ButtomInitialState extends State<ButtomInitial> {
           TextButton(
             //Redirecionamento executado ao clicar no button. Definido na página em que o button está sendo chamado.
             onPressed: () {
-             Navigator.of(context).push(
+             Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => widget.destination),
               );
             },

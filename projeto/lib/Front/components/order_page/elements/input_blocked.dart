@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:projeto/front/components/Style.dart';
 
 class InputBlocked extends StatefulWidget {
   final String value;
+  final List<TextInputFormatter>? inputFormatters;
 
-  const InputBlocked({Key? key, required this.value});
+  const InputBlocked({
+    Key? key,
+     required this.value,
+     this.inputFormatters,
+     });
 
   @override
   State<InputBlocked> createState() => _InputBlockedState();
@@ -15,10 +21,11 @@ class _InputBlockedState extends State<InputBlocked> {
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        height: Style.height_40(context),
+        height: Style.height_50(context),
         child: TextFormField(
           initialValue: widget.value,
           readOnly: true,
+          inputFormatters: widget.inputFormatters,
           style: TextStyle(
             fontSize: Style.height_10(context)
           ),

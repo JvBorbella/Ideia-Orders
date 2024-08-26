@@ -26,10 +26,16 @@ class NewCustomer {
       'auth-token': token,
       'Content-Type': 'application/json',
     };
+    String getUnmaskedText(String maskedText) {
+        // Remove todos os caracteres não numéricos
+        return maskedText.replaceAll(RegExp(r'\D'), '');
+      }
+      var cpfDefault = getUnmaskedText(cpfController);
+      var telDefault = getUnmaskedText(telefonecontatoController);
     var body = jsonEncode({
-      'cpf': cpfController,
+      'cpf': cpfDefault,
       'nome': nomeController,
-      'telefone': telefonecontatoController,
+      'telefone': telDefault,
       'cep': cepController,
       'endereco': logradouroController,
       'enderecocidade': localidadeController,
@@ -40,7 +46,7 @@ class NewCustomer {
       'uf': uf,
     });
 
-    print(body);
+    print(cpfDefault);
 
     try {
       var response = await http.post(
@@ -72,7 +78,7 @@ class NewCustomer {
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
               content: Text(
-                'Não foi possível cadastrar o cliente',
+                '${response.statusCode} - ${response.body}',
                 style: TextStyle(
                   fontSize: Style.SaveUrlMessageSize(context),
                   color: Style.tertiaryColor,
@@ -83,6 +89,20 @@ class NewCustomer {
           );
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                '$e',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.errorColor,
+            ),
+          );
       print('Erro durante a requisição: $e');
     }
   }

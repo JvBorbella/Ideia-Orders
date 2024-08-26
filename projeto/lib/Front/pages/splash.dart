@@ -19,7 +19,7 @@ class _SplashPageState extends State<SplashPage> {
 
     //Função para adicionar um timer à tela splash
     Timer(Duration(seconds: 4), () {
-     Navigator.of(context).push(
+     Navigator.of(context).pushReplacement(
         //Função executada após o tempo acabar
         MaterialPageRoute(builder: (context) => LoginPage()),
       );

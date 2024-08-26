@@ -62,7 +62,7 @@ class LoginFunction {
         await sharedPreferences.setString('email', email);
         
         // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
-       Navigator.of(context).push(
+       Navigator.of(context).pushReplacement(
             MaterialPageRoute(
                 builder: (context) => Home(),
             ),
@@ -149,7 +149,7 @@ class LoginFunction {
             behavior: SnackBarBehavior.floating,
             padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
             content: Text(
-              'Não foi possível iniciar a sessão!',
+              'Não foi possível iniciar a sessão! - ${response.statusCode}',
               style: TextStyle(
                 fontSize: Style.SaveUrlMessageSize(context),
                 color: Style.tertiaryColor,
@@ -166,7 +166,7 @@ class LoginFunction {
           behavior: SnackBarBehavior.floating,
           padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
           content: Text(
-            'Não foi possível iniciar a sessão',
+            'Não foi possível iniciar a sessão - $e',
             style: TextStyle(
               fontSize: Style.SaveUrlMessageSize(context),
               color: Style.tertiaryColor,

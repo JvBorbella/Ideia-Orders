@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:projeto/front/components/style.dart';
 
 class NewOrder {
   late String nome;
@@ -31,6 +33,7 @@ class NewOrder {
 
 class DataServiceNewOrder {
   static Future<void> sendDataOrder(
+    BuildContext context,
       String urlBasic,
       String token,
       String cpfController,
@@ -61,6 +64,20 @@ class DataServiceNewOrder {
         print('Dados enviados com sucesso');
         print('Resposta do servidor: ${response.body}');
       } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Erro ao abrir pedido: ${response.statusCode} - ${response.body}',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.errorColor,
+            ),
+          );
         print('Erro ao enviar dados: ${response.statusCode}');
         print('Resposta do servidor: ${response.body}');
       }

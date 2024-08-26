@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:projeto/front/components/style.dart';
 
 class OrdersEndpoint {
   late String usuarioId;
@@ -10,6 +12,7 @@ class OrdersEndpoint {
   late String nomepessoa;
   late String operador;
   late String flagprocessado;
+  late String flagpermitefaturar;
 
   OrdersEndpoint({
     required this.usuarioId,
@@ -20,6 +23,7 @@ class OrdersEndpoint {
     required this.nomepessoa,
     required this.operador,
     required this.flagprocessado,
+    required this.flagpermitefaturar
   });
 
   factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
@@ -32,12 +36,13 @@ class OrdersEndpoint {
       nomepessoa: json['pessoa_nome'] ?? '',
       operador: json['operador'] ?? '',
       flagprocessado: json['flagprocessado'] ?? '',
+      flagpermitefaturar: json['flagpermitefaturar'] ?? '',
     );
   }
 }
 
 class DataServiceOrders {
-  static Future<List<OrdersEndpoint>?> fetchDataOrders(String urlBasic, String prevendaid, String token) async {
+  static Future<List<OrdersEndpoint>?> fetchDataOrders(BuildContext context, String urlBasic, String prevendaid, String token) async {
     List<OrdersEndpoint>? orders;
 
     print('token: $token');
@@ -75,7 +80,22 @@ class DataServiceOrders {
           print('Dados não encontrados - orders');
         }
       } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+          content: Text(
+            'Erro ao carregar dados: ${response.statusCode} - ${response.body}',
+            style: TextStyle(
+              fontSize: Style.SaveUrlMessageSize(context),
+              color: Style.tertiaryColor,
+            ),
+          ),
+          backgroundColor: Style.errorColor,
+        ),
+      );
         print('Erro ao carregar dados: ${response.statusCode}');
+        print('Resposta do servidor: ${response.body}');
       }
     } catch (e) {
       print('Erro durante a requisição Orders: $e');
@@ -148,7 +168,7 @@ class DataServiceOrdersDetails {
 
             // print('Pedidos: '+response.body);
         } else {
-          print('Dados não encontrados - ordersDetails');
+          print('Dados não encontrados - ordersDetails - ${response.statusCode} ${response.body}');
         }
       } else {
         print('Erro ao carregar dados: ${response.statusCode}');

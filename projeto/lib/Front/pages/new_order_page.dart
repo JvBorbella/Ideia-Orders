@@ -83,7 +83,6 @@ class _NewOrderPageState extends State<NewOrderPage> {
     super.initState();
     _loadSavedUrlBasic();
     _loadSavedToken();
-    print('endereço: '+endereco);
     loadData();
     _refreshData();
   }
@@ -98,58 +97,63 @@ class _NewOrderPageState extends State<NewOrderPage> {
       );
     }
     return SafeArea(
-        child: Scaffold(
-      body: ListView(
-        children: [
-          Navbar(text: 'Novo pedido', children: [
-            NavbarButton(destination: Home(), Icons: Icons.arrow_back_ios_new)
-          ]),
-          SizedBox(
-            height: Style.height_10(context),
-          ),
-          ProductSession(
-              prevendaid: widget.prevendaId.toString(),
-              pessoanome: widget.pessoanome.toString(),
-              cpfcnpj: widget.cpfcnpj.toString(),
-              telefone: widget.telefone.toString(),
-              cep: widget.cep.toString(),
-              bairro: widget.bairro.toString(),
-              cidade: widget.cidade.toString(),
-              endereco: widget.endereco.toString(),
-              complemento: widget.complemento.toString(),
-              produtoid: produtoid.toString(),
-              prevendaprodutoid: prevendaprodutoid.toString(),
-              nomeproduto: nomeproduto.toString(),
-              codigoproduto: codigoproduto.toString(),
-              valorunitario: valorunitario.toDouble(),
-              valortotalitem: valortotalitem.toDouble(),
-              valortotal: valortotal.toDouble(),
-              quantidade: quantidade.toDouble(),
-              imagemurl: imagemurl.toString()),
-          SizedBox(
-            height: Style.height_30(context),
-          ),
-          CustomerSession(
-            pessoanome: widget.pessoanome,
-            cpfcnpj: widget.cpfcnpj,
-            telefone: widget.telefone,
-            cep: enderecocep,
-            bairro: enderecobairro,
-            numero: endereconumero,
-            endereco: endereco,
-            complemento: enderecocomplemento,
-            cidade: enderecocidade,
-            uf: uf,
-
-            prevendaid: widget.prevendaId,
-            numpedido: widget.numero
-          ),
-          SizedBox(
-            height: Style.height_30(context),
-          ),
-        ],
-      ),
-    ));
+        child: WillPopScope(
+            child: Scaffold(
+              body: ListView(
+                children: [
+                  Navbar(text: 'Novo pedido', children: [
+                    NavbarButton(
+                        destination: Home(), Icons: Icons.arrow_back_ios_new)
+                  ]),
+                  SizedBox(
+                    height: Style.height_10(context),
+                  ),
+                  ProductSession(
+                      prevendaid: widget.prevendaId.toString(),
+                      pessoanome: widget.pessoanome.toString(),
+                      cpfcnpj: widget.cpfcnpj.toString(),
+                      telefone: widget.telefone.toString(),
+                      cep: widget.cep.toString(),
+                      bairro: widget.bairro.toString(),
+                      cidade: widget.cidade.toString(),
+                      endereco: widget.endereco.toString(),
+                      complemento: widget.complemento.toString(),
+                      produtoid: produtoid.toString(),
+                      prevendaprodutoid: prevendaprodutoid.toString(),
+                      nomeproduto: nomeproduto.toString(),
+                      codigoproduto: codigoproduto.toString(),
+                      valorunitario: valorunitario.toDouble(),
+                      valortotalitem: valortotalitem.toDouble(),
+                      valortotal: valortotal.toDouble(),
+                      quantidade: quantidade.toDouble(),
+                      imagemurl: imagemurl.toString()),
+                  SizedBox(
+                    height: Style.height_30(context),
+                  ),
+                  CustomerSession(
+                      pessoanome: widget.pessoanome,
+                      cpfcnpj: widget.cpfcnpj,
+                      telefone: widget.telefone,
+                      cep: enderecocep,
+                      bairro: enderecobairro,
+                      numero: endereconumero,
+                      endereco: endereco,
+                      complemento: enderecocomplemento,
+                      cidade: enderecocidade,
+                      uf: uf,
+                      prevendaid: widget.prevendaId,
+                      numpedido: widget.numero.toString()),
+                  SizedBox(
+                    height: Style.height_30(context),
+                  ),
+                ],
+              ),
+            ),
+            onWillPop: () async {
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Home()));
+              return true;
+            }));
   }
 
   Future<void> _loadSavedUrlBasic() async {
@@ -188,7 +192,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
 
   Future<void> fetchDataCliente2() async {
     final data =
-        await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj);
+        await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj, token);
     setState(() {
       pessoaid = data['pessoa_id'].toString();
       nome = data['nome'].toString();

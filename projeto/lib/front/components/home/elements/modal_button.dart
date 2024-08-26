@@ -13,6 +13,10 @@ class ModalButton extends StatefulWidget {
 class _ModalButtonState extends State<ModalButton> {
   late BuildContext modalContext;
 
+  void openModal(BuildContext context) {
+    _openModal(context);
+  }
+
   void _openModal(BuildContext context) {
     //Código para abrir modal
     showModalBottomSheet(
@@ -22,7 +26,8 @@ class _ModalButtonState extends State<ModalButton> {
         return Container(
           //Configurações de tamanho e espaçamento do modal
           height: Style.ModalSize(context),
-          child: Container(
+          child: WillPopScope(
+            child: Container(
             //Tamanho e espaçamento interno do modal
             height: Style.InternalModalSize(context),
             margin: EdgeInsets.only(left: Style.ModalMargin(context), right: Style.ModalMargin(context)),
@@ -104,7 +109,13 @@ class _ModalButtonState extends State<ModalButton> {
                 ),
               ],
             ),
-          ),
+          ), 
+            onWillPop: () async {
+              _closeModal();
+              return true;
+            }
+            ) 
+            
         );
       },
     );
