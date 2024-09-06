@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/order_details.dart';
 import 'package:projeto/back/orders_endpoint.dart';
@@ -34,13 +35,14 @@ class OrderPage extends StatefulWidget {
   final complemento;
   final uf;
   final operador;
+  final pessoaid;
 
   final datahora;
   final valortotal;
   final codigoproduto;
 
   const OrderPage({
-    Key? key,
+    super.key,
     this.prevendaId,
     this.numero,
     this.pessoanome,
@@ -56,7 +58,8 @@ class OrderPage extends StatefulWidget {
     this.valortotal,
     this.codigoproduto,
     this.operador,
-  }) : super(key: key);
+    this.pessoaid,
+  });
 
   @override
   State<OrderPage> createState() => _OrderPageState();
@@ -65,6 +68,8 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage> {
   String urlBasic = '';
   String token = '';
+  String ibge = '';
+  String cidade = '';
 
   late String pessoaid = '';
   late String nome = '';
@@ -80,6 +85,7 @@ class _OrderPageState extends State<OrderPage> {
   late String endereconumero = '';
   late String enderecocomplemento = '';
   late String uf = '';
+  late String email = '';
 
   late String nomeproduto = '';
   late String codigoproduto = '';
@@ -91,10 +97,21 @@ class _OrderPageState extends State<OrderPage> {
   late double valortotal = 0.0;
   late double quantidade = 0.0;
 
+  final _complementocontroller2 = TextEditingController();
+  final _bairrocontroller = TextEditingController();
+  final _localidadecontroller = TextEditingController();
+  final _ibgecontroller = TextEditingController();
+  final _ufcontroller = TextEditingController();
+  final _logradourocontroller = TextEditingController();
+
   List<OrdersDetailsEndpoint> orders = [];
 
    NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+
+  final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
+  final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
+  final _cepMaskFormatter = MaskTextInputFormatter(mask: '#####-###');
 
       final cepFormatter = MaskTextInputFormatter(
       mask: '#####-###', filter: {"#": RegExp(r'[0-9]')});
@@ -113,7 +130,7 @@ class _OrderPageState extends State<OrderPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -124,7 +141,7 @@ class _OrderPageState extends State<OrderPage> {
             child: Scaffold(
               body: ListView(
                 children: [
-                  Navbar(text: 'Pedido', children: [
+                  const Navbar(text: 'Pedido', children: [
                     NavbarButton(
                         destination: Home(), Icons: Icons.arrow_back_ios_new)
                   ]),
@@ -161,9 +178,8 @@ class _OrderPageState extends State<OrderPage> {
                           Row(
                             children: [
                               Text(
-                                'Data do pedido - ' +
-                                    DateFormat('dd/MM/yyyy hh:mm:ss')
-                                        .format(widget.datahora),
+                                'Data do pedido - ${DateFormat('dd/MM/yyyy hh:mm:ss')
+                                        .format(widget.datahora)}',
                                 style: TextStyle(
                                     color: Style.primaryColor,
                                     fontSize: Style.height_12(context),
@@ -190,12 +206,12 @@ class _OrderPageState extends State<OrderPage> {
                   SizedBox(
                     height: Style.height_10(context),
                   ),
-                  TextTitle(text: 'Produto(s)'),
+                  const TextTitle(text: 'Produto(s)'),
                   SizedBox(
                     height: Style.height_10(context),
                   ),
                   ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: orders.length,
                       itemBuilder: (context, index) {
@@ -246,7 +262,7 @@ class _OrderPageState extends State<OrderPage> {
                                                     children: [
                                                       Row(
                                                         children: [
-                                                          Container(
+                                                          SizedBox(
                                                             width:
                                                                 Style.width_150(
                                                                     context),
@@ -315,15 +331,11 @@ class _OrderPageState extends State<OrderPage> {
                                                       Row(
                                                         children: [
                                                           Text(
-                                                            currencyFormat
+                                                            '${currencyFormat
                                                                     .format(orders[
                                                                             index]
-                                                                        .valorunitario)
-                                                                    .toString() +
-                                                                ' x ' +
-                                                                orders[index]
-                                                                    .quantidade
-                                                                    .toString(),
+                                                                        .valorunitario)} x ${orders[index]
+                                                                    .quantidade}',
                                                             style: TextStyle(
                                                                 fontSize: Style
                                                                     .height_12(
@@ -336,12 +348,10 @@ class _OrderPageState extends State<OrderPage> {
                                                       Row(
                                                         children: [
                                                           Text(
-                                                            'Subtotal - ' +
-                                                                currencyFormat
+                                                            'Subtotal - ${currencyFormat
                                                                     .format(orders[
                                                                             index]
-                                                                        .valortotalitem)
-                                                                    .toString(),
+                                                                        .valortotalitem)}',
                                                             style: TextStyle(
                                                                 fontSize: Style
                                                                     .height_10(
@@ -372,14 +382,14 @@ class _OrderPageState extends State<OrderPage> {
                   ),
                   Center(
                     child: Text(
-                      'Total - ' + currencyFormat.format(widget.valortotal),
+                      'Total - ${currencyFormat.format(widget.valortotal)}',
                       style: TextStyle(
                           color: Style.primaryColor,
                           fontSize: Style.height_15(context),
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                  TextTitle(text: 'Dados do Cliente'),
+                  const TextTitle(text: 'Dados do Cliente'),
                   SizedBox(
                     height: Style.height_10(context),
                   ),
@@ -390,47 +400,39 @@ class _OrderPageState extends State<OrderPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        NameInputblocked(text: 'Nome'),
+                        const NameInputblocked(text: 'Nome'),
                         InputBlocked(
                             value: nome.isEmpty ? '' : nome),
                         SizedBox(
-                          height: Style.height_10(context),
+                          height: Style.height_5(context),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
+                            SizedBox(
                               width: Style.width_150(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  NameInputblocked(text: 'CPF/CNPJ'),
+                                  const NameInputblocked(text: 'CPF/CNPJ'),
                                   InputBlocked(
                                     value: widget.cpfcnpj == 'null'
                                         ? ''
-                                        : widget.cpfcnpj,
-                                    inputFormatters: [
-                                      MaskedInputFormatter(
-                                          '000.000.000-00'), // Máscara de CPF
-                                    ],
+                                        : _cpfMaskFormatter.maskText(widget.cpfcnpj)
                                   ),
                                 ],
                               ),
                             ),
-                            Container(
+                            SizedBox(
                               width: Style.width_150(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  NameInputblocked(text: 'Telefone'),
+                                  const NameInputblocked(text: 'Telefone'),
                                   InputBlocked(
                                     value: telefone == 'null'
                                         ? ''
-                                        : telefone,
-                                    inputFormatters: [
-                                      MaskedInputFormatter(
-                                          '(00) 00000-0000'), // Máscara de CPF
-                                    ],
+                                        : _telMaskFormatter.maskText(telefone)
                                   )
                                 ],
                               ),
@@ -438,74 +440,107 @@ class _OrderPageState extends State<OrderPage> {
                           ],
                         ),
                         SizedBox(
-                          height: Style.height_10(context),
+                          height: Style.height_5(context),
                         ),
-                        NameInputblocked(text: 'Endereço'),
+                        const NameInputblocked(text: 'Endereço'),
                         InputBlocked(
                             value:
-                                endereco == null ? '' : endereco),
+                                email ?? ''),
                         SizedBox(
-                          height: Style.height_10(context),
+                          height: Style.height_5(context),
+                        ),
+                        const NameInputblocked(text: 'CEP'),
+                                  InputBlocked(
+                                      value: cepFormatter.maskText(
+                                          enderecocep ?? '')),
+                        
+                        SizedBox(
+                          height: Style.height_5(context),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: Style.width_225(context),
+                             SizedBox(
+                              width: Style.width_215(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  NameInputblocked(text: 'Complemento'),
-                                  InputBlocked(
-                                      value: enderecocomplemento == null
-                                          ? ''
-                                          : enderecocomplemento)
+                                  const NameInputblocked(text: 'Endereço'),
+                        InputBlocked(
+                            value:
+                                endereco ?? ''),
                                 ],
                               ),
                             ),
-                            Container(
-                              width: Style.width_80(context),
+                            SizedBox(
+                              width: Style.width_100(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  NameInputblocked(text: 'UF'),
+                                  const NameInputblocked(text: 'UF'),
                                   InputBlocked(
-                                      value: uf == null ? '' : uf)
+                                      value: uf ?? '')
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                       
+                        SizedBox(
+                          height: Style.height_5(context),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: Style.width_140(context),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const NameInputblocked(text: 'Bairro'),
+                                  InputBlocked(
+                                      value: enderecobairro ?? '')
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: Style.width_180(context),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const NameInputblocked(text: 'Cidade'),
+                                  InputBlocked(
+                                      value: _localidadecontroller.text ?? '')
                                 ],
                               ),
                             ),
                           ],
                         ),
                         SizedBox(
-                          height: Style.height_10(context),
+                          height: Style.height_5(context),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: Style.width_150(context),
+                            SizedBox(
+                              width: Style.width_100(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  NameInputblocked(text: 'Bairro'),
+                                 const NameInputblocked(text: 'Número'),
                                   InputBlocked(
-                                      value: enderecobairro == null
-                                          ? ''
-                                          : enderecobairro)
+                                      value: endereconumero == null ? '' : endereconumero.toString())
                                 ],
                               ),
                             ),
-                            Container(
-                              width: Style.width_150(context),
+                            SizedBox(
+                              width: Style.width_215(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  NameInputblocked(text: 'CEP'),
+                                  const NameInputblocked(text: 'Complemento'),
                                   InputBlocked(
-                                      value: cepFormatter.maskText(
-                                          enderecocep == null
-                                              ? ''
-                                              : enderecocep))
+                                      value: enderecocomplemento ?? '')
                                 ],
                               ),
                             ),
@@ -556,7 +591,7 @@ class _OrderPageState extends State<OrderPage> {
             ),
             onWillPop: () async {
               Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => Home()));
+                  MaterialPageRoute(builder: (context) => const Home()));
               return true;
             }));
   }
@@ -580,11 +615,20 @@ class _OrderPageState extends State<OrderPage> {
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
-      _loadSavedToken()
+      _loadSavedToken(),
     ]);
     await Future.wait([
       fetchDataCliente2(),
     ]);
+     await GetCep.getcep(
+      enderecocep, 
+      _logradourocontroller, 
+      _complementocontroller2, 
+      _bairrocontroller, 
+      _ufcontroller, 
+      _localidadecontroller, 
+      _ibgecontroller, 
+      ibge);
     await Future.wait([
       fetchDataOrders(),
       // fetchDataOrdersDetails2(widget.prevendaId),
@@ -615,6 +659,7 @@ class _OrderPageState extends State<OrderPage> {
       enderecocidade = data['enderecocidade'].toString();
       uf = data['uf'].toString();
       codigo = data['codigo'].toString();
+      email = data['emailcontato'].toString();
     });
   }
 

@@ -6,8 +6,7 @@ class InputBlocked extends StatefulWidget {
   final String value;
   final List<TextInputFormatter>? inputFormatters;
 
-  const InputBlocked({
-    Key? key,
+  const InputBlocked({Key?key,
      required this.value,
      this.inputFormatters,
      });
@@ -20,7 +19,7 @@ class _InputBlockedState extends State<InputBlocked> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
+      child: SizedBox(
         height: Style.height_50(context),
         child: TextFormField(
           initialValue: widget.value,

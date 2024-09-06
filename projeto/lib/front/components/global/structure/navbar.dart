@@ -5,8 +5,7 @@ class Navbar extends StatefulWidget {
   final String text;
   final List<Widget> children;
 
-  const Navbar({Key? key, required this.text, required this.children})
-      : super(key: key);
+  const Navbar({super.key, required this.text, required this.children});
 
   @override
   State<Navbar> createState() => _NavbarState();

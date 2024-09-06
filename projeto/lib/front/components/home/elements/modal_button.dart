@@ -4,7 +4,7 @@ import 'package:projeto/front/pages/login.dart';
 
 
 class ModalButton extends StatefulWidget {
-  const ModalButton({Key? key}) : super(key: key);
+  const ModalButton({super.key});
 
   @override
   State<ModalButton> createState() => _ModalButtonState();
@@ -23,7 +23,7 @@ class _ModalButtonState extends State<ModalButton> {
       context: context,
       builder: (BuildContext context) {
         modalContext = context;
-        return Container(
+        return SizedBox(
           //Configurações de tamanho e espaçamento do modal
           height: Style.ModalSize(context),
           child: WillPopScope(
@@ -129,7 +129,7 @@ class _ModalButtonState extends State<ModalButton> {
   void _sair() {
    Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => LoginPage(),
+          builder: (context) => const LoginPage(),
         ),
         (route) => false);
   }

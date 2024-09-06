@@ -5,7 +5,7 @@ class NavbarButton extends StatefulWidget {
   final Widget destination;
   final Icons;
 
-  const NavbarButton({Key? key, required this.destination, required this.Icons}) : super (key: key);
+  const NavbarButton({super.key, required this.destination, required this.Icons});
 
   @override
   State<NavbarButton> createState() => _NavbarButtonState();

@@ -6,9 +6,9 @@ class FormCard extends StatefulWidget {
   final List<Widget> children;
 
   const FormCard({
-    Key? key,
+    super.key,
     required this.children,
-  }) : super(key: key);
+  });
 
   @override
   State<FormCard> createState() => _FormCardState();
@@ -29,11 +29,10 @@ class _FormCardState extends State<FormCard> {
               ),
               //Área do container com os widgets de form.
           Container(
+            padding: const EdgeInsets.only(left: 20, right: 20),
             child: Column(
               children: widget.children,
             ),
-            //Espaçamento interno do container.
-            padding: EdgeInsets.only(left: 20, right: 20),
           ),
         ],
       ),

@@ -5,7 +5,7 @@ import 'package:projeto/front/components/style.dart';
 import 'dart:async';
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({Key? key}) : super(key: key);
+  const SplashPage({super.key});
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -18,10 +18,10 @@ class _SplashPageState extends State<SplashPage> {
     super.initState();
 
     //Função para adicionar um timer à tela splash
-    Timer(Duration(seconds: 4), () {
+    Timer(const Duration(seconds: 4), () {
      Navigator.of(context).pushReplacement(
         //Função executada após o tempo acabar
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     });
   }
@@ -31,7 +31,7 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       body: Container(
         //Estilização da tela splash
-        decoration: BoxDecoration(),
+        decoration: const BoxDecoration(),
         //Conteúdo da tela
         child: Row(
           //Alinhamentos
@@ -51,7 +51,7 @@ class _SplashPageState extends State<SplashPage> {
                     ),
                   ],
                 ),
-                Row(
+                const Row(
                   //Chamando a animação do texto abaixo da imagem
                   children: [
                     AnimatedTextMove(

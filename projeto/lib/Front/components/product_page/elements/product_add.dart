@@ -19,7 +19,7 @@ class ProductAdd extends StatefulWidget {
   final flagunidadefracionada;
   final VoidCallback? onProductAdded;
 
-  const ProductAdd({
+  const ProductAdd({ 
     Key? key,
     this.prevendaid,
     this.produtoid,
@@ -203,7 +203,7 @@ class _ProductAddState extends State<ProductAdd> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
+                              SizedBox(
                                 width: Style.width_130(context),
                                 child: Input(
                                   controller: _quantidadecontroller,
@@ -240,7 +240,7 @@ class _ProductAddState extends State<ProductAdd> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
+                              SizedBox(
                                 width: Style.width_180(context),
                                 child: TextFormField(
                                   controller: _complementocontroller,
@@ -249,7 +249,7 @@ class _ProductAddState extends State<ProductAdd> {
                                       .top, // Alinha o cursor ao topo
                                   maxLines:
                                       null, // Permite quebra de linha automática
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     contentPadding: EdgeInsets.only(
                                         top: 20.0,
                                         left: 10.0,
@@ -371,7 +371,7 @@ class _ProductAddState extends State<ProductAdd> {
                         children: [
                           Row(
                             children: [
-                              Container(
+                              SizedBox(
                                 width: Style.width_130(context),
                                 child: Text(
                                   widget.nomeproduto,

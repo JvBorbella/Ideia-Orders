@@ -34,21 +34,32 @@ class NewOrder {
 class DataServiceNewOrder {
   static Future<void> sendDataOrder(
     BuildContext context,
-      String urlBasic,
-      String token,
-      String cpfController,
-      String telefonecontatoController,
-      String nomeController,) async {
+    String urlBasic,
+    String token,    
+    String cpfController,
+    String telefonecontatoController,
+    String nomeController,
+    String pessoaid,
+  ) async {
+    String getUnmaskedText(String maskedText) {
+      // Remove todos os caracteres não numéricos
+      return maskedText.replaceAll(RegExp(r'\D'), '');
+    }
+
+    var cpfDefault = getUnmaskedText(cpfController);
+    var telDefault = getUnmaskedText(telefonecontatoController);
+
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/novopedido');
 
-      var headers = {
+    var headers = {
       'auth-token': token,
       'Content-Type': 'application/json',
     };
     var body = jsonEncode({
-      'cpf': cpfController,
+      'pessoa_id': pessoaid,
+      'cpf': cpfDefault,
       'nome': nomeController,
-      'telefone': telefonecontatoController,
+      'telefone': telDefault,
     });
 
     print(headers);
@@ -65,19 +76,19 @@ class DataServiceNewOrder {
         print('Resposta do servidor: ${response.body}');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-              content: Text(
-                'Erro ao abrir pedido: ${response.statusCode} - ${response.body}',
-                style: TextStyle(
-                  fontSize: Style.SaveUrlMessageSize(context),
-                  color: Style.tertiaryColor,
-                ),
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Erro ao abrir pedido: ${response.statusCode} - ${response.body}',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
               ),
-              backgroundColor: Style.errorColor,
             ),
-          );
+            backgroundColor: Style.errorColor,
+          ),
+        );
         print('Erro ao enviar dados: ${response.statusCode}');
         print('Resposta do servidor: ${response.body}');
       }

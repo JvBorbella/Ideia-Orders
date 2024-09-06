@@ -5,17 +5,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class GetCep {
   static Future<void> getcep(
-      TextEditingController cepController,
+      String cepController,
       TextEditingController logradouroController,
       TextEditingController complementoController,
       TextEditingController bairroController,
       TextEditingController ufController,
       TextEditingController localidadeController,
-      TextEditingController ibgeController) async {
+      TextEditingController ibgeController,
+      String ibge) async {
     try {
-      var cep = cepController.text;
+      var cep = cepController;
       var authorization = Uri.parse('https://viacep.com.br/ws/$cep/json/');
       var response = await http.get(authorization);
+
+      print(authorization);
 
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
@@ -42,6 +45,9 @@ class GetCep {
         localidadeController.text = localidade ?? '';
         ibgeController.text = ibge ?? '';
         ufController.text = uf ?? '';
+        ibge = ibge ?? '';
+
+        print(response.body);
       } else {
         print('Erro ao consultar o CEP. Status Code: ${response.statusCode}');
       }

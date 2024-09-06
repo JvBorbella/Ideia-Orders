@@ -51,10 +51,10 @@ class _ConfigPageState extends State<ConfigPage> {
                 child: Column(
                   children: [
                     //Chamando a navbar
-                    Navbar(children: [
+                    const Navbar(text: 'Configurações', children: [
                       //Chamando os elementos internos da navbar
-                    ], text: 'Configurações'),
-                    Container(
+                    ]),
+                    SizedBox(
                       height: MediaQuery.of(context).size.height * 0.9,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

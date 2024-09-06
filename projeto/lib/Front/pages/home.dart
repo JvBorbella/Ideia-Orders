@@ -26,11 +26,11 @@ class Home extends StatefulWidget {
   final String urlBasic;
 
   const Home({
-    Key? key,
+    super.key,
     this.token = '',
     this.url = '',
     this.urlBasic = '',
-  }) : super(key: key);
+  });
 
   @override
   State<Home> createState() => _HomeState();
@@ -49,6 +49,7 @@ class _HomeState extends State<Home> {
   String id = '';
   String token = '';
   String prevendaId = '';
+  String flagFilter = '';
 
   late String pessoanome = '';
   late String cpfcnpj = '';
@@ -74,6 +75,7 @@ class _HomeState extends State<Home> {
   final _numerocontroller = TextEditingController();
   final _ufcontroller = TextEditingController();
   final _logradourocontroller = TextEditingController();
+  final _emailcontroller = TextEditingController();
 
   final _cpfcontroller = TextEditingController();
   final _nomecontroller = TextEditingController();
@@ -102,20 +104,13 @@ class _HomeState extends State<Home> {
     }
   }
 
-  // final cepFormatter = MaskTextInputFormatter(
-  //     mask: '#####-###', filter: {"#": RegExp(r'[0-9]')});
-
-  // final cpfFormatter = MaskTextInputFormatter(
-  //   mask: '###.###.###-##',
-  //   filter: {"#": RegExp(r'[0-9]')},
-  // );
-
   @override
   void initState() {
     super.initState();
     _loadSavedId();
     _loadSavedUrlBasic();
     _loadSavedToken();
+    _loadSavedFilter();
     loadData();
   }
 
@@ -158,6 +153,7 @@ class _HomeState extends State<Home> {
                   inputFormatters: [
                     MaskedInputFormatter('000.000.000-00'), // Máscara de CPF
                   ],
+                  textInputAction: TextInputAction.go,
                   IconButton: IconButton(
                     onPressed: () async {
                       await GetCliente.getcliente(
@@ -173,9 +169,10 @@ class _HomeState extends State<Home> {
                         _numerocontroller,
                         _complementocontroller,
                         _cidadecontroller,
+                        _emailcontroller
                       );
                     },
-                    icon: Icon(Icons.person_search),
+                    icon: const Icon(Icons.person_search),
                   ),
                 ),
                 SizedBox(
@@ -203,30 +200,36 @@ class _HomeState extends State<Home> {
                   height: Style.height_20(context),
                 ),
                 TextButton(
-                    onPressed: () async {
-                      await DataServiceNewOrder.sendDataOrder(
-                        context,
-                        urlBasic,
-                        token,
-                        _cpfcontroller.text,
-                        _telefonecontatocontroller.text,
-                        _nomecontroller.text,
-                      );
-                      setState(() {
-                        fetchDataOrders();
-                      });
-                      _closeModal();
-                      _cpfcontroller.clear();
-                      _nomecontroller.clear();
-                      _telefonecontatocontroller.clear();
-                    },
-                    child: Text('Abrir pedido'))
+                  onPressed: () async {
+                    await DataServiceNewOrder.sendDataOrder(
+                      context,
+                      urlBasic,
+                      token,
+                      _cpfcontroller.text,
+                      _telefonecontatocontroller.text,
+                      _nomecontroller.text,
+                      pessoaid,
+                    );
+                    setState(() {
+                      fetchDataOrders();
+                    });
+                    _closeModal();
+                    _cpfcontroller.clear();
+                    _nomecontroller.clear();
+                    _telefonecontatocontroller.clear();
+                  },
+                  child: const Text('Abrir pedido'),
+                )
               ],
             ),
           ),
         );
       },
-    );
+    ).then((_) {
+      _cpfcontroller.clear();
+      _nomecontroller.clear();
+      _telefonecontatocontroller.clear();
+    });
   }
 
   void _closeModal() {
@@ -237,7 +240,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -248,12 +251,12 @@ class _HomeState extends State<Home> {
         child: WillPopScope(
             child: Scaffold(
               drawer: Drawer(
-                child: CustomDrawer(),
                 width: MediaQuery.of(context).size.width * 0.9,
+                child: CustomDrawer(),
               ),
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.endFloat,
-              floatingActionButton: Container(
+              floatingActionButton: SizedBox(
                 width: Style.height_40(context), // Defina a largura desejada
                 height: Style.height_40(context), // Defina a largura desejada
                 child: FloatingActionButton(
@@ -261,7 +264,7 @@ class _HomeState extends State<Home> {
                   onPressed: () {
                     _openModal(context);
                   },
-                  shape: CircleBorder(),
+                  shape: const CircleBorder(),
                   child: Icon(
                     Icons.add,
                     color: Style.tertiaryColor,
@@ -274,6 +277,7 @@ class _HomeState extends State<Home> {
                 child: ListView(
                   children: [
                     Navbar(
+                      text: 'Pedidos',
                       children: [
                         DrawerButton(
                           style: ButtonStyle(
@@ -286,32 +290,156 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                       ],
-                      text: 'Pedidos',
                     ),
-                    // Container(
-                    //   height: Style.height_60(context),
-                    //   padding: EdgeInsets.all(Style.height_12(context)),
-                    //   child: SearchBar(
-                    //     constraints: BoxConstraints(),
-                    //     leading: const Icon(
-                    //       Icons.search,
-                    //       color: Style.primaryColor,
-                    //     ),
-                    //     hintText: 'Pesquise o código do pedido',
-                    //     hintStyle: WidgetStatePropertyAll(
-                    //         TextStyle(color: Style.quarantineColor)),
-                    //     padding: WidgetStatePropertyAll(
-                    //       EdgeInsets.only(
-                    //           left: Style.height_15(context),
-                    //           right: Style.height_15(context)),
-                    //     ),
-                    //   ),
-                    // ),
                     SizedBox(height: Style.height_10(context)),
-                    Center(child: TextTitle(text: 'Lista de pedidos')),
+                    const Center(child: TextTitle(text: 'Lista de pedidos')),
                     SizedBox(height: Style.height_10(context)),
+                    Container(
+                      padding: EdgeInsets.all(Style.height_15(context)),
+                      margin: EdgeInsets.only(bottom: Style.height_20(context)),
+                      decoration: BoxDecoration(
+                        color: Style.defaultColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.15),
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            height: Style.height_30(context),
+                            child: PopupMenuButton<String>(
+                              itemBuilder: (BuildContext context) =>
+                                  <PopupMenuEntry<String>>[
+                                PopupMenuItem(
+                                    enabled: false,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                              bottom: Style.height_5(context)),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      Style.height_25(context)),
+                                              color: Style.errorColor),
+                                          child: IconButton(
+                                            onPressed: () {
+                                              _closeModal();
+                                            },
+                                            icon: Image.network(
+                                                'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/05/icons8-excluir-20.png'),
+                                            style: const ButtonStyle(
+                                                iconColor:
+                                                    WidgetStatePropertyAll(
+                                                        Style.tertiaryColor)),
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                                PopupMenuDivider(
+                                  height: Style.height_1(context),
+                                ),
+                                const PopupMenuItem<String>(
+                                  labelTextStyle: WidgetStatePropertyAll(
+                                      TextStyle(
+                                          fontSize: 15,
+                                          color: Style.primaryColor)),
+                                  value: 'finalizados',
+                                  child: Text(
+                                    'Faturados',
+                                  ),
+                                ),
+                                PopupMenuDivider(
+                                  height: Style.height_1(context),
+                                ),
+                                const PopupMenuItem<String>(
+                                  labelTextStyle: WidgetStatePropertyAll(
+                                      TextStyle(
+                                          fontSize: 15,
+                                          fontFamily: 'Poppins-Medium',
+                                          color: Style.primaryColor)),
+                                  value: 'abertos',
+                                  child: Text(
+                                    'Em aberto',
+                                  ),
+                                ),
+                                PopupMenuDivider(
+                                  height: Style.height_1(context),
+                                ),
+                                const PopupMenuItem<String>(
+                                  labelTextStyle: WidgetStatePropertyAll(
+                                      TextStyle(
+                                          fontSize: 15,
+                                          fontFamily: 'Poppins-Medium',
+                                          color: Style.primaryColor)),
+                                  value: 'todos',
+                                  child: Text('Todos'),
+                                ),
+                              ],
+                              onSelected: (String value) async {
+                                String filterValue;
+                                if (value == 'finalizados') {
+                                  filterValue = '1';
+                                } else if (value == 'abertos') {
+                                  filterValue = '0';
+                                } else {
+                                  filterValue = '';
+                                }
+                                await _saveFilter(filterValue);
+                                await fetchDataOrders(
+                                    ascending: true, flagFilter: filterValue);
+                                setState(() {
+                                  selectedOptionChild =
+                                      _getFilterText(filterValue);
+                                });
+                              },
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.filter_list_outlined,
+                                      color: Style.primaryColor,
+                                      size: Style.height_20(context),
+                                    ),
+                                    SizedBox(
+                                      width: Style.height_2(context),
+                                    ),
+                                    Text(
+                                      'Filtrado por: ',
+                                      style: TextStyle(
+                                          fontSize: Style.height_12(context)),
+                                    ),
+                                    Container(
+                                      // width: 150,
+                                      child: Text(
+                                        selectedOptionChild,
+                                        style: TextStyle(
+                                          color: Style.secondaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: Style.height_12(context),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow
+                                            .clip, // corta o texto no limite da largura
+                                        softWrap:
+                                            true, // permite a quebra de linha conforme necessário
+                                      ),
+                                    )
+                                  ]),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: orders.length,
                         itemBuilder: (context, index) {
@@ -326,6 +454,7 @@ class _HomeState extends State<Home> {
                                     .pushReplacement(MaterialPageRoute(
                                         builder: (context) => OrderPage(
                                               prevendaId: orders[index].prevendaId,
+                                              pessoaid: pessoaid,
                                               numero: orders[index].numero.toString(),
                                               pessoanome: pessoanome,
                                               cpfcnpj: cpfcnpj,
@@ -334,9 +463,6 @@ class _HomeState extends State<Home> {
                                               valortotal: orders[index].valortotal,
                                               codigoproduto: codigoproduto,
                                               endereco: endereco,
-                                              // enderecobairro: enderecobairro,
-                                              // enderecocep: enderecocep,
-                                              // enderecocomplemento: enderecocomplemento,
                                               uf: uf,
                                               operador: orders[index].operador,
                                             )));
@@ -345,6 +471,7 @@ class _HomeState extends State<Home> {
                                   MaterialPageRoute(
                                     builder: (context) => NewOrderPage(
                                       prevendaId: orders[index].prevendaId,
+                                      pessoaid: pessoaid.toString(),
                                       numero: orders[index].numero.toString(),
                                       pessoanome: pessoanome.toString(),
                                       cpfcnpj: cpfcnpj.toString(),
@@ -363,6 +490,8 @@ class _HomeState extends State<Home> {
                               valortotal: orders[index].valortotal,
                               nomepessoa: orders[index].nomepessoa,
                               data: orders[index].datahora,
+                              flagpermitefaturar:
+                                  orders[index].flagpermitefaturar.toString(),
                             ),
                           );
                         }),
@@ -379,7 +508,8 @@ class _HomeState extends State<Home> {
     await Future.wait([
       _loadSavedUrlBasic(),
     ]);
-    await Future.wait([fetchDataOrders(), fetchDataCliente2()]);
+    await Future.wait(
+        [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
   }
 
   Future<void> _loadSavedUrlBasic() async {
@@ -407,18 +537,57 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _refreshData() async {
+    setState(() {
+      isLoading =
+          true; // Define isLoading como true para mostrar o indicador de carregamento
+    });
     await loadData();
     setState(() {
       isLoading = false;
     });
   }
 
-  Future<void> fetchDataOrders() async {
-    List<OrdersEndpoint>? fetchData =
-        await DataServiceOrders.fetchDataOrders(context, urlBasic, id, token);
+  // Função para salvar o filtro no SharedPreferences
+  Future<void> _saveFilter(String filter) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString('flagFilter', filter);
+  }
+
+  // Função para carregar o filtro do SharedPreferences
+  Future<void> _loadSavedFilter() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      flagFilter = sharedPreferences.getString('flagFilter') ?? '';
+      selectedOptionChild = _getFilterText(flagFilter);
+    });
+  }
+
+  // Função para obter o texto do filtro com base no flagFilter
+  String _getFilterText(String filter) {
+    switch (filter) {
+      case '1':
+        return 'Finalizados';
+      case '0':
+        return 'Em aberto';
+      default:
+        return 'Todos';
+    }
+  }
+
+  Future<void> fetchDataOrders({bool? ascending, String? flagFilter}) async {
+    List<OrdersEndpoint>? fetchData = await DataServiceOrders.fetchDataOrders(
+        context, urlBasic, id, token,
+        ascending: ascending);
+
     if (fetchData != null) {
+      // Aplicando o filtro baseado no campo flagpermitefaturar
+      if (flagFilter != null && flagFilter.isNotEmpty) {
+        fetchData = fetchData
+            .where((order) => order.flagpermitefaturar == flagFilter)
+            .toList();
+      }
       setState(() {
-        orders = fetchData;
+        orders = fetchData!;
       });
     }
     setState(() {

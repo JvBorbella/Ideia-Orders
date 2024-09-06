@@ -38,7 +38,7 @@ class DataServiceRePrintOrder {
           print(response.body);
           print(urlPost);
 
-          await ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
@@ -116,7 +116,7 @@ class DataServiceRePrintOrderNetwork {
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
           message = jsonData['message'];
 
-          await ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
@@ -131,7 +131,7 @@ class DataServiceRePrintOrderNetwork {
             ),
           );
 
-           await ScaffoldMessenger.of(context).showSnackBar(
+           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),

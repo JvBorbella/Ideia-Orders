@@ -13,8 +13,7 @@ class ProductsOrder extends StatefulWidget {
   final double valorunitario;
   final int quantidade;
 
-  const ProductsOrder({
-    Key?key, 
+  const ProductsOrder({Key?key, 
     this.urlBasic = '',
     this.prevenda_id = '',
     this.produtoId = '',
@@ -81,7 +80,7 @@ class _MyWidgetState extends State<ProductsOrder> {
                         children: [
                           Row(
                             children: [
-                              Container(
+                              SizedBox(
                                 width: Style.width_150(context),
                                 child: Text(
                                 nome,
@@ -125,7 +124,7 @@ class _MyWidgetState extends State<ProductsOrder> {
                           Row(
                             children: [
                               Text(
-                                currencyFormat.format(widget.valorunitario).toString() + ' x ' + widget.quantidade.toString(),
+                                '${currencyFormat.format(widget.valorunitario)} x ${widget.quantidade}',
                                 style: TextStyle(
                                     fontSize: Style.height_12(context),
                                     color: Style.primaryColor),
@@ -135,7 +134,7 @@ class _MyWidgetState extends State<ProductsOrder> {
                           Row(
                             children: [
                               Text(
-                                 'Subtotal - R\$ ' + (widget.valorunitario * widget.quantidade).toStringAsFixed(2),
+                                 'Subtotal - R\$ ${(widget.valorunitario * widget.quantidade).toStringAsFixed(2)}',
                                 style: TextStyle(
                                     fontSize: Style.height_10(context),
                                     color: Style.warningColor),

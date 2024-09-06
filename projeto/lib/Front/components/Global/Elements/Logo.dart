@@ -8,7 +8,7 @@ class Logo extends StatelessWidget {
     return Material(
       child: Container(
         color: null,
-        child: Column(
+        child: const Column(
           children: [
             // Image.asset(
             //   '../../../../assets/images/ideia.png',

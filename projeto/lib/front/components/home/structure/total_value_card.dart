@@ -12,8 +12,7 @@ class TotalCard extends StatefulWidget {
   final double children;
   final text;
 
-  const TotalCard({
-    Key? key,
+  const TotalCard({Key?key,
     required this.children,
     this.text,
     // required this.vendadia,
@@ -42,6 +41,9 @@ class _TotalCardState extends State<TotalCard> {
           color: Style.primaryColor,
           borderRadius: BorderRadius.circular(10.0),
         ),
+        //espaçamento interno
+        padding: const EdgeInsets.all(10.0),
+        width: MediaQuery.of(context).size.width * 0.41,
         child: Column(
           //Conteúdo interno do card
           children: [
@@ -60,9 +62,6 @@ class _TotalCardState extends State<TotalCard> {
             ),
           ],
         ),
-        //espaçamento interno
-        padding: EdgeInsets.all(10.0),
-        width: MediaQuery.of(context).size.width * 0.41,
       ),
     );
   }

@@ -4,7 +4,7 @@ import 'package:projeto/front/components/Style.dart';
 class TextTitle extends StatefulWidget {
   final String text;
 
-  const TextTitle({Key? key, required this.text});
+  const TextTitle({Key?key, required this.text});
 
   @override
   State<TextTitle> createState() => _TextTitleState();

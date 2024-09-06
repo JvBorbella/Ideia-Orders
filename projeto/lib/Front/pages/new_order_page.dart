@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/order_details.dart';
 import 'package:projeto/front/components/style.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class NewOrderPage extends StatefulWidget {
   final prevendaId;
+  final pessoaid;
   final numero;
   final pessoanome;
   final cpfcnpj;
@@ -26,23 +28,27 @@ class NewOrderPage extends StatefulWidget {
   final valortotal;
   final codigoproduto;
 
+  final noProduct;
+
   const NewOrderPage({
-    Key? key,
-    this.prevendaId,
-    this.numero,
-    this.pessoanome,
-    this.cpfcnpj,
-    this.telefone,
-    this.endereco,
-    this.bairro,
-    this.cidade,
-    this.cep,
-    this.complemento,
-    this.uf,
-    this.datahora,
-    this.valortotal,
-    this.codigoproduto,
-  }) : super(key: key);
+  super.key,
+  this.prevendaId,
+  this.pessoaid,
+  this.numero,
+  this.pessoanome,
+  this.cpfcnpj,
+  this.telefone,
+  this.endereco,
+  this.bairro,
+  this.cidade,
+  this.cep,
+  this.complemento,
+  this.uf,
+  this.datahora,
+  this.valortotal,
+  this.codigoproduto,
+  this.noProduct = '0', // valor padrão
+});
 
   @override
   State<NewOrderPage> createState() => _NewOrderPageState();
@@ -51,6 +57,8 @@ class NewOrderPage extends StatefulWidget {
 class _NewOrderPageState extends State<NewOrderPage> {
   String urlBasic = '';
   String token = '';
+  String ibge = '';
+  String cidade = '';
 
   late String pessoaid = '';
   late String nome = '';
@@ -65,6 +73,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
   late String endereconumero = '';
   late String enderecocomplemento = '';
   late String uf = '';
+  late String email = '';
 
   late String nomeproduto = '';
   late String codigoproduto = '';
@@ -76,6 +85,13 @@ class _NewOrderPageState extends State<NewOrderPage> {
   late double valortotal = 0.0;
   late double quantidade = 0.0;
 
+  final _complementocontroller2 = TextEditingController();
+  final _bairrocontroller = TextEditingController();
+  final _localidadecontroller = TextEditingController();
+  final _ibgecontroller = TextEditingController();
+  final _ufcontroller = TextEditingController();
+  final _logradourocontroller = TextEditingController();
+
   bool isLoading = true;
   @override
   void initState() {
@@ -85,12 +101,14 @@ class _NewOrderPageState extends State<NewOrderPage> {
     _loadSavedToken();
     loadData();
     _refreshData();
+
+    // cidade = _localidadecontroller.text;
   }
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -101,7 +119,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
             child: Scaffold(
               body: ListView(
                 children: [
-                  Navbar(text: 'Novo pedido', children: [
+                  const Navbar(text: 'Novo pedido', children: [
                     NavbarButton(
                         destination: Home(), Icons: Icons.arrow_back_ios_new)
                   ]),
@@ -110,6 +128,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
                   ),
                   ProductSession(
                       prevendaid: widget.prevendaId.toString(),
+                      pessoaid: pessoaid.toString(),
                       pessoanome: widget.pessoanome.toString(),
                       cpfcnpj: widget.cpfcnpj.toString(),
                       telefone: widget.telefone.toString(),
@@ -126,12 +145,14 @@ class _NewOrderPageState extends State<NewOrderPage> {
                       valortotalitem: valortotalitem.toDouble(),
                       valortotal: valortotal.toDouble(),
                       quantidade: quantidade.toDouble(),
-                      imagemurl: imagemurl.toString()),
+                      imagemurl: imagemurl.toString(),
+                      onProductRemoved: _onProductRemoved),
                   SizedBox(
                     height: Style.height_30(context),
                   ),
                   CustomerSession(
                       pessoanome: widget.pessoanome,
+                      pessoaid: pessoaid,
                       cpfcnpj: widget.cpfcnpj,
                       telefone: widget.telefone,
                       cep: enderecocep,
@@ -139,10 +160,12 @@ class _NewOrderPageState extends State<NewOrderPage> {
                       numero: endereconumero,
                       endereco: endereco,
                       complemento: enderecocomplemento,
-                      cidade: enderecocidade,
+                      cidade: _localidadecontroller.text,
                       uf: uf,
+                      email: email,
                       prevendaid: widget.prevendaId,
-                      numpedido: widget.numero.toString()),
+                      numpedido: widget.numero.toString(),
+                      noProduct: widget.noProduct,),
                   SizedBox(
                     height: Style.height_30(context),
                   ),
@@ -151,7 +174,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
             ),
             onWillPop: () async {
               Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => Home()));
+                  MaterialPageRoute(builder: (context) => const Home()));
               return true;
             }));
   }
@@ -172,15 +195,33 @@ class _NewOrderPageState extends State<NewOrderPage> {
     });
   }
 
+  //   Future<void> _loadSavedCidade() async {
+  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  //   String savedCidade = sharedPreferences.getString('localidade') ?? '';
+  //   setState(() {
+  //     cidade = savedCidade;
+  //   });
+  // }
+
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
+      // _loadSavedCidade(),
     ]);
     await Future.wait([
       fetchDataCliente2(),
       fetchDataOrdersDetails2(widget.prevendaId)
       // initializer(),
     ]);
+    await GetCep.getcep(
+      enderecocep, 
+      _logradourocontroller, 
+      _complementocontroller2, 
+      _bairrocontroller, 
+      _ufcontroller, 
+      _localidadecontroller, 
+      _ibgecontroller, 
+      ibge);
   }
 
   Future<void> _refreshData() async {
@@ -190,9 +231,35 @@ class _NewOrderPageState extends State<NewOrderPage> {
     });
   }
 
+  void _onProductRemoved() {
+  // Recarrega a página inteira, passando '1' como valor para noProduct
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(
+      builder: (context) => NewOrderPage(
+        prevendaId: widget.prevendaId,
+        numero: widget.numero,
+        pessoanome: widget.pessoanome,
+        cpfcnpj: widget.cpfcnpj,
+        telefone: widget.telefone,
+        endereco: widget.endereco,
+        bairro: widget.bairro,
+        cidade: widget.cidade,
+        cep: widget.cep,
+        complemento: widget.complemento,
+        uf: widget.uf,
+        datahora: widget.datahora,
+        valortotal: widget.valortotal,
+        codigoproduto: widget.codigoproduto,
+        noProduct: '1',
+      ),
+    ),
+  );
+}
+
+
   Future<void> fetchDataCliente2() async {
-    final data =
-        await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj, token);
+    final data = await DataServiceCliente2.fetchDataCliente2(
+        urlBasic, widget.cpfcnpj, token);
     setState(() {
       pessoaid = data['pessoa_id'].toString();
       nome = data['nome'].toString();
@@ -206,6 +273,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
       enderecocidade = data['enderecocidade'].toString();
       uf = data['uf'].toString();
       codigo = data['codigo'].toString();
+      email = data['emailcontato'].toString();
     });
   }
 

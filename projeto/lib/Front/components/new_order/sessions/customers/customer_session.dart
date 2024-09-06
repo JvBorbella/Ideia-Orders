@@ -4,15 +4,19 @@ import 'package:projeto/back/finish_order.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/new_customer.dart';
+import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+
 
 class CustomerSession extends StatefulWidget {
   final prevendaid;
+  final pessoaid;
   final pessoanome;
   final cpfcnpj;
   final telefone;
@@ -25,12 +29,16 @@ class CustomerSession extends StatefulWidget {
   final numero;
   final cidade;
   final uf;
+  final email;
 
   final numpedido;
 
+  final noProduct;
+
   const CustomerSession(
-      {Key? key,
+      {Key?key,
       this.prevendaid,
+      this.pessoaid,
       this.pessoanome,
       this.cpfcnpj,
       this.telefone,
@@ -43,7 +51,9 @@ class CustomerSession extends StatefulWidget {
       this.numero,
       this.cidade,
       this.uf,
-      this.numpedido});
+      this.numpedido,
+      this.noProduct,
+      this.email});
 
   @override
   State<CustomerSession> createState() => _CustomerSessionState();
@@ -71,39 +81,39 @@ class _CustomerSessionState extends State<CustomerSession> {
   final _cpfcontroller = TextEditingController();
   final _nomecontroller = TextEditingController();
   final _telefonecontatocontroller = TextEditingController();
+  final _emailcontroller = TextEditingController();
+
+  final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
+  final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
+  final _cepMaskFormatter = MaskTextInputFormatter(mask: '#####-###');
+
+  List<OrdersDetailsEndpoint> orders = [];
+
 
   @override
   void initState() {
     super.initState();
-    _loadSavedUrlBasic();
-    _loadSavedToken();
-    print(widget.cidade);
-    _cepcontroller.text = widget.cep;
-    _bairrocontroller.text = widget.bairro.toString();
+    loadData();
     _localidadecontroller.text = widget.cidade ?? '';
+    _cepcontroller.text = _cepMaskFormatter.maskText(widget.cep);
+    _bairrocontroller.text = widget.bairro.toString();
     _numerocontroller.text = widget.numero ?? '';
     _ibgecontroller.text = widget.ibge.toString();
     _complementocontroller.text = widget.complemento.toString();
     _ufcontroller.text = widget.uf.toString();
     _logradourocontroller.text = widget.endereco.toString();
-    _nomecontroller.text = widget.pessoanome == null ? '' : widget.pessoanome;
-    _cpfcontroller.text = widget.cpfcnpj;
-    _telefonecontatocontroller.text = widget.telefone;
+    _nomecontroller.text = widget.pessoanome == 'null' ? '' : widget.pessoanome;
+    _cpfcontroller.text = widget.cpfcnpj == 'null' ? '' : _cpfMaskFormatter.maskText(widget.cpfcnpj);
+    _telefonecontatocontroller.text = widget.telefone == 'null' ? '' : _telMaskFormatter.maskText(widget.telefone);
+    _emailcontroller.text = widget.email ?? '';
   }
 
   @override
   Widget build(BuildContext context) {
-    //  if (isLoading) {
-    //   return Material(
-    //     child:  Center(
-    //       child: CircularProgressIndicator(),
-    //     ),
-    //   );
-    // }
     return Material(
       child: Column(
         children: [
-          TextTitle(text: 'Dados do cliente'),
+          const TextTitle(text: 'Dados do cliente'),
           SizedBox(
             height: Style.height_5(context),
           ),
@@ -114,7 +124,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                 Input(
                   text: 'CPF',
                   type: TextInputType.text,
-                  controller: _cpfcontroller == null ? '' : _cpfcontroller,
+                  controller: _cpfcontroller,
                   inputFormatters: [MaskedInputFormatter('000.000.000-00')],
                   textAlign: TextAlign.start,
                   IconButton: IconButton(
@@ -132,9 +142,10 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _numerocontroller,
                           _complementocontroller,
                           _cidadecontroller,
+                          _emailcontroller
                         );
                       },
-                      icon: Icon(Icons.person_search)),
+                      icon: const Icon(Icons.person_search)),
                 ),
                 SizedBox(
                   height: Style.height_10(context),
@@ -142,9 +153,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                 Input(
                   text: 'Telefone',
                   type: TextInputType.text,
-                  controller: _telefonecontatocontroller == null
-                      ? ''
-                      : _telefonecontatocontroller,
+                  controller: _telefonecontatocontroller,
                   textAlign: TextAlign.start,
                   inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
                 ),
@@ -154,7 +163,16 @@ class _CustomerSessionState extends State<CustomerSession> {
                 Input(
                   text: 'Nome do cliente',
                   type: TextInputType.text,
-                  controller: _nomecontroller.text.isEmpty ? '' : _nomecontroller,
+                  controller: _nomecontroller,
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(
+                  height: Style.height_10(context),
+                ),
+                Input(
+                  text: 'Email do cliente',
+                  type: TextInputType.emailAddress,
+                  controller: _emailcontroller,
                   textAlign: TextAlign.start,
                 ),
                 SizedBox(
@@ -169,16 +187,17 @@ class _CustomerSessionState extends State<CustomerSession> {
                   IconButton: IconButton(
                       onPressed: () async {
                         await GetCep.getcep(
-                          _cepcontroller,
+                          _cepcontroller.text,
                           _logradourocontroller,
                           _complementocontroller,
                           _bairrocontroller,
                           _ufcontroller,
                           _localidadecontroller,
                           _ibgecontroller,
+                          ibge,
                         );
                       },
-                      icon: Icon(Icons.screen_search_desktop_sharp)),
+                      icon: const Icon(Icons.screen_search_desktop_sharp)),
                 ),
                 SizedBox(
                   height: Style.height_10(context),
@@ -188,7 +207,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   children: [
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: Style.width_215(context),
                           child: Input(
                               controller: _logradourocontroller,
@@ -200,7 +219,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                     ),
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: Style.width_100(context),
                           child: Input(
                               controller: _ufcontroller,
@@ -220,7 +239,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   children: [
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: Style.width_140(context),
                           child: Input(
                               controller: _bairrocontroller,
@@ -232,7 +251,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                     ),
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: Style.width_180(context),
                           child: Input(
                               controller: _localidadecontroller,
@@ -252,7 +271,19 @@ class _CustomerSessionState extends State<CustomerSession> {
                   children: [
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
+                          width: Style.width_100(context),
+                          child: Input(
+                              controller: _numerocontroller,
+                              textAlign: TextAlign.start,
+                              text: 'Número',
+                              type: TextInputType.text),
+                        )
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(
                           width: Style.width_215(context),
                           child: Input(
                               controller: _complementocontroller,
@@ -262,18 +293,6 @@ class _CustomerSessionState extends State<CustomerSession> {
                         )
                       ],
                     ),
-                    Column(
-                      children: [
-                        Container(
-                          width: Style.width_100(context),
-                          child: Input(
-                              controller: _numerocontroller,
-                              textAlign: TextAlign.start,
-                              text: 'Número',
-                              type: TextInputType.text),
-                        )
-                      ],
-                    )
                   ],
                 ),
                 SizedBox(
@@ -284,17 +303,19 @@ class _CustomerSessionState extends State<CustomerSession> {
                   children: [
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: Style.width_150(context),
                           child: RegisterButton(
                             text: 'Cadastrar cliente',
                             color: Style.primaryColor,
                             width: Style.width_150(context),
                             onPressed: () async {
-                              await NewCustomer.getcliente(
+                              await NewCustomer.getCostumer(
                                   context,
                                   urlBasic,
                                   token,
+                                  widget.prevendaid,
+                                  widget.pessoaid,
                                   _nomecontroller.text,
                                   _cpfcontroller.text,
                                   _telefonecontatocontroller.text,
@@ -305,7 +326,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   _complementocontroller.text,
                                   _numerocontroller.text,
                                   ibge,
+                                  _emailcontroller.text,
                                   _ufcontroller.text);
+                                  print('pessoa_id: '+widget.pessoaid);
                             },
                           ),
                         ),
@@ -313,7 +336,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                     ),
                     Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: Style.width_150(context),
                           child: Column(
                             children: [
@@ -373,6 +396,24 @@ class _CustomerSessionState extends State<CustomerSession> {
                                         backgroundColor: Style.errorColor,
                                       ),
                                     );
+                                  } else if (orders.isEmpty || widget.noProduct == '1') {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        padding: EdgeInsets.all(
+                                            Style.SaveUrlMessagePadding(
+                                                context)),
+                                        content: Text(
+                                          'Não é possível finalizar o pedido sem produtos.',
+                                          style: TextStyle(
+                                            fontSize: Style.SaveUrlMessageSize(
+                                                context),
+                                            color: Style.tertiaryColor,
+                                          ),
+                                        ),
+                                        backgroundColor: Style.errorColor,
+                                      ),
+                                    );
                                   } else {
                                      _openModal(context);
                                   }
@@ -403,9 +444,9 @@ class _CustomerSessionState extends State<CustomerSession> {
       context: context,
       builder: (BuildContext context) {
         modalContext = context;
-        return Container(
+        return SizedBox(
             //Configurações de tamanho e espaçamento do modal
-            height: Style.height_300(context),
+            height: Style.height_350(context),
             child: WillPopScope(
                 child: Container(
                   //Tamanho e espaçamento interno do modal
@@ -550,6 +591,40 @@ class _CustomerSessionState extends State<CustomerSession> {
                             ),
                           ),
                         ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              _closeModal();
+                            },
+                            child: Container(
+                              // width: Style.ButtonCancelWidth(context),
+                              // height: Style.ButtonCancelHeight(context),
+                              padding: EdgeInsets.all(
+                                  Style.ButtonCancelPadding(context)),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    Style.ButtonExitBorderRadius(context)),
+                                border: Border.all(
+                                    width: Style.WidthBorderImageContainer(
+                                        context),
+                                    color: Style.errorColor),
+                                color: Style.errorColor,
+                              ),
+                              child: Text(
+                                'Cancelar finalização',
+                                style: TextStyle(
+                                  color: Style.tertiaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Style.height_10(context),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     ],
                   ),
@@ -593,16 +668,25 @@ class _CustomerSessionState extends State<CustomerSession> {
 
   Future<void> loadData() async {
     await Future.wait([
-      _loadSavedUrlBasic(),
-    ]);
+      _loadSavedUrlBasic(), 
+      _loadSavedToken(),
+      _loadSavedIbge(),
+      ]);
+      
     await Future.wait([
-      // fetchDataCliente2(),
-      // initializer(),
+      fetchDataOrders(),
     ]);
   }
 
-  Future<void> _refreshData() async {
-    await loadData();
+  Future<void> fetchDataOrders() async {
+    List<OrdersDetailsEndpoint>? fetchData =
+        await DataServiceOrdersDetails.fetchDataOrdersDetails(
+            urlBasic, widget.prevendaid, token);
+    if (fetchData != null) {
+      setState(() {
+        orders = fetchData;
+      });
+    }
     setState(() {
       isLoading = false;
     });

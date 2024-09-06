@@ -491,6 +491,10 @@ class Style {
     return MediaQuery.of(context).size.height * 0.48;
   }
 
+  static double height_350(BuildContext context) {
+    return MediaQuery.of(context).size.height * 0.56;
+  }
+
   static double width_250(BuildContext context) {
     return MediaQuery.of(context).size.width * 0.6944444444444444;
   }

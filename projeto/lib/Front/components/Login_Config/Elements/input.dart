@@ -18,7 +18,7 @@ class Input extends StatefulWidget {
   final onTap;
 
   const Input(
-      {Key? key,
+      {super.key,
       required this.text,
       required this.type,
       this.obscureText,
@@ -29,8 +29,7 @@ class Input extends StatefulWidget {
       this.textInputAction,
       this.inputFormatters,
       this.onTap
-      })
-      : super(key: key);
+      });
 
   @override
   State<Input> createState() => _InputState();
@@ -53,9 +52,9 @@ class _InputState extends State<Input> {
     return Material(
       child: ConstrainedBox(
         constraints:
-            BoxConstraints(maxWidth: 1200),
+            const BoxConstraints(maxWidth: 1200),
         child: Container(
-          margin: EdgeInsets.only(left: 5.0, right: 5),
+          margin: const EdgeInsets.only(left: 5.0, right: 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -85,10 +84,10 @@ class _InputState extends State<Input> {
                     fontSize: Style.height_10(context),
                   ),
                   floatingLabelAlignment: FloatingLabelAlignment.center,
-                  enabledBorder: UnderlineInputBorder(
+                  enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Style.secondaryColor),
                   ),
-                  focusedBorder: UnderlineInputBorder(
+                  focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(
                       color: Style.secondaryColor,
                     ),

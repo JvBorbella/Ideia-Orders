@@ -8,8 +8,7 @@ class RegisterIconButton extends StatefulWidget {
   final IconData icon;
   final Function onPressed;
 
-  const RegisterIconButton({
-    Key? key, 
+  const RegisterIconButton({Key?key, 
     required this.text,
     required this.color,
     required this.width,
@@ -25,7 +24,7 @@ class _RegisterIconButtonState extends State<RegisterIconButton> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
+      child: SizedBox(
         width: widget.width,
         child: TextButton(
           style: ButtonStyle(

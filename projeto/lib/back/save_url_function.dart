@@ -12,7 +12,7 @@ class SaveUrlService {
     await sharedPreferences.setString('saveUrl', url); //Referenciando o texto armazenado através de 'saveUrl'.
     //Ao efetuar o processo acima, será exibida a mensagem:
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         behavior: SnackBarBehavior.floating,
         content: Text(
           'IP salvo com sucesso!',

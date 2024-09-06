@@ -38,7 +38,7 @@ class DataServicePrintComplete {
           print(response.body);
           print(urlPost);
 
-          await ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
@@ -53,7 +53,7 @@ class DataServicePrintComplete {
             ),
           );
 
-          await ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),

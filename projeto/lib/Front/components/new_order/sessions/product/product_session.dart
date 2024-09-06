@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductSession extends StatefulWidget {
   final prevendaid;
+  final pessoaid;
   final pessoanome;
   final cpfcnpj;
   final telefone;
@@ -29,27 +30,30 @@ class ProductSession extends StatefulWidget {
   final quantidade;
   final imagemurl;
 
-  const ProductSession({
-    Key? key,
-    this.prevendaid,
-    this.pessoanome,
-    this.cpfcnpj,
-    this.telefone,
-    this.cep,
-    this.bairro,
-    this.cidade,
-    this.endereco,
-    this.complemento,
-    this.produtoid,
-    this.prevendaprodutoid,
-    this.nomeproduto,
-    this.codigoproduto,
-    this.valorunitario,
-    this.valortotalitem,
-    this.valortotal,
-    this.quantidade,
-    this.imagemurl,
-  });
+  final VoidCallback? onProductRemoved;
+
+  const ProductSession(
+      {Key? key,
+      this.prevendaid,
+      this.pessoaid,
+      this.pessoanome,
+      this.cpfcnpj,
+      this.telefone,
+      this.cep,
+      this.bairro,
+      this.cidade,
+      this.endereco,
+      this.complemento,
+      this.produtoid,
+      this.prevendaprodutoid,
+      this.nomeproduto,
+      this.codigoproduto,
+      this.valorunitario,
+      this.valortotalitem,
+      this.valortotal,
+      this.quantidade,
+      this.imagemurl,
+      this.onProductRemoved});
 
   @override
   State<ProductSession> createState() => _ProductSessionState();
@@ -217,10 +221,7 @@ class _ProductSessionState extends State<ProductSession> {
                                               children: [
                                                 Text(
                                                   'Subtotal - ' +
-                                                      currencyFormat
-                                                          .format(orders[index]
-                                                              .valortotalitem)
-                                                          .toString(),
+                                                      currencyFormat.format(orders[index].valortotalitem).toString(),
                                                   style: TextStyle(
                                                       fontSize: Style.height_10(
                                                           context),
@@ -285,24 +286,22 @@ class _ProductSessionState extends State<ProductSession> {
                                                                         context,
                                                                         urlBasic,
                                                                         token,
-                                                                        widget
-                                                                            .prevendaid,
-                                                                        orders[index]
-                                                                            .prevendaprodutoid);
+                                                                        widget.prevendaid,
+                                                                        orders[index].prevendaprodutoid);
                                                                     _closeModal();
 
-                                                                    setState(
-                                                                        () {
-                                                                      orders.removeAt(
-                                                                          index);
-                                                                      totalValue =
-                                                                          _calculateTotal(); // Recalcula o valor total
+                                                                    setState(() {
+                                                                      orders.removeAt(index);
+                                                                      totalValue = _calculateTotal();
                                                                     });
 
-                                                                    if (orders
-                                                                        .isEmpty) {
-                                                                      setState(
-                                                                          () {}); // Força uma atualização da UI quando a lista estiver vazia
+                                                                    if (orders.isEmpty) {
+                                                                      setState(() {
+
+                                                                      });
+                                                                      if (widget.onProductRemoved != null) {
+                                                                        widget.onProductRemoved!();
+                                                                      } // Força uma atualização da UI quando a lista estiver vazia
                                                                     }
                                                                   },
                                                                   child:
@@ -435,6 +434,7 @@ class _ProductSessionState extends State<ProductSession> {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => ProductList(
                         prevendaid: widget.prevendaid.toString(),
+                        pessoaid: widget.pessoaid.toString(),
                         pessoanome: widget.pessoanome.toString(),
                         cpfcnpj: widget.cpfcnpj.toString(),
                         telefone: widget.telefone.toString(),

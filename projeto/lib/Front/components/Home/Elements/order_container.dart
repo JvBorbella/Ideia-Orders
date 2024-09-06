@@ -7,14 +7,16 @@ class OrderContainer extends StatefulWidget {
   final double valortotal;
   final DateTime data;
   final String numero;
+  final flagpermitefaturar;
 
   const OrderContainer({
-    Key? key, 
+    super.key, 
   required this.valortotal,
   required this.data,
   required this.nomepessoa,
   required this.numero,
-  }) : super(key: key);
+  this.flagpermitefaturar,
+  });
 
   @override
   State<OrderContainer> createState() => _OrderContainerState();
@@ -64,7 +66,7 @@ class _OrderContainerState extends State<OrderContainer> {
               ),
               Column(
                 children: [
-                  Container(
+                  SizedBox(
                     width: Style.width_215(context),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,6 +93,16 @@ class _OrderContainerState extends State<OrderContainer> {
                   )
                 ],
               ),
+            ],
+          ),
+          Column(
+            children: [
+              if (widget.flagpermitefaturar == '1')
+              Icon(
+                Icons.check_circle_outline,
+                color: Style.sucefullColor,
+                size: Style.height_15(context),
+              )
             ],
           ),
           Column(

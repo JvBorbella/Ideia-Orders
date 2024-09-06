@@ -28,7 +28,7 @@ class LoginFunction {
       // //password: recebe o valor digitado no input de senha na tela de login.
       // var md5Password = md5.convert(utf8.encode(password)).toString();
       //md5Password: criptografa a senha digitada em md5 Hash pois o servidor só aceita requisição com a senha já criptografada.
-      var authorization = Uri.parse('$url/ideia/secure/login?');
+      var authorization = Uri.parse('$url/ideia/secure/login');
       //authorization: define a url que fará a requisição post ao servidor.
 
       //response: variável definida para receber a resposta da requisição post do servidor.
@@ -64,7 +64,7 @@ class LoginFunction {
         // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
        Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-                builder: (context) => Home(),
+                builder: (context) => const Home(),
             ),
           );
         } else {

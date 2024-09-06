@@ -10,8 +10,7 @@ class ButtonConfig extends StatefulWidget {
   final double height;
 
   const ButtonConfig(
-      {Key? key, required this.text, this.onPressed, required this.height})
-      : super(key: key);
+      {super.key, required this.text, this.onPressed, required this.height});
 
   @override
   State<ButtonConfig> createState() => _ButtonConfigState();
@@ -45,7 +44,7 @@ class _ButtonConfigState extends State<ButtonConfig> {
             ),
           ),
           //Espaçamento para o bottom.
-          SizedBox(height: 10.0),
+          const SizedBox(height: 10.0),
         ],
       ),
     );

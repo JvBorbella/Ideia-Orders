@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loadSavedUser() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedUser = await sharedPreferences.getString('saveUser') ?? '';
+    String savedUser = sharedPreferences.getString('saveUser') ?? '';
     setState(() {
       _userController.text = savedUser;
     });
@@ -70,10 +70,10 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               //Chamando a navbar
-              Navbar(children: [
+              const Navbar(text: 'Login', children: [
                 //Chamando os elementos internos da navbar
-              ], text: 'Login'),
-              Container(
+              ]),
+              SizedBox(
                 height: MediaQuery.of(context).size.height * 0.9,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

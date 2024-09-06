@@ -4,7 +4,7 @@ import 'package:projeto/front/components/new_order/elements/register_icon_button
 import 'package:projeto/front/pages/home.dart';
 
 class CancelButton extends StatefulWidget {
-  const CancelButton({Key? key}) : super(key: key);
+  const CancelButton({super.key});
 
   @override
   State<CancelButton> createState() => _CancelButtonState();
@@ -19,7 +19,7 @@ class _CancelButtonState extends State<CancelButton> {
       context: context,
       builder: (BuildContext context) {
         modalContext = context;
-        return Container(
+        return SizedBox(
           //Configurações de tamanho e espaçamento do modal
           height: Style.ModalSize(context),
           child: Container(
@@ -37,7 +37,7 @@ class _CancelButtonState extends State<CancelButton> {
               children: [
                 Row(
                   children: [
-                    Container(
+                    SizedBox(
                       width: Style.width_250(context),
                       child: Text(
                       'Deseja cancelar este pedido?',
@@ -130,7 +130,7 @@ class _CancelButtonState extends State<CancelButton> {
   void _cancelar() {
    Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => Home(),
+          builder: (context) => const Home(),
         ),
         (route) => false);
   }

@@ -11,14 +11,13 @@ class LiberationButtom extends StatefulWidget {
   final onPressed;
 
   const LiberationButtom(
-      {Key? key,
+      {super.key,
       required this.text,
       // required this.liberacaoremotaId,
       // required this.url,
       // required this.token,
       // required this.message,
-      this.onPressed})
-      : super(key: key);
+      this.onPressed});
 
   @override
   State<LiberationButtom> createState() => _LiberationButtomState();
@@ -31,9 +30,12 @@ class _LiberationButtomState extends State<LiberationButtom> {
       child: Container(
         //Estilização do button
         decoration: BoxDecoration(
-          border: Border.all(width: 2, color: Color(0xff42B9F0)),
+          border: Border.all(width: 2, color: const Color(0xff42B9F0)),
           borderRadius: BorderRadius.circular(5),
         ),
+        //Tamanho do button
+        width: 160,
+        padding: const EdgeInsets.all(0),
         child: Column(
           //Alinhamento interno
           mainAxisAlignment: MainAxisAlignment.center,
@@ -58,9 +60,6 @@ class _LiberationButtomState extends State<LiberationButtom> {
             ),
           ],
         ),
-        //Tamanho do button
-        width: 160,
-        padding: EdgeInsets.all(0),
       ),
     );
   }

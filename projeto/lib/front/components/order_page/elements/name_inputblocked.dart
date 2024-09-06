@@ -4,8 +4,7 @@ import 'package:projeto/front/components/style.dart';
 class NameInputblocked extends StatefulWidget {
   final String text;
 
-  const NameInputblocked({
-    Key?key,
+  const NameInputblocked({Key?key,
     required this.text
   });
 

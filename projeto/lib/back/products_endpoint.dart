@@ -63,6 +63,9 @@ class DataServiceProducts {
           products = (jsonData['data']['produtos'] as List)
               .map((e) => ProductsEndpoint.fromJson(e))
               .toList();
+
+          products = products.where((product) => product.precotabela > 0.0).toList();
+
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -57,7 +57,7 @@ class DataServiceFinishOrder {
           );
 
           Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+              .pushReplacement(MaterialPageRoute(builder: (context) => const Home()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -113,7 +113,7 @@ class DataServiceFinishOrderPrintLocal {
           var responsePrint =
               await http.get(urlPrint, headers: {'auth-token': token});
 
-          await ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
@@ -144,13 +144,13 @@ class DataServiceFinishOrderPrintLocal {
           );
 
           Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+              .pushReplacement(MaterialPageRoute(builder: (context) => const Home()));
 
           // Chama a função para imprimir com intervalo
           await _imprimirComIntervalo(
             numpedido: numpedido,
             jsonData: jsonData,
-            intervalo: Duration(seconds: 5),
+            intervalo: const Duration(seconds: 5),
             repeticoes: 2,
           );
         } else {
@@ -241,7 +241,7 @@ class DataServiceFinishOrderPrintNetwork {
           // print(urlPrint);
           // print(responsePrint.body);
 
-          await ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
@@ -272,7 +272,7 @@ class DataServiceFinishOrderPrintNetwork {
           );
 
           Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+              .pushReplacement(MaterialPageRoute(builder: (context) => const Home()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

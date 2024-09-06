@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductList extends StatefulWidget {
   final prevendaid;
+  final pessoaid;
   final String? pessoanome;
   final String? cpfcnpj;
   final String? telefone;
@@ -18,9 +19,10 @@ class ProductList extends StatefulWidget {
   final String? endereco;
   final String? complemento;
 
-  const ProductList({
+  const ProductList({ 
     Key? key,
     this.prevendaid,
+    this.pessoaid,
     this.pessoanome,
     this.cpfcnpj,
     this.telefone,
@@ -52,7 +54,7 @@ class _ProductListState extends State<ProductList> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -64,14 +66,15 @@ class _ProductListState extends State<ProductList> {
             child: Scaffold(
               body: RefreshIndicator(
                 onRefresh: _refreshData,
-                child: ListView(
-                  children: [
-                    Navbar(
+                  child: Column(
+                    children: [
+                      Navbar(
                       text: 'Produtos',
                       children: [
                         NavbarButton(
                           destination: NewOrderPage(
                             prevendaId: widget.prevendaid,
+                            pessoaid: widget.pessoaid,
                             pessoanome: widget.pessoanome,
                             cpfcnpj: widget.cpfcnpj,
                             telefone: widget.telefone,
@@ -96,18 +99,18 @@ class _ProductListState extends State<ProductList> {
                         onSubmitted: (value) async {
                           await fetchDataProducts(); // Chama a função de pesquisa ao pressionar "Enter"
                         },
-                        constraints: BoxConstraints(),
+                        constraints: const BoxConstraints(),
                         leading: IconButton(
                           padding:
                               EdgeInsets.only(bottom: Style.height_1(context)),
                           onPressed: () async {
                             await fetchDataProducts();
                           },
-                          icon: Icon(Icons.search),
+                          icon: const Icon(Icons.search),
                           color: Style.primaryColor,
                         ),
                         hintText: 'Pesquise pelo produto',
-                        hintStyle: WidgetStatePropertyAll(
+                        hintStyle: const WidgetStatePropertyAll(
                             TextStyle(color: Style.quarantineColor)),
                         padding: WidgetStatePropertyAll(EdgeInsets.only(
                           left: Style.height_15(context),
@@ -116,10 +119,10 @@ class _ProductListState extends State<ProductList> {
                       ),
                     ),
                     SizedBox(height: Style.height_10(context)),
-                    TextTitle(text: 'Lista de produtos'),
+                    const TextTitle(text: 'Lista de produtos'),
                     SizedBox(height: Style.height_10(context)),
-                    ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
+                    Expanded(
+                      child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: products.length,
                       itemBuilder: (context, index) {
@@ -145,8 +148,9 @@ class _ProductListState extends State<ProductList> {
                         );
                       },
                     ),
-                  ],
-                ),
+                      )
+                    ],
+                  ),
               ),
             ),
             onWillPop: () async {
@@ -154,6 +158,7 @@ class _ProductListState extends State<ProductList> {
                 MaterialPageRoute(
                   builder: (context) => NewOrderPage(
                     prevendaId: widget.prevendaid.toString(),
+                    pessoaid: widget.pessoaid.toString(),
                     pessoanome: widget.pessoanome.toString(),
                     cpfcnpj: widget.cpfcnpj.toString(),
                     telefone: widget.telefone.toString(),

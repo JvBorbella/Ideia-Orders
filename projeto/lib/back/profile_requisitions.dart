@@ -92,13 +92,13 @@ class AcceptRequisition {
     String url,
     String token,
     String liberacaoremotaId,
-    String _textController,
+    String textController,
   ) async {
     //Tentativa de requisição post para efetuar a liberação.
     try {
       //Definindo a url que fará a requisição post, sendo atribuida a ela o id da solicitação que está sendo autorizada.
       var accept = Uri.parse('$url/confirmaction/$liberacaoremotaId');
-      var mensagemresposta = jsonEncode(_textController);
+      var mensagemresposta = jsonEncode(textController);
       print('texto digitado: $mensagemresposta');
 
       var responseAccept = await http.post(
@@ -114,7 +114,7 @@ class AcceptRequisition {
       //Caso a requisição seja aceita, será exibida a seguinte mensagem.
       if (responseAccept.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             behavior: SnackBarBehavior.floating,
             content: Text(
               'Solicitação aceita',
@@ -133,7 +133,7 @@ class AcceptRequisition {
     } catch (e) {
       //Se a tentativa de liberação não dê certo, será exibida essa mensagem.
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Text(
             'Não foi possível aceitar essa solicitação',
@@ -158,13 +158,13 @@ class RejectRequisition {
     String url,
     String token,
     String liberacaoremotaId,
-    String _textController,
+    String textController,
   ) async {
     //Tentativa de requisição post para efetuar a exclusão da solicitação.
     try {
       //Definindo a url que fará a requisição post, sendo atribuida a ela o id da solicitação que está sendo excluída.
       var reject = Uri.parse('$url/cancelaction/$liberacaoremotaId');
-      var mensagemresposta = jsonEncode(_textController);
+      var mensagemresposta = jsonEncode(textController);
       print('texto digitado: $mensagemresposta');
 
       var responseReject = await http.post(
@@ -180,7 +180,7 @@ class RejectRequisition {
       //Caso a requisição post seja aceita, será exibida a seguinte mensagem.
       if (responseReject.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             behavior: SnackBarBehavior.floating,
             content: Text(
               'Solicitação remota excluída',
@@ -199,7 +199,7 @@ class RejectRequisition {
     } catch (e) {
       //Se a tentativa de exclusão não dê certo, será exibida essa mensagem.
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Text(
             'Ocorreu um erro ao excluir essa solicitação',

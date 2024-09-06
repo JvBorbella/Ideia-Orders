@@ -16,9 +16,10 @@ class GetCliente {
     TextEditingController logradouroController,
     TextEditingController ufController,
     TextEditingController bairroController,
-    TextEditingController cidadeController,
     TextEditingController numeroController,
     TextEditingController complementoController,
+    TextEditingController cidadeController,
+    TextEditingController emailController,
   ) async {
     try {
       String getUnmaskedText(String maskedText) {
@@ -57,22 +58,22 @@ class GetCliente {
           var enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           var enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           var endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          var enderecocomplemento =
-              pessoaData['enderecocomplemento']?.toString() ?? '';
+          var enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
+          var email = pessoaData['emailcontato']?.toString() ?? '';
 
-          SharedPreferences sharedPreferences =
-              await SharedPreferences.getInstance();
-          await sharedPreferences.setString('nome', nome);
-          await sharedPreferences.setString('cpf', cpfcliente);
-          await sharedPreferences.setString('telefone', telefonecontato);
-          await sharedPreferences.setString('enderecocep', enderecocep);
-          await sharedPreferences.setString('endereco', endereco);
-          await sharedPreferences.setString('uf', uf);
-          await sharedPreferences.setString('enderecobairro', enderecobairro);
-          await sharedPreferences.setString('enderecocidade', enderecocidade);
-          await sharedPreferences.setString('endereconumero', endereconumero);
-          await sharedPreferences.setString(
-              'enderecocomplemento', enderecocomplemento);
+          // SharedPreferences sharedPreferences =
+          //     await SharedPreferences.getInstance();
+          // await sharedPreferences.setString('nome', nome);
+          // await sharedPreferences.setString('cpf', cpfcliente);
+          // await sharedPreferences.setString('telefone', telefonecontato);
+          // await sharedPreferences.setString('enderecocep', enderecocep);
+          // await sharedPreferences.setString('endereco', endereco);
+          // await sharedPreferences.setString('uf', uf);
+          // await sharedPreferences.setString('enderecobairro', enderecobairro);
+          // await sharedPreferences.setString('enderecocidade', enderecocidade);
+          // await sharedPreferences.setString('endereconumero', endereconumero);
+          // await sharedPreferences.setString(
+          //     'enderecocomplemento', enderecocomplemento);
 
           var cpfFormatado = MaskedInputFormatter('###.###.###-##').formatEditUpdate(
             TextEditingValue.empty,
@@ -100,6 +101,7 @@ class GetCliente {
           cidadeController.text = enderecocidade;
           numeroController.text = endereconumero;
           complementoController.text = enderecocomplemento;
+          emailController.text = email;
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -140,6 +142,7 @@ class GetCliente2 {
   late String endereconumero;
   late String enderecocomplemento;
   late String enderecocep;
+  late String email;
 
   GetCliente2({
     required this.pessoaid,
@@ -154,6 +157,7 @@ class GetCliente2 {
     required this.endereconumero,
     required this.enderecocomplemento,
     required this.enderecocep,
+    required this.email
   });
 
   factory GetCliente2.fromJson(Map<String, dynamic> json) {
@@ -170,6 +174,7 @@ class GetCliente2 {
       endereconumero: json['endereconumero'] ?? '',
       enderecocomplemento: json['enderecocomplemento'] ?? '',
       uf: json['uf'] ?? '',
+      email: json['emailcontato'] ?? ''
     );
   }
 }
@@ -189,6 +194,7 @@ class DataServiceCliente2 {
     String enderecocidade = '';
     String endereconumero = '';
     String enderecocep = '';
+    String email = '';
 
     try {
 
@@ -226,6 +232,9 @@ class DataServiceCliente2 {
           enderecocomplemento =
               pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
+          email = pessoaData['emailcontato']?.toString() ?? '';
+
+          print(response.body);
           
         } else {
           print('Dados não encontrados');
@@ -250,6 +259,7 @@ class DataServiceCliente2 {
       'endereconumero': endereconumero,
       'enderecocomplemento': enderecocomplemento,
       'uf': uf,
+      'emailcontato': email
     };
   }
 }

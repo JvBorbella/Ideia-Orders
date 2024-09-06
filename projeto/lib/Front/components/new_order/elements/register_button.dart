@@ -7,8 +7,7 @@ class RegisterButton extends StatefulWidget {
   final double width;
   final onPressed;
 
-  const RegisterButton({
-    Key? key, 
+  const RegisterButton({Key?key, 
     required this.text,
     required this.color,
     required this.width,
@@ -23,7 +22,7 @@ class _RegisterButtonState extends State<RegisterButton> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
+      child: SizedBox(
         width: widget.width,
         child: TextButton(
           style: ButtonStyle(

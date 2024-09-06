@@ -49,7 +49,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               children: [
                 Container(
                   // height: Style.DrawerHeaderSize(context),
-                  decoration: BoxDecoration(color: Style.primaryColor),
+                  decoration: const BoxDecoration(color: Style.primaryColor),
                   child: Container(
                     padding: EdgeInsets.all(Style.height_15(context)),
                     child: Column(
@@ -59,10 +59,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           children: [
                             IconButton(
                               onPressed: _closeDrawer,
-                              icon: Icon(Icons.close),
+                              icon: const Icon(Icons.close),
                               iconSize: Style.IconCloseDrawerSize(context),
                               alignment: Alignment.topRight,
-                              style: ButtonStyle(
+                              style: const ButtonStyle(
                                 iconColor: WidgetStatePropertyAll(
                                     Style.tertiaryColor),
                               ),
@@ -77,7 +77,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                             Column(
                               children: [
                                 Padding(padding: EdgeInsets.only(left: Style.height_25(context))),
-                                Container(
+                                SizedBox(
                                   width: Style.AccountNameWidth(context),
                                   height: Style.AccountNameWidth(context),
                                   // decoration: BoxDecoration(shape: BoxShape.circle),
@@ -109,7 +109,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                 Row(
                                   children: [
                                     Text(
-                                      'Olá, ' + login + '!',
+                                      'Olá, $login!',
                                       style: TextStyle(
                                         fontFamily: 'Poppins-Regular',
                                         fontSize: Style.LoginFontSize(context),
@@ -142,7 +142,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Container(
-                              child: ModalButton(),
+                              child: const ModalButton(),
                             ),
                           ],
                         ),
@@ -219,7 +219,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedUrl() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedUrl = await sharedPreferences.getString('url') ?? '';
+    String savedUrl = sharedPreferences.getString('url') ?? '';
     setState(() {
       url = savedUrl;
     });
@@ -227,7 +227,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedToken = await sharedPreferences.getString('token') ?? '';
+    String savedToken = sharedPreferences.getString('token') ?? '';
     setState(() {
       token = savedToken;
     });
@@ -235,7 +235,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedLogin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedLogin = await sharedPreferences.getString('login') ?? '';
+    String savedLogin = sharedPreferences.getString('login') ?? '';
     setState(() {
       login = savedLogin;
     });
@@ -243,7 +243,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedImage() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedImage = await sharedPreferences.getString('image') ?? '';
+    String savedImage = sharedPreferences.getString('image') ?? '';
     setState(() {
       image = savedImage;
     });
@@ -251,7 +251,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedUrlBasic() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedUrlBasic = await sharedPreferences.getString('urlBasic') ?? '';
+    String savedUrlBasic = sharedPreferences.getString('urlBasic') ?? '';
     setState(() {
       urlBasic = savedUrlBasic;
     });
@@ -259,7 +259,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedEmail() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String savedEmail = await sharedPreferences.getString('email') ?? '';
+    String savedEmail = sharedPreferences.getString('email') ?? '';
     setState(() {
       email = savedEmail;
     });
