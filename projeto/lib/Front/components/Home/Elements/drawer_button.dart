@@ -19,15 +19,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
   String urlBasic = '';
   String email = '';
 
+  // bool check = true;
+
+  bool isCheckedCPF = true;
+  bool isCheckedProduct = false;
+
+  bool flagService = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadSavedUrl();
-    _loadSavedToken();
-    _loadSavedLogin();
-    _loadSavedImage();
-    _loadSavedUrlBasic();
-    _loadSavedEmail();
+    loadData();
   }
 
   void _closeDrawer() {
@@ -38,183 +40,332 @@ class _CustomDrawerState extends State<CustomDrawer> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
-      child: WillPopScope(
-        child: Drawer(
-          // width: MediaQuery.of(context).size.width * 0.8,
-          child: Column(
-        children: [
-          Container(
-            child: Column(
+        color: Colors.transparent,
+        child: WillPopScope(
+            child: Drawer(
+                // width: MediaQuery.of(context).size.width * 0.8,
+                child: Column(
               children: [
                 Container(
-                  // height: Style.DrawerHeaderSize(context),
-                  decoration: const BoxDecoration(color: Style.primaryColor),
-                  child: Container(
-                    padding: EdgeInsets.all(Style.height_15(context)),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              onPressed: _closeDrawer,
-                              icon: const Icon(Icons.close),
-                              iconSize: Style.IconCloseDrawerSize(context),
-                              alignment: Alignment.topRight,
-                              style: const ButtonStyle(
-                                iconColor: WidgetStatePropertyAll(
-                                    Style.tertiaryColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // SizedBox(
-                        //   height: Style.SalesCardSpace(context),
-                        // ),
-                        Row(
-                          children: [
-                            Column(
-                              children: [
-                                Padding(padding: EdgeInsets.only(left: Style.height_25(context))),
-                                SizedBox(
-                                  width: Style.AccountNameWidth(context),
-                                  height: Style.AccountNameWidth(context),
-                                  // decoration: BoxDecoration(shape: BoxShape.circle),
-                                  child: ClipOval(
-                                    child: image.isNotEmpty
-                                        ? Image.network(
-                                            urlBasic + image,
-                                            alignment: Alignment.topCenter,
-                                            fit: BoxFit.cover,
-                                            filterQuality: FilterQuality.high,
-                                          ) // Exibe a imagem
-                                        : Image.network(
-                                            'https://cdn-icons-png.flaticon.com/512/4519/4519678.png',
-                                            color: Style.tertiaryColor,
-                                            alignment: Alignment.topCenter,
-                                            fit: BoxFit.cover,
-                                            filterQuality: FilterQuality.high,
-                                          ),
+                  child: Column(
+                    children: [
+                      Container(
+                        // height: Style.DrawerHeaderSize(context),
+                        decoration:
+                            const BoxDecoration(color: Style.primaryColor),
+                        child: Container(
+                          padding: EdgeInsets.all(Style.height_15(context)),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    onPressed: _closeDrawer,
+                                    icon: const Icon(Icons.close),
+                                    iconSize:
+                                        Style.IconCloseDrawerSize(context),
+                                    alignment: Alignment.topRight,
+                                    style: const ButtonStyle(
+                                      iconColor: WidgetStatePropertyAll(
+                                          Style.tertiaryColor),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              width: Style.height_10(context),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Olá, $login!',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins-Regular',
-                                        fontSize: Style.LoginFontSize(context),
-                                        color: Style.tertiaryColor,
+                                ],
+                              ),
+                              // SizedBox(
+                              //   height: Style.SalesCardSpace(context),
+                              // ),
+                              Row(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                              left: Style.height_25(context))),
+                                      SizedBox(
+                                        width: Style.AccountNameWidth(context),
+                                        height: Style.AccountNameWidth(context),
+                                        // decoration: BoxDecoration(shape: BoxShape.circle),
+                                        child: ClipOval(
+                                          child: image.isNotEmpty
+                                              ? Image.network(
+                                                  urlBasic + image,
+                                                  alignment:
+                                                      Alignment.topCenter,
+                                                  fit: BoxFit.cover,
+                                                  filterQuality:
+                                                      FilterQuality.high,
+                                                ) // Exibe a imagem
+                                              : Image.asset(
+                                                  "assets/images/icon_person/icon_person.png",
+                                                  color: Style.tertiaryColor,
+                                                  alignment:
+                                                      Alignment.topCenter,
+                                                  fit: BoxFit.cover,
+                                                  filterQuality:
+                                                      FilterQuality.high,
+                                                ),
+                                        ),
                                       ),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      email,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins-Regular',
-                                        fontSize: Style.EmailFontSize(context),
-                                        color: Style.tertiaryColor,
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    width: Style.height_10(context),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Olá, $login!',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins-Regular',
+                                              fontSize:
+                                                  Style.LoginFontSize(context),
+                                              color: Style.tertiaryColor,
+                                            ),
+                                            textAlign: TextAlign.start,
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            )
-                          ],
+                                      Row(
+                                        children: [
+                                          Text(
+                                            email,
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins-Regular',
+                                              fontSize:
+                                                  Style.EmailFontSize(context),
+                                              color: Style.tertiaryColor,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: Style.ModalButtonSpace(context),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Container(
+                                    child: const ModalButton(),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(
-                          height: Style.ModalButtonSpace(context),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              child: const ModalButton(),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(
+                        left: Style.height_15(context),
+                        top: Style.height_12(context),
+                        bottom: Style.height_8(context),
+                      ),
+                      child: Text(
+                        '⚙️Configurações',
+                        style: TextStyle(
+                            fontSize: Style.height_15(context),
+                            fontWeight: FontWeight.bold,
+                            color: Style.primaryColor),
+                      ),
+                    ),
+                  ],
+                ),
+
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isCheckedCPF,
+                      onChanged: (value) async {
+                        setState(() {
+                          isCheckedCPF = value!;
+                        });
+                        print('Value: $isCheckedCPF');
+                        SharedPreferences sharedPreferences =
+                            await SharedPreferences.getInstance();
+                        await sharedPreferences.setBool(
+                            'checkCPF', isCheckedCPF);
+                      },
+                    ),
+                    Text(
+                      'Ativar CPF obrigatório?',
+                      style: TextStyle(
+                          color: Style.primaryColor,
+                          fontSize: Style.height_12(context)),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isCheckedProduct,
+                      onChanged: (value) async {
+                        setState(() {
+                          isCheckedProduct = value!;
+                        });
+                        print('Value: $isCheckedProduct');
+                        SharedPreferences sharedPreferences =
+                            await SharedPreferences.getInstance();
+                        await sharedPreferences.setBool(
+                            'checkProduct', isCheckedProduct);
+                      },
+                    ),
+                    Container(
+                      width: Style.width_225(context),
+                      child: Text(
+                        'Ativar adicionar produtos em massa ao pedido?',
+                        style: TextStyle(
+                            color: Style.primaryColor,
+                            fontSize: Style.height_12(context)),
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: flagService,
+                      onChanged: (value) async {
+                        setState(() {
+                          flagService = value!;
+                        });
+                        print('Value: $flagService');
+                        SharedPreferences sharedPreferences =
+                            await SharedPreferences.getInstance();
+                        await sharedPreferences.setBool(
+                            'flagService', flagService);
+                      },
+                    ),
+                    Container(
+                      width: Style.width_225(context),
+                      child: Text(
+                        'Ativar modo venda de serviços?',
+                        style: TextStyle(
+                            color: Style.primaryColor,
+                            fontSize: Style.height_12(context)),
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                      ),
+                    )
+                  ],
+                ),
+
+                // ListBody(
+                //   children: [
+                //     Container(
+                //       // padding: EdgeInsets.only(left: 15),
+                //       child: Column(
+                //         mainAxisAlignment: MainAxisAlignment.start,
+                //         crossAxisAlignment: CrossAxisAlignment.start,
+                //         children: [
+                //           SizedBox(
+                //             height: Style.ButtonDrawerSpace(context),
+                //           ),
+                //           TextButton(
+                //             onPressed: () {},
+                //             child: Text(
+                //               'Promoções',
+                //               style: TextStyle(
+                //                   color: Style.primaryColor,
+                //                   fontSize: Style.ButtonDrawerSize(context),
+                //                   fontFamily: 'Poppins-Regular'),
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             height: Style.ButtonDrawerSpace(context),
+                //           ),
+                //           TextButton(
+                //             onPressed: () {},
+                //             child: Text(
+                //               'Produtos negativos',
+                //               style: TextStyle(
+                //                   color: Style.primaryColor,
+                //                   fontSize: Style.ButtonDrawerSize(context),
+                //                   fontFamily: 'Poppins-Regular'),
+                //             ),
+                //           ),
+                //           SizedBox(
+                //             height: Style.ButtonDrawerSpace(context),
+                //           ),
+                //           TextButton(
+                //             onPressed: () {},
+                //             child: Text(
+                //               'Funcionários escalados',
+                //               style: TextStyle(
+                //                   color: Style.primaryColor,
+                //                   fontSize: Style.ButtonDrawerSize(context),
+                //                   fontFamily: 'Poppins-Regular'),
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     )
+                //   ],
+                // )
               ],
-            ),
-          ),
-          // ListBody(
-          //   children: [
-          //     Container(
-          //       // padding: EdgeInsets.only(left: 15),
-          //       child: Column(
-          //         mainAxisAlignment: MainAxisAlignment.start,
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           SizedBox(
-          //             height: Style.ButtonDrawerSpace(context),
-          //           ),
-          //           TextButton(
-          //             onPressed: () {},
-          //             child: Text(
-          //               'Promoções',
-          //               style: TextStyle(
-          //                   color: Style.primaryColor,
-          //                   fontSize: Style.ButtonDrawerSize(context),
-          //                   fontFamily: 'Poppins-Regular'),
-          //             ),
-          //           ),
-          //           SizedBox(
-          //             height: Style.ButtonDrawerSpace(context),
-          //           ),
-          //           TextButton(
-          //             onPressed: () {},
-          //             child: Text(
-          //               'Produtos negativos',
-          //               style: TextStyle(
-          //                   color: Style.primaryColor,
-          //                   fontSize: Style.ButtonDrawerSize(context),
-          //                   fontFamily: 'Poppins-Regular'),
-          //             ),
-          //           ),
-          //           SizedBox(
-          //             height: Style.ButtonDrawerSpace(context),
-          //           ),
-          //           TextButton(
-          //             onPressed: () {},
-          //             child: Text(
-          //               'Funcionários escalados',
-          //               style: TextStyle(
-          //                   color: Style.primaryColor,
-          //                   fontSize: Style.ButtonDrawerSize(context),
-          //                   fontFamily: 'Poppins-Regular'),
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //     )
-          //   ],
-          // )
-        ],
-      )
-      ), 
-        onWillPop: () async {
-          _closeDrawer();
-          return true;
-        }
-        ) 
-        
-    );
+            )),
+            onWillPop: () async {
+              _closeDrawer();
+              return true;
+            }));
+  }
+
+  Future<void> loadData() async {
+    await _loadSavedFlagService();
+    await _loadSavedCheckCPF();
+    await _loadSavedCheckProduct();
+    await Future.wait([
+      _loadSavedUrl(),
+      _loadSavedToken(),
+      _loadSavedLogin(),
+      _loadSavedImage(),
+      _loadSavedUrlBasic(),
+      _loadSavedEmail(),
+    ]);
+  }
+
+  Future<void> _loadSavedFlagService() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedFlagService = sharedPreferences.getBool('flagService') ??
+        true; // Carrega o valor salvo (padrão: true)
+    setState(() {
+      flagService = savedFlagService; // Atualiza o estado com o valor salvo
+    });
+  }
+
+  Future<void> _loadSavedCheckCPF() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedCheckCPF = sharedPreferences.getBool('checkCPF') ??
+        true; // Carrega o valor salvo (padrão: true)
+    setState(() {
+      isCheckedCPF = savedCheckCPF; // Atualiza o estado com o valor salvo
+    });
+  }
+
+  Future<void> _loadSavedCheckProduct() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ??
+        false; // Carrega o valor salvo (padrão: true)
+    setState(() {
+      isCheckedProduct =
+          savedCheckProduct; // Atualiza o estado com o valor salvo
+    });
   }
 
   Future<void> _loadSavedUrl() async {

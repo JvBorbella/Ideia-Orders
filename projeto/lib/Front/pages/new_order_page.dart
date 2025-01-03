@@ -29,26 +29,28 @@ class NewOrderPage extends StatefulWidget {
   final codigoproduto;
 
   final noProduct;
+  final operador;
 
   const NewOrderPage({
-  super.key,
-  this.prevendaId,
-  this.pessoaid,
-  this.numero,
-  this.pessoanome,
-  this.cpfcnpj,
-  this.telefone,
-  this.endereco,
-  this.bairro,
-  this.cidade,
-  this.cep,
-  this.complemento,
-  this.uf,
-  this.datahora,
-  this.valortotal,
-  this.codigoproduto,
-  this.noProduct = '0', // valor padrão
-});
+    super.key,
+    this.prevendaId,
+    this.pessoaid,
+    this.numero,
+    this.pessoanome,
+    this.cpfcnpj,
+    this.telefone,
+    this.endereco,
+    this.bairro,
+    this.cidade,
+    this.cep,
+    this.complemento,
+    this.uf,
+    this.datahora,
+    this.valortotal,
+    this.codigoproduto,
+    this.operador,
+    this.noProduct = '0', // valor padrão
+  });
 
   @override
   State<NewOrderPage> createState() => _NewOrderPageState();
@@ -102,6 +104,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
     loadData();
     _refreshData();
 
+    print(widget.numero);
+
     // cidade = _localidadecontroller.text;
   }
 
@@ -129,6 +133,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
                   ProductSession(
                       prevendaid: widget.prevendaId.toString(),
                       pessoaid: pessoaid.toString(),
+                      numpedido: widget.numero.toString(),
                       pessoanome: widget.pessoanome.toString(),
                       cpfcnpj: widget.cpfcnpj.toString(),
                       telefone: widget.telefone.toString(),
@@ -151,21 +156,22 @@ class _NewOrderPageState extends State<NewOrderPage> {
                     height: Style.height_30(context),
                   ),
                   CustomerSession(
-                      pessoanome: widget.pessoanome,
-                      pessoaid: pessoaid,
-                      cpfcnpj: widget.cpfcnpj,
-                      telefone: widget.telefone,
-                      cep: enderecocep,
-                      bairro: enderecobairro,
-                      numero: endereconumero,
-                      endereco: endereco,
-                      complemento: enderecocomplemento,
-                      cidade: _localidadecontroller.text,
-                      uf: uf,
-                      email: email,
-                      prevendaid: widget.prevendaId,
-                      numpedido: widget.numero.toString(),
-                      noProduct: widget.noProduct,),
+                    pessoanome: widget.pessoanome,
+                    pessoaid: pessoaid,
+                    cpfcnpj: widget.cpfcnpj,
+                    telefone: widget.telefone,
+                    cep: enderecocep,
+                    bairro: enderecobairro,
+                    numero: endereconumero,
+                    endereco: endereco,
+                    complemento: enderecocomplemento,
+                    cidade: _localidadecontroller.text,
+                    uf: uf,
+                    email: email,
+                    prevendaid: widget.prevendaId,
+                    numpedido: widget.numero.toString(),
+                    noProduct: widget.noProduct,
+                  ),
                   SizedBox(
                     height: Style.height_30(context),
                   ),
@@ -214,14 +220,14 @@ class _NewOrderPageState extends State<NewOrderPage> {
       // initializer(),
     ]);
     await GetCep.getcep(
-      enderecocep, 
-      _logradourocontroller, 
-      _complementocontroller2, 
-      _bairrocontroller, 
-      _ufcontroller, 
-      _localidadecontroller, 
-      _ibgecontroller, 
-      ibge);
+        enderecocep,
+        _logradourocontroller,
+        _complementocontroller2,
+        _bairrocontroller,
+        _ufcontroller,
+        _localidadecontroller,
+        _ibgecontroller,
+        ibge);
   }
 
   Future<void> _refreshData() async {
@@ -232,30 +238,29 @@ class _NewOrderPageState extends State<NewOrderPage> {
   }
 
   void _onProductRemoved() {
-  // Recarrega a página inteira, passando '1' como valor para noProduct
-  Navigator.of(context).pushReplacement(
-    MaterialPageRoute(
-      builder: (context) => NewOrderPage(
-        prevendaId: widget.prevendaId,
-        numero: widget.numero,
-        pessoanome: widget.pessoanome,
-        cpfcnpj: widget.cpfcnpj,
-        telefone: widget.telefone,
-        endereco: widget.endereco,
-        bairro: widget.bairro,
-        cidade: widget.cidade,
-        cep: widget.cep,
-        complemento: widget.complemento,
-        uf: widget.uf,
-        datahora: widget.datahora,
-        valortotal: widget.valortotal,
-        codigoproduto: widget.codigoproduto,
-        noProduct: '1',
+    // Recarrega a página inteira, passando '1' como valor para noProduct
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => NewOrderPage(
+          prevendaId: widget.prevendaId,
+          numero: widget.numero,
+          pessoanome: widget.pessoanome,
+          cpfcnpj: widget.cpfcnpj,
+          telefone: widget.telefone,
+          endereco: widget.endereco,
+          bairro: widget.bairro,
+          cidade: widget.cidade,
+          cep: widget.cep,
+          complemento: widget.complemento,
+          uf: widget.uf,
+          datahora: widget.datahora,
+          valortotal: widget.valortotal,
+          codigoproduto: widget.codigoproduto,
+          noProduct: '1',
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Future<void> fetchDataCliente2() async {
     final data = await DataServiceCliente2.fetchDataCliente2(

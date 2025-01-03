@@ -42,7 +42,7 @@ class OrdersEndpoint {
 
 class DataServiceOrders {
   static Future<List<OrdersEndpoint>?> fetchDataOrders(
-      BuildContext context, String urlBasic, String prevendaid, String token,
+      BuildContext context, String urlBasic, String usuario_id, String token,
       {bool? ascending}) async {
     List<OrdersEndpoint>? orders;
 
@@ -65,7 +65,7 @@ class DataServiceOrders {
               .toList();
 
           orders =
-              orders.where((order) => order.usuarioId == prevendaid).toList();
+              orders.where((order) => order.usuarioId == usuario_id).toList();
 
           orders = orders
               .where((order) =>
@@ -152,7 +152,7 @@ class DataServiceOrdersDetails {
 
       var response = await http.get(urlPost, headers: {'auth-token': token});
 
-      print(response.body);
+      
       print('Token: $token');
 
       if (response.statusCode == 200) {

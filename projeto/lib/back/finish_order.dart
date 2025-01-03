@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:projeto/back/new_customer.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,10 +26,16 @@ class DataServiceFinishOrder {
     String token,
     String prevendaid,
     String numpedido,
+    // String nomeController,
+    // String cpfController,
+    // String telefonecontatoController,
+    // String pessoaid,
   ) async {
     String? message;
 
     try {
+      // await NewCustomer.AdjustOrder(context, urlBasic, token, nomeController,
+      //     cpfController, telefonecontatoController, prevendaid, pessoaid);
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
       var response = await http.post(urlPost, headers: {'auth-token': token});
 
@@ -38,7 +45,6 @@ class DataServiceFinishOrder {
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
           message = jsonData['message'];
 
-          print(response.body);
           print(urlPost);
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -56,8 +62,8 @@ class DataServiceFinishOrder {
             ),
           );
 
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) => const Home()));
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const Home()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -92,10 +98,16 @@ class DataServiceFinishOrderPrintLocal {
     String token,
     String prevendaid,
     String numpedido,
+    // String nomeController,
+    // String cpfController,
+    // String telefonecontatoController,
+    // String pessoaid,
   ) async {
     String? message;
 
     try {
+      // await NewCustomer.AdjustOrder(context, urlBasic, token, nomeController,
+      //     cpfController, telefonecontatoController, prevendaid, pessoaid);
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
       var response = await http.post(urlPost, headers: {'auth-token': token});
 
@@ -105,7 +117,7 @@ class DataServiceFinishOrderPrintLocal {
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
           message = jsonData['message'];
 
-          print(response.body);
+          print(numpedido);
           print(urlPost);
 
           var urlPrint =
@@ -143,8 +155,8 @@ class DataServiceFinishOrderPrintLocal {
             ),
           );
 
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) => const Home()));
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const Home()));
 
           // Chama a função para imprimir com intervalo
           await _imprimirComIntervalo(
@@ -209,16 +221,21 @@ class DataServiceFinishOrderPrintNetwork {
     String token,
     String prevendaid,
     String numpedido,
+    // String nomeController,
+    // String cpfController,
+    // String telefonecontatoController,
+    // String pessoaid,
   ) async {
     String? message;
 
     try {
+      // await NewCustomer.AdjustOrder(context, urlBasic, token, nomeController,
+      //     cpfController, telefonecontatoController, prevendaid, pessoaid);
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
       var response = await http.post(urlPost, headers: {'auth-token': token});
 
       print(urlPost);
       print(response.statusCode);
-      print(response.body);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -271,8 +288,8 @@ class DataServiceFinishOrderPrintNetwork {
             ),
           );
 
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) => const Home()));
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const Home()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

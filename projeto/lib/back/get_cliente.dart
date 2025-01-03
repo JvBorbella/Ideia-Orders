@@ -234,7 +234,7 @@ class DataServiceCliente2 {
           uf = pessoaData['uf']?.toString() ?? '';
           email = pessoaData['emailcontato']?.toString() ?? '';
 
-          print(response.body);
+          
           
         } else {
           print('Dados não encontrados');

@@ -1,4 +1,4 @@
-package com.ideiatecnologia.projeto
+package com.ideiatecnologia.IdeiaOrders
 
 import io.flutter.embedding.android.FlutterActivity
 

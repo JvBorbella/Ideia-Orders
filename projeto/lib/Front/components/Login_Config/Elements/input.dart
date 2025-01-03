@@ -72,7 +72,7 @@ class _InputState extends State<Input> {
                 textAlign: widget.textAlign,
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
-                textInputAction: widget.textInputAction ?? TextInputAction.next,
+                textInputAction: widget.textInputAction ?? TextInputAction.unspecified,
                 inputFormatters: widget.inputFormatters,
                 onTap: widget.onTap,
                 decoration: InputDecoration(

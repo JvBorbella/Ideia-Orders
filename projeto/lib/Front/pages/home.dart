@@ -46,6 +46,7 @@ class _HomeState extends State<Home> {
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   String selectedOptionChild = '';
   String urlBasic = '';
+  String usuario_id = '';
   String id = '';
   String token = '';
   String prevendaId = '';
@@ -153,7 +154,7 @@ class _HomeState extends State<Home> {
                   inputFormatters: [
                     MaskedInputFormatter('000.000.000-00'), // Máscara de CPF
                   ],
-                  textInputAction: TextInputAction.go,
+                  textInputAction: TextInputAction.unspecified,
                   IconButton: IconButton(
                     onPressed: () async {
                       await GetCliente.getcliente(
@@ -169,7 +170,7 @@ class _HomeState extends State<Home> {
                         _numerocontroller,
                         _complementocontroller,
                         _cidadecontroller,
-                        _emailcontroller
+                        _emailcontroller,
                       );
                     },
                     icon: const Icon(Icons.person_search),
@@ -183,6 +184,7 @@ class _HomeState extends State<Home> {
                   type: TextInputType.text,
                   controller: _telefonecontatocontroller,
                   textAlign: TextAlign.start,
+                  textInputAction: TextInputAction.unspecified,
                   inputFormatters: [
                     MaskedInputFormatter('(00) 00000-0000'), // Máscara de CPF
                   ],
@@ -194,6 +196,7 @@ class _HomeState extends State<Home> {
                   text: 'Nome do cliente',
                   type: TextInputType.text,
                   controller: _nomecontroller,
+                  textInputAction: TextInputAction.unspecified,
                   textAlign: TextAlign.start,
                 ),
                 SizedBox(
@@ -201,6 +204,9 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   onPressed: () async {
+                    final data = await DataServiceCliente2.fetchDataCliente2(
+                        urlBasic, _cpfcontroller.text, token);
+                    var pessoa_id = data['pessoa_id'].toString();
                     await DataServiceNewOrder.sendDataOrder(
                       context,
                       urlBasic,
@@ -208,7 +214,7 @@ class _HomeState extends State<Home> {
                       _cpfcontroller.text,
                       _telefonecontatocontroller.text,
                       _nomecontroller.text,
-                      pessoaid,
+                      pessoa_id,
                     );
                     setState(() {
                       fetchDataOrders();
@@ -332,8 +338,8 @@ class _HomeState extends State<Home> {
                                             onPressed: () {
                                               _closeModal();
                                             },
-                                            icon: Image.network(
-                                                'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/05/icons8-excluir-20.png'),
+                                            icon: Image.asset(
+                                                "assets/images/icon_remove/icon_remove.png"),
                                             style: const ButtonStyle(
                                                 iconColor:
                                                     WidgetStatePropertyAll(
@@ -453,14 +459,18 @@ class _HomeState extends State<Home> {
                                 Navigator.of(context)
                                     .pushReplacement(MaterialPageRoute(
                                         builder: (context) => OrderPage(
-                                              prevendaId: orders[index].prevendaId,
+                                              prevendaId:
+                                                  orders[index].prevendaId,
                                               pessoaid: pessoaid,
-                                              numero: orders[index].numero.toString(),
+                                              numero: orders[index]
+                                                  .numero
+                                                  .toString(),
                                               pessoanome: pessoanome,
                                               cpfcnpj: cpfcnpj,
                                               telefone: telefone,
                                               datahora: orders[index].datahora,
-                                              valortotal: orders[index].valortotal,
+                                              valortotal:
+                                                  orders[index].valortotal,
                                               codigoproduto: codigoproduto,
                                               endereco: endereco,
                                               uf: uf,
@@ -479,6 +489,7 @@ class _HomeState extends State<Home> {
                                       datahora: orders[index].datahora,
                                       valortotal: orders[index].valortotal,
                                       codigoproduto: codigoproduto,
+                                      operador: orders[index].operador,
                                       // Passe outros campos conforme necessário
                                     ),
                                   ),
@@ -507,6 +518,7 @@ class _HomeState extends State<Home> {
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
+      _loadSavedUserId(),
     ]);
     await Future.wait(
         [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
@@ -517,6 +529,14 @@ class _HomeState extends State<Home> {
     String savedUrlBasic = sharedPreferences.getString('urlBasic') ?? '';
     setState(() {
       urlBasic = savedUrlBasic;
+    });
+  }
+
+   Future<void> _loadSavedUserId() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedUserId = sharedPreferences.getString('usuario_id') ?? '';
+    setState(() {
+      usuario_id = savedUserId;
     });
   }
 
@@ -576,7 +596,7 @@ class _HomeState extends State<Home> {
 
   Future<void> fetchDataOrders({bool? ascending, String? flagFilter}) async {
     List<OrdersEndpoint>? fetchData = await DataServiceOrders.fetchDataOrders(
-        context, urlBasic, id, token,
+        context, urlBasic, usuario_id, token,
         ascending: ascending);
 
     if (fetchData != null) {

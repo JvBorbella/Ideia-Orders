@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:projeto/back/add_product.dart';
+import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
@@ -19,7 +20,7 @@ class ProductAdd extends StatefulWidget {
   final flagunidadefracionada;
   final VoidCallback? onProductAdded;
 
-  const ProductAdd({ 
+  const ProductAdd({
     Key? key,
     this.prevendaid,
     this.produtoid,
@@ -37,20 +38,12 @@ class ProductAdd extends StatefulWidget {
   State<ProductAdd> createState() => _ProductAddState();
 }
 
-// int value = 0;
-
-// void add() {
-//   value++;
-// }
-
-// void remove() {
-//   value--;
-// }
-
 String urlBasic = '';
 String token = '';
 
 String text = '';
+bool isCheckedProduct = true;
+bool flagService = true;
 
 class _ProductAddState extends State<ProductAdd> {
   late TextEditingController _complementocontroller;
@@ -61,9 +54,11 @@ class _ProductAddState extends State<ProductAdd> {
   @override
   void initState() {
     super.initState();
+    _loadSavedCheckProduct();
     _complementocontroller = TextEditingController();
     // _quantidadecontroller = TextEditingController();
-    if (widget.flagunidadefracionada == 0) {
+    if (widget.flagunidadefracionada == 0 ||
+        widget.flagunidadefracionada == null) {
       _quantidadecontroller = TextEditingController(text: '1');
     } else {
       _quantidadecontroller = TextEditingController(text: '1,0');
@@ -71,6 +66,7 @@ class _ProductAddState extends State<ProductAdd> {
     print(widget.flagunidadefracionada);
     _loadSavedUrlBasic();
     _loadSavedToken();
+    _loadSavedFlagService();
   }
 
   @override
@@ -84,11 +80,6 @@ class _ProductAddState extends State<ProductAdd> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        // if (widget.flagunidadefracionada == 0) {
-        //   _quantidadecontroller = TextEditingController(text: '1');
-        // } else {
-        //   _quantidadecontroller = TextEditingController(text: '1,0');
-        // }
         return Center(
             child: SingleChildScrollView(
                 child: AlertDialog(
@@ -96,17 +87,6 @@ class _ProductAddState extends State<ProductAdd> {
                     content: Container(
                         child:
                             Column(mainAxisSize: MainAxisSize.min, children: [
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.end,
-                      //   children: [
-                      //     IconButton(
-                      //       onPressed: _closeModal,
-                      //       icon: Icon(Icons.close),
-                      //       color: Style.errorColor,
-                      //       iconSize: Style.height_15(context),
-                      //       )
-                      //   ],
-                      // ),
                       Container(
                         alignment: Alignment.center,
                         child: Text(
@@ -170,7 +150,7 @@ class _ProductAddState extends State<ProductAdd> {
                                     color: Style.quarantineColor),
                               ),
                               Text(
-                                widget.unidade,
+                                widget.unidade ?? '',
                                 style: TextStyle(
                                     fontSize: Style.height_15(context),
                                     color: Style.primaryColor,
@@ -285,30 +265,58 @@ class _ProductAddState extends State<ProductAdd> {
                                 width: Style.width_100(context),
                                 onPressed: () async {
                                   // Adiciona o produto ao pedido
-                                  bool success =
-                                      await DataServiceAddProduct.sendDataOrder(
-                                    context,
-                                    urlBasic,
-                                    token,
-                                    widget.prevendaid,
-                                    widget.produtoid,
-                                    _complementocontroller.text,
-                                    _quantidadecontroller.text,
-                                    widget.flagunidadefracionada,
-                                  );
+                                  if (flagService == true) {
+                                    bool success = await DataServiceAddProduct
+                                        .sendDataOrder(
+                                            context,
+                                            urlBasic,
+                                            token,
+                                            widget.prevendaid,
+                                            widget.produtoid,
+                                            _complementocontroller.text,
+                                            _quantidadecontroller.text,
+                                            widget.flagunidadefracionada ?? 0,
+                                            1);
 
-                                  // Só chama o callback se o produto foi adicionado com sucesso
-                                  if (success &&
-                                      widget.onProductAdded != null) {
-                                    widget.onProductAdded!();
-                                  }
+                                    // Só chama o callback se o produto foi adicionado com sucesso
+                                    if (success &&
+                                        widget.onProductAdded != null) {
+                                      widget.onProductAdded!();
+                                    }
 
-                                  // Verifica se o widget ainda está montado antes de fechar o modal
-                                  if (mounted) {
-                                    _closeModal(success);
-                                    // Limpa os campos após adicionar o produto
-                                    _quantidadecontroller.clear();
-                                    _complementocontroller.clear();
+                                    // Verifica se o widget ainda está montado antes de fechar o modal
+                                    if (mounted) {
+                                      _closeModal(success);
+                                      // Limpa os campos após adicionar o produto
+                                      _quantidadecontroller.clear();
+                                      _complementocontroller.clear();
+                                    }
+                                  } else {
+                                    bool success = await DataServiceAddProduct
+                                        .sendDataOrder(
+                                            context,
+                                            urlBasic,
+                                            token,
+                                            widget.prevendaid,
+                                            widget.produtoid,
+                                            _complementocontroller.text,
+                                            _quantidadecontroller.text,
+                                            widget.flagunidadefracionada ?? 0,
+                                            0);
+
+                                    // Só chama o callback se o produto foi adicionado com sucesso
+                                    if (success &&
+                                        widget.onProductAdded != null) {
+                                      widget.onProductAdded!();
+                                    }
+
+                                    // Verifica se o widget ainda está montado antes de fechar o modal
+                                    if (mounted) {
+                                      _closeModal(success);
+                                      // Limpa os campos após adicionar o produto
+                                      _quantidadecontroller.clear();
+                                      _complementocontroller.clear();
+                                    }
                                   }
                                 },
                               ),
@@ -362,8 +370,7 @@ class _ProductAddState extends State<ProductAdd> {
                     children: [
                       Column(
                         children: [
-                          Image.network(
-                              'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/06/Barcode.png')
+                          Image.asset("assets/images/image_product/Barcode.png")
                         ],
                       ),
                       Column(
@@ -396,17 +403,6 @@ class _ProductAddState extends State<ProductAdd> {
                               ),
                             ],
                           ),
-                          // Row(
-                          //   children: [
-                          //     Text(
-                          //       'Estoque',
-                          //       style: TextStyle(
-                          //         fontSize: Style.height_10(context),
-                          //         color: Style.quarantineColor,
-                          //       ),
-                          //     ),
-                          //   ],
-                          // )
                         ],
                       )
                     ],
@@ -420,47 +416,40 @@ class _ProductAddState extends State<ProductAdd> {
                 Container(
                   child: Row(
                     children: [
-                      // Column(
-                      //   crossAxisAlignment: CrossAxisAlignment.end,
-                      //   children: [
-                      //     Row(
-                      //       children: [
-                      //         Text(
-                      //           'Vl. Unit',
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_12(context),
-                      //               color: Style.warningColor),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     Row(
-                      //       children: [
-                      //         Text(
-                      //           currencyFormat.format(widget.precotabela).toString(),
-                      //           style: TextStyle(
-                      //               fontSize: Style.height_12(context),
-                      //               color: Style.warningColor),
-                      //         )
-                      //       ],
-                      //     )
-                      //   ],
-                      // ),
+                      if (isCheckedProduct == true)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Vl. Unit',
+                                  style: TextStyle(
+                                      fontSize: Style.height_8(context),
+                                      color: Style.secondaryColor),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  currencyFormat
+                                      .format(widget.precotabela)
+                                      .toString(),
+                                  style: TextStyle(
+                                      fontSize: Style.height_12(context),
+                                      color: Style.secondaryColor,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
                       SizedBox(
                         width: Style.height_10(context),
                       ),
                       Column(
                         children: [
-                          // Container(
-                          //   width: Style.width_50(context),
-                          //   child: Input(
-                          //     text: 'Qtde',
-                          //     type: TextInputType.number,
-                          //     textAlign: TextAlign.center,
-                          //     ),
-                          // ),
-                          // SizedBox(
-                          //   height: Style.height_5(context),
-                          // ),
                           Container(
                             height: Style.height_30(context),
                             decoration: BoxDecoration(
@@ -468,8 +457,63 @@ class _ProductAddState extends State<ProductAdd> {
                                 borderRadius: BorderRadius.circular(
                                     Style.height_5(context))),
                             child: TextButton(
-                              onPressed: () {
-                                _openModal(context);
+                              onPressed: () async {
+                                if (isCheckedProduct == false) {
+                                  _openModal(context);
+                                } else
+                                if (flagService == true) {
+                                  bool success =
+                                      await DataServiceAddProduct.sendDataOrder(
+                                          context,
+                                          urlBasic,
+                                          token,
+                                          widget.prevendaid,
+                                          widget.produtoid,
+                                          _complementocontroller.text,
+                                          _quantidadecontroller.text,
+                                          widget.flagunidadefracionada ?? 0,
+                                          1);
+
+                                  // Só chama o callback se o produto foi adicionado com sucesso
+                                  if (success &&
+                                      widget.onProductAdded != null) {
+                                    widget.onProductAdded!();
+                                  }
+
+                                  // Verifica se o widget ainda está montado antes de fechar o modal
+                                  if (mounted) {
+                                    // _closeModal(success);
+                                    // Limpa os campos após adicionar o produto
+                                    _quantidadecontroller.clear();
+                                    _complementocontroller.clear();
+                                  }
+                                } else {
+                                  bool success =
+                                      await DataServiceAddProduct.sendDataOrder(
+                                          context,
+                                          urlBasic,
+                                          token,
+                                          widget.prevendaid,
+                                          widget.produtoid,
+                                          _complementocontroller.text,
+                                          _quantidadecontroller.text,
+                                          widget.flagunidadefracionada ?? 0,
+                                          0);
+
+                                  // Só chama o callback se o produto foi adicionado com sucesso
+                                  if (success &&
+                                      widget.onProductAdded != null) {
+                                    widget.onProductAdded!();
+                                  }
+
+                                  // Verifica se o widget ainda está montado antes de fechar o modal
+                                  if (mounted) {
+                                    // _closeModal(success);
+                                    // Limpa os campos após adicionar o produto
+                                    _quantidadecontroller.clear();
+                                    _complementocontroller.clear();
+                                  }
+                                }
                               },
                               child: Text(
                                 'Adicionar',
@@ -505,6 +549,25 @@ class _ProductAddState extends State<ProductAdd> {
     String savedToken = sharedPreferences.getString('token') ?? '';
     setState(() {
       token = savedToken;
+    });
+  }
+
+  Future<void> _loadSavedCheckProduct() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ??
+        true; // Carrega o valor salvo (padrão: true)
+    setState(() {
+      isCheckedProduct =
+          savedCheckProduct; // Atualiza o estado com o valor salvo
+    });
+  }
+
+  Future<void> _loadSavedFlagService() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedFlagService = sharedPreferences.getBool('flagService') ??
+        true; // Carrega o valor salvo (padrão: true)
+    setState(() {
+      flagService = savedFlagService; // Atualiza o estado com o valor salvo
     });
   }
 }

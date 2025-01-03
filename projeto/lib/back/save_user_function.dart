@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SaveUserService {
   Future<void> saveUser(BuildContext context, String username) async {
-    if (username.isNotEmpty) { //Caso username esteja vazio, a função preencherá com o texto digitado no input.
+    // if (username.isNotEmpty) { //Caso username esteja vazio, a função preencherá com o texto digitado no input.
       try {
         SharedPreferences sharedPreferences =
             await SharedPreferences.getInstance();
@@ -14,7 +14,7 @@ class SaveUserService {
         //Caso não tenha sido possível salvá-lo, será exibida o erro no console.
         print('Erro ao salvar usuário: $e');
       }
-    }
+    // }
   }
 
   //Em listenAndSaveUser o texto salvo será carregado no controller do input, através da função saveUser.

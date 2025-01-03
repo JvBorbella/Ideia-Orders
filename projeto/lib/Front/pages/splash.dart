@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/front/components/Splash/elements/text_splash_page.dart';
+import 'package:projeto/front/pages/config.dart';
 import 'package:projeto/front/pages/login.dart';
 import 'package:projeto/front/components/style.dart';
 import 'dart:async';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -12,14 +15,14 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+
   @override
   //Função para iniciar o timer quando o widget for carregado
   void initState() {
     super.initState();
-
     //Função para adicionar um timer à tela splash
     Timer(const Duration(seconds: 4), () {
-     Navigator.of(context).pushReplacement(
+      Navigator.of(context).pushReplacement(
         //Função executada após o tempo acabar
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );
@@ -44,8 +47,8 @@ class _SplashPageState extends State<SplashPage> {
               children: [
                 Row(
                   children: [
-                    Image.network(
-                      'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/02/IDEIA-LOGO-AZUL-e1707321339855.png',
+                    Image.asset(
+                      "assets/images/image_card/image_card.png",
                       color: Style.primaryColor,
                       height: Style.LogoSplashSize(context),
                     ),

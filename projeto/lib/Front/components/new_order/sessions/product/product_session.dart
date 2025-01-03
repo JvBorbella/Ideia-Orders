@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProductSession extends StatefulWidget {
   final prevendaid;
   final pessoaid;
+  final numpedido;
   final pessoanome;
   final cpfcnpj;
   final telefone;
@@ -36,6 +37,7 @@ class ProductSession extends StatefulWidget {
       {Key? key,
       this.prevendaid,
       this.pessoaid,
+      this.numpedido,
       this.pessoanome,
       this.cpfcnpj,
       this.telefone,
@@ -129,8 +131,8 @@ class _ProductSessionState extends State<ProductSession> {
                                       children: [
                                         Column(
                                           children: [
-                                            Image.network(
-                                                'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/06/Barcode.png')
+                                            Image.asset(
+                                                "assets/images/image_product/Barcode.png")
                                           ],
                                         ),
                                         Column(
@@ -435,6 +437,7 @@ class _ProductSessionState extends State<ProductSession> {
                   builder: (context) => ProductList(
                         prevendaid: widget.prevendaid.toString(),
                         pessoaid: widget.pessoaid.toString(),
+                        numpedido: widget.numpedido.toString(),
                         pessoanome: widget.pessoanome.toString(),
                         cpfcnpj: widget.cpfcnpj.toString(),
                         telefone: widget.telefone.toString(),

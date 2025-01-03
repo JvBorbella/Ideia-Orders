@@ -178,7 +178,7 @@ class _OrderPageState extends State<OrderPage> {
                           Row(
                             children: [
                               Text(
-                                'Data do pedido - ${DateFormat('dd/MM/yyyy hh:mm:ss')
+                                'Data do pedido - ${DateFormat('dd/MM/yyyy HH:mm:ss')
                                         .format(widget.datahora)}',
                                 style: TextStyle(
                                     color: Style.primaryColor,
@@ -251,8 +251,8 @@ class _OrderPageState extends State<OrderPage> {
                                                 children: [
                                                   Column(
                                                     children: [
-                                                      Image.network(
-                                                          'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/06/Barcode.png')
+                                                      Image.asset(
+                                                          "assets/images/image_product/Barcode.png")
                                                     ],
                                                   ),
                                                   Column(
@@ -569,7 +569,7 @@ class _OrderPageState extends State<OrderPage> {
                             text: 'Reimprimir cupom na rede',
                             color: Style.warningColor,
                             width: Style.width_150(context),
-                            icon: Icons.network_check_outlined,
+                            icon: Icons.wifi,
                             onPressed: () async {
                               await DataServiceRePrintOrderNetwork
                                   .fetchDataRePrintOrderNetwork
@@ -662,25 +662,6 @@ class _OrderPageState extends State<OrderPage> {
       email = data['emailcontato'].toString();
     });
   }
-
-  // Future<void> fetchDataOrdersDetails2(String prevendaId) async {
-  //   final data = await DataServiceOrdersDetails2.fetchDataOrdersDetails2(
-  //       urlBasic, prevendaId);
-  //   setState(() {
-  //     pessoanome = data['pessoa_nome'].toString();
-  //     cpfcliente = data['cpfcnpj'].toString();
-  //     telefone = data['telefone'].toString();
-  //     codigoproduto = data['codigo'].toString();
-  //     nomeproduto = data['nome'].toString();
-  //     imagemurl = data['imagem_url'].toString();
-  //     prevendaprodutoid = data['prevendaproduto_id'].toString();
-  //     produtoid = data['produto_id'].toString();
-  //     valorunitario = double.parse(data['valorunitario'] ?? '0.0');
-  //     valortotalitem = double.parse(data['valortotalitem'] ?? '0.0');
-  //     valortotal = double.parse(data['valortotal'] ?? '0.0');
-  //     quantidade = double.parse(data['quantidade'] ?? '0.0');
-  //   });
-  // }
 
   Future<void> fetchDataOrders() async {
     List<OrdersDetailsEndpoint>? fetchData =

@@ -45,6 +45,7 @@ class DataServiceAddProduct {
     String complementoController,
     String quantidadeController,
     int flagunidadefracionada,
+    int flagservico
   ) async {
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/novoitemprevenda');
 
@@ -67,6 +68,7 @@ class DataServiceAddProduct {
         'complemento': complementoController,
         'quantidade':
             double.parse(substituirVirgulaPorPonto(quantidadeController)),
+            // 'flagservico': flagservico
       });
 
       print(body);
@@ -149,6 +151,7 @@ class DataServiceAddProduct {
           'produto_id': produtoid,
           'complemento': complementoController,
           'quantidade': int.parse(quantidadeController),
+          // 'flagservico': flagservico
         });
 
         print(body);

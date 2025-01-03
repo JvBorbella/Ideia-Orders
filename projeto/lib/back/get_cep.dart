@@ -47,7 +47,7 @@ class GetCep {
         ufController.text = uf ?? '';
         ibge = ibge ?? '';
 
-        print(response.body);
+        
       } else {
         print('Erro ao consultar o CEP. Status Code: ${response.statusCode}');
       }

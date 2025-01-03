@@ -68,8 +68,8 @@ class _MyWidgetState extends State<ProductsOrder> {
                     children: [
                       Column(
                         children: [
-                          Image.network(
-                              'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/06/Barcode.png')
+                          Image.asset(
+                              "assets/images/image_products/Barcode.png")
                         ],
                       ),
                       SizedBox(

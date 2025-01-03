@@ -22,8 +22,8 @@ class _FormCardState extends State<FormCard> {
       child: Column(
         children: [
           // Imagem usada nas telas de login e config.
-          Image.network(
-                'https://bdc.ideiatecnologia.com.br/wp/wp-content/uploads/2024/02/IDEIA-LOGO-AZUL-e1707321339855.png',
+          Image.asset(
+                "assets/images/image_card/image_card.png",
                 color: Style.primaryColor,
                 height: 75,
               ),

@@ -13,7 +13,6 @@ import 'package:projeto/front/components/new_order/elements/register_icon_button
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
-
 class CustomerSession extends StatefulWidget {
   final prevendaid;
   final pessoaid;
@@ -36,7 +35,7 @@ class CustomerSession extends StatefulWidget {
   final noProduct;
 
   const CustomerSession(
-      {Key?key,
+      {Key? key,
       this.prevendaid,
       this.pessoaid,
       this.pessoanome,
@@ -66,6 +65,7 @@ class _CustomerSessionState extends State<CustomerSession> {
   String token = '';
   String ibge = '';
   String cpf = '';
+  bool isCheckedCPF = true;
 
   bool isLoading = true;
 
@@ -87,8 +87,9 @@ class _CustomerSessionState extends State<CustomerSession> {
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
   final _cepMaskFormatter = MaskTextInputFormatter(mask: '#####-###');
 
-  List<OrdersDetailsEndpoint> orders = [];
+  final pessoa_id = String;
 
+  List<OrdersDetailsEndpoint> orders = [];
 
   @override
   void initState() {
@@ -103,9 +104,16 @@ class _CustomerSessionState extends State<CustomerSession> {
     _ufcontroller.text = widget.uf.toString();
     _logradourocontroller.text = widget.endereco.toString();
     _nomecontroller.text = widget.pessoanome == 'null' ? '' : widget.pessoanome;
-    _cpfcontroller.text = widget.cpfcnpj == 'null' ? '' : _cpfMaskFormatter.maskText(widget.cpfcnpj);
-    _telefonecontatocontroller.text = widget.telefone == 'null' ? '' : _telMaskFormatter.maskText(widget.telefone);
+    _cpfcontroller.text = widget.cpfcnpj == 'null'
+        ? ''
+        : _cpfMaskFormatter.maskText(widget.cpfcnpj);
+    _telefonecontatocontroller.text = widget.telefone == 'null'
+        ? ''
+        : _telMaskFormatter.maskText(widget.telefone);
     _emailcontroller.text = widget.email ?? '';
+
+    print('Número: ' + widget.numero);
+    print('Número: ' + widget.numpedido);
   }
 
   @override
@@ -127,6 +135,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   controller: _cpfcontroller,
                   inputFormatters: [MaskedInputFormatter('000.000.000-00')],
                   textAlign: TextAlign.start,
+                  textInputAction: TextInputAction.unspecified,
                   IconButton: IconButton(
                       onPressed: () async {
                         await GetCliente.getcliente(
@@ -142,7 +151,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _numerocontroller,
                           _complementocontroller,
                           _cidadecontroller,
-                          _emailcontroller
+                          _emailcontroller,
                         );
                       },
                       icon: const Icon(Icons.person_search)),
@@ -155,6 +164,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   type: TextInputType.text,
                   controller: _telefonecontatocontroller,
                   textAlign: TextAlign.start,
+                  textInputAction: TextInputAction.unspecified,
                   inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
                 ),
                 SizedBox(
@@ -165,6 +175,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   type: TextInputType.text,
                   controller: _nomecontroller,
                   textAlign: TextAlign.start,
+                  textInputAction: TextInputAction.unspecified,
                 ),
                 SizedBox(
                   height: Style.height_10(context),
@@ -174,6 +185,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   type: TextInputType.emailAddress,
                   controller: _emailcontroller,
                   textAlign: TextAlign.start,
+                  textInputAction: TextInputAction.unspecified,
                 ),
                 SizedBox(
                   height: Style.height_10(context),
@@ -184,6 +196,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                   type: TextInputType.number,
                   textAlign: TextAlign.start,
                   inputFormatters: [MaskedInputFormatter('00000-000')],
+                  textInputAction: TextInputAction.unspecified,
                   IconButton: IconButton(
                       onPressed: () async {
                         await GetCep.getcep(
@@ -213,6 +226,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                               controller: _logradourocontroller,
                               textAlign: TextAlign.start,
                               text: 'Endereço',
+                              textInputAction: TextInputAction.unspecified,
                               type: TextInputType.text),
                         )
                       ],
@@ -225,6 +239,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                               controller: _ufcontroller,
                               textAlign: TextAlign.start,
                               text: 'UF',
+                              textInputAction: TextInputAction.unspecified,
                               type: TextInputType.text),
                         )
                       ],
@@ -245,6 +260,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                               controller: _bairrocontroller,
                               textAlign: TextAlign.start,
                               text: 'Bairro',
+                              textInputAction: TextInputAction.unspecified,
                               type: TextInputType.text),
                         )
                       ],
@@ -257,6 +273,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                               controller: _localidadecontroller,
                               textAlign: TextAlign.start,
                               text: 'Cidade',
+                              textInputAction: TextInputAction.unspecified,
                               type: TextInputType.text),
                         )
                       ],
@@ -277,6 +294,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                               controller: _numerocontroller,
                               textAlign: TextAlign.start,
                               text: 'Número',
+                              textInputAction: TextInputAction.unspecified,
                               type: TextInputType.text),
                         )
                       ],
@@ -289,6 +307,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                               controller: _complementocontroller,
                               textAlign: TextAlign.start,
                               text: 'Complemento',
+                              textInputAction: TextInputAction.unspecified,
                               type: TextInputType.text),
                         )
                       ],
@@ -328,7 +347,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   ibge,
                                   _emailcontroller.text,
                                   _ufcontroller.text);
-                                  print('pessoa_id: '+widget.pessoaid);
+                              print('pessoa_id: ' + widget.pessoaid);
                             },
                           ),
                         ),
@@ -342,61 +361,94 @@ class _CustomerSessionState extends State<CustomerSession> {
                             children: [
                               RegisterIconButton(
                                 onPressed: () async {
-                                  if (_cpfcontroller.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        behavior: SnackBarBehavior.floating,
-                                        padding: EdgeInsets.all(
-                                            Style.SaveUrlMessagePadding(
-                                                context)),
-                                        content: Text(
-                                          'Por favor, preencha o CPF do cliente',
-                                          style: TextStyle(
-                                            fontSize: Style.SaveUrlMessageSize(
-                                                context),
-                                            color: Style.tertiaryColor,
+                                  if (isCheckedCPF == true) {
+                                    if (_cpfcontroller.text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          padding: EdgeInsets.all(
+                                              Style.SaveUrlMessagePadding(
+                                                  context)),
+                                          content: Text(
+                                            'Por favor, preencha o CPF do cliente',
+                                            style: TextStyle(
+                                              fontSize:
+                                                  Style.SaveUrlMessageSize(
+                                                      context),
+                                              color: Style.tertiaryColor,
+                                            ),
                                           ),
+                                          backgroundColor: Style.errorColor,
                                         ),
-                                        backgroundColor: Style.errorColor,
-                                      ),
-                                    );
-                                  } else if (_telefonecontatocontroller.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        behavior: SnackBarBehavior.floating,
-                                        padding: EdgeInsets.all(
-                                            Style.SaveUrlMessagePadding(
-                                                context)),
-                                        content: Text(
-                                          'Por favor, preencha o telefone do cliente',
-                                          style: TextStyle(
-                                            fontSize: Style.SaveUrlMessageSize(
-                                                context),
-                                            color: Style.tertiaryColor,
+                                      );
+                                    } else if (_telefonecontatocontroller
+                                        .text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          padding: EdgeInsets.all(
+                                              Style.SaveUrlMessagePadding(
+                                                  context)),
+                                          content: Text(
+                                            'Por favor, preencha o telefone do cliente',
+                                            style: TextStyle(
+                                              fontSize:
+                                                  Style.SaveUrlMessageSize(
+                                                      context),
+                                              color: Style.tertiaryColor,
+                                            ),
                                           ),
+                                          backgroundColor: Style.errorColor,
                                         ),
-                                        backgroundColor: Style.errorColor,
-                                      ),
-                                    );
-                                  } else if (_nomecontroller.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        behavior: SnackBarBehavior.floating,
-                                        padding: EdgeInsets.all(
-                                            Style.SaveUrlMessagePadding(
-                                                context)),
-                                        content: Text(
-                                          'Por favor, preencha o nome do cliente',
-                                          style: TextStyle(
-                                            fontSize: Style.SaveUrlMessageSize(
-                                                context),
-                                            color: Style.tertiaryColor,
+                                      );
+                                    } else if (_nomecontroller.text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          padding: EdgeInsets.all(
+                                              Style.SaveUrlMessagePadding(
+                                                  context)),
+                                          content: Text(
+                                            'Por favor, preencha o nome do cliente',
+                                            style: TextStyle(
+                                              fontSize:
+                                                  Style.SaveUrlMessageSize(
+                                                      context),
+                                              color: Style.tertiaryColor,
+                                            ),
                                           ),
+                                          backgroundColor: Style.errorColor,
                                         ),
-                                        backgroundColor: Style.errorColor,
-                                      ),
-                                    );
-                                  } else if (orders.isEmpty || widget.noProduct == '1') {
+                                      );
+                                    } else if (orders.isEmpty ||
+                                        widget.noProduct == '1') {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          padding: EdgeInsets.all(
+                                              Style.SaveUrlMessagePadding(
+                                                  context)),
+                                          content: Text(
+                                            'Não é possível finalizar o pedido sem produtos.',
+                                            style: TextStyle(
+                                              fontSize:
+                                                  Style.SaveUrlMessageSize(
+                                                      context),
+                                              color: Style.tertiaryColor,
+                                            ),
+                                          ),
+                                          backgroundColor: Style.errorColor,
+                                        ),
+                                      );
+                                    } else {
+                                      _openModal(context);
+                                    }
+                                  } else if (orders.isEmpty ||
+                                      widget.noProduct == '1') {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         behavior: SnackBarBehavior.floating,
@@ -415,7 +467,22 @@ class _CustomerSessionState extends State<CustomerSession> {
                                       ),
                                     );
                                   } else {
-                                     _openModal(context);
+                                    final data = await DataServiceCliente2
+                                        .fetchDataCliente2(urlBasic,
+                                            _cpfcontroller.text, token);
+                                    var pessoa_id =
+                                        data['pessoa_id'].toString();
+                                    await NewCustomer.AdjustOrder(
+                                      context,
+                                      urlBasic,
+                                      token,
+                                      _nomecontroller.text,
+                                      _cpfcontroller.text,
+                                      _telefonecontatocontroller.text,
+                                      widget.prevendaid,
+                                      pessoa_id,
+                                    );
+                                    _openModal(context);
                                   }
                                 },
                                 text: 'Finalizar pedido',
@@ -483,11 +550,16 @@ class _CustomerSessionState extends State<CustomerSession> {
                           TextButton(
                             onPressed: () async {
                               await DataServiceFinishOrder.fetchDataFinishOrder(
-                                  context,
-                                  urlBasic,
-                                  token,
-                                  widget.prevendaid,
-                                  widget.numpedido);
+                                context,
+                                urlBasic,
+                                token,
+                                widget.prevendaid,
+                                widget.numpedido,
+                                // _nomecontroller.text,
+                                // _cpfcontroller.text,
+                                // _telefonecontatocontroller.text,
+                                // widget.pessoaid
+                              );
                             },
                             child: Container(
                               // width: Style.width_200(context),
@@ -519,11 +591,16 @@ class _CustomerSessionState extends State<CustomerSession> {
                             onPressed: () async {
                               await DataServiceFinishOrderPrintLocal
                                   .fetchDataFinishOrderPrintLocal(
-                                      context,
-                                      urlBasic,
-                                      token,
-                                      widget.prevendaid,
-                                      widget.numpedido);
+                                context,
+                                urlBasic,
+                                token,
+                                widget.prevendaid,
+                                widget.numpedido,
+                                // _nomecontroller.text,
+                                // _cpfcontroller.text,
+                                // _telefonecontatocontroller.text,
+                                // widget.pessoaid
+                              );
                             },
                             child: Container(
                               // width: Style.ButtonCancelWidth(context),
@@ -559,11 +636,16 @@ class _CustomerSessionState extends State<CustomerSession> {
                             onPressed: () async {
                               await DataServiceFinishOrderPrintNetwork
                                   .fetchDataFinishOrderPrintNetwork(
-                                      context,
-                                      urlBasic,
-                                      token,
-                                      widget.prevendaid,
-                                      widget.numpedido);
+                                context,
+                                urlBasic,
+                                token,
+                                widget.prevendaid,
+                                widget.numpedido.toString(),
+                                // _nomecontroller.text,
+                                // _cpfcontroller.text,
+                                // _telefonecontatocontroller.text,
+                                // widget.pessoaid
+                              );
                             },
                             child: Container(
                               // width: Style.ButtonCancelWidth(context),
@@ -666,13 +748,23 @@ class _CustomerSessionState extends State<CustomerSession> {
     });
   }
 
+  Future<void> _loadSavedCheckCPF() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedCheckCPF = sharedPreferences.getBool('checkCPF') ??
+        true; // Carrega o valor salvo (padrão: true)
+    setState(() {
+      isCheckedCPF = savedCheckCPF; // Atualiza o estado com o valor salvo
+    });
+  }
+
   Future<void> loadData() async {
     await Future.wait([
-      _loadSavedUrlBasic(), 
+      _loadSavedUrlBasic(),
       _loadSavedToken(),
       _loadSavedIbge(),
-      ]);
-      
+      _loadSavedCheckCPF()
+    ]);
+
     await Future.wait([
       fetchDataOrders(),
     ]);

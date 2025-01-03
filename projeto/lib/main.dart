@@ -9,13 +9,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "IdeiaVendas",
+      title: "IdeiaOrders",
       theme: ThemeData(
         // scaffoldBackgroundColor: Colors.white,
         textTheme: TextTheme(
            bodySmall: TextStyle(
               fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.height * 0.012
+              fontSize: MediaQuery.of(context).size.height * 0.012,
             ),
             bodyMedium: TextStyle(
               fontFamily: 'Poppins-Regular',

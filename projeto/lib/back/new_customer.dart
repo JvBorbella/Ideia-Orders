@@ -43,7 +43,7 @@ class NewCustomer {
     };
 
     print(cpfDefault);
-    print('email'+emailController);
+    print('email' + emailController);
 
     try {
       var response = await http.get(
@@ -419,7 +419,7 @@ class NewCustomer {
       'prevenda_id': prevendaid,
       'pessoa_id': pessoaid,
     });
-
+    print(body);
     print(cpfDefault);
 
     try {
