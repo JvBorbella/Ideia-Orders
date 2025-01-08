@@ -9,6 +9,7 @@ import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/order_details.dart';
 import 'package:projeto/back/orders_endpoint.dart';
+import 'package:projeto/back/pdf_generator.dart';
 import 'package:projeto/back/reprint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
@@ -577,6 +578,30 @@ class _OrderPageState extends State<OrderPage> {
                                       token, widget.prevendaId, widget.numero);
                             },
                           ),
+                            ],
+                          ), 
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              PdfGeneratorViewer(
+                                prevenda_id: widget.prevendaId,
+                                numero: widget.numero,
+                                urlBasic: urlBasic,
+                                token: token,
+                              )
+                  //         RegisterIconButton(
+                  //           text: 'Gerar PDF',
+                  //           color: Style.warningColor,
+                  //           width: Style.width_150(context),
+                  //           icon: Icons.print,
+                  //           onPressed: () async {
+                  //             Navigator.of(context).pushReplacement(
+                  // MaterialPageRoute(builder: (context) => PdfGeneratorViewer()));
+                  //           },
+                  //         ),
                             ],
                           ), 
                         ),

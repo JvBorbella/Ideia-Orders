@@ -15,12 +15,7 @@ class GetClienteNewOrder {
     try {
       var cpf = cpfController.text;
       var authorization = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpf');
-      var response = await http.get(
-        authorization,
-        headers: {
-          // 'auth-token': token, // Solicita JSON
-        },
-      );
+      var response = await http.get(authorization);
 
       if (response.statusCode == 200) {
 

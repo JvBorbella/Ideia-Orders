@@ -3,7 +3,6 @@ import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:projeto/front/components/Style.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class GetCliente {
   static Future<void> getcliente(
@@ -30,14 +29,7 @@ class GetCliente {
       var cpf = cpfController.text;
       var cpfdefault = getUnmaskedText(cpf);
       var authorization = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpfdefault');
-      var response = await http.get(
-        authorization,
-        headers: {
-          // 'auth-token': token, // Solicita JSON
-        },
-      );
-      print(cpfdefault);
-      print(authorization);
+      var response = await http.get(authorization);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -45,8 +37,7 @@ class GetCliente {
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('pessoa') &&
             jsonData['data']['pessoa'].isNotEmpty) {
-          var pessoaData = jsonData['data']['pessoa']
-              [0]; // Alterado para acessar o primeiro item da lista
+          var pessoaData = jsonData['data']['pessoa'][0]; // Alterado para acessar o primeiro item da lista
 
           // Garantindo que os dados são convertidos para String
           var nome = pessoaData['nome']?.toString() ?? '';
@@ -60,20 +51,6 @@ class GetCliente {
           var endereconumero = pessoaData['endereconumero']?.toString() ?? '';
           var enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
           var email = pessoaData['emailcontato']?.toString() ?? '';
-
-          // SharedPreferences sharedPreferences =
-          //     await SharedPreferences.getInstance();
-          // await sharedPreferences.setString('nome', nome);
-          // await sharedPreferences.setString('cpf', cpfcliente);
-          // await sharedPreferences.setString('telefone', telefonecontato);
-          // await sharedPreferences.setString('enderecocep', enderecocep);
-          // await sharedPreferences.setString('endereco', endereco);
-          // await sharedPreferences.setString('uf', uf);
-          // await sharedPreferences.setString('enderecobairro', enderecobairro);
-          // await sharedPreferences.setString('enderecocidade', enderecocidade);
-          // await sharedPreferences.setString('endereconumero', endereconumero);
-          // await sharedPreferences.setString(
-          //     'enderecocomplemento', enderecocomplemento);
 
           var cpfFormatado = MaskedInputFormatter('###.###.###-##').formatEditUpdate(
             TextEditingValue.empty,
@@ -229,13 +206,10 @@ class DataServiceCliente2 {
           enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          enderecocomplemento =
-              pessoaData['enderecocomplemento']?.toString() ?? '';
+          enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
           email = pessoaData['emailcontato']?.toString() ?? '';
 
-          
-          
         } else {
           print('Dados não encontrados');
         }

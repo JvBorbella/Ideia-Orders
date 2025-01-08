@@ -18,8 +18,6 @@ class GetCep {
       var authorization = Uri.parse('https://viacep.com.br/ws/$cep/json/');
       var response = await http.get(authorization);
 
-      print(authorization);
-
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
         var logradouro = responseBody['logradouro'];
@@ -29,8 +27,7 @@ class GetCep {
         var ibge = responseBody['ibge'];
         var uf = responseBody['uf'];
 
-        SharedPreferences sharedPreferences =
-            await SharedPreferences.getInstance();
+        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         await sharedPreferences.setString('logradouro', logradouro);
         await sharedPreferences.setString('complemento', complemento);
         await sharedPreferences.setString('bairro', bairro);
@@ -46,8 +43,7 @@ class GetCep {
         ibgeController.text = ibge ?? '';
         ufController.text = uf ?? '';
         ibge = ibge ?? '';
-
-        
+ 
       } else {
         print('Erro ao consultar o CEP. Status Code: ${response.statusCode}');
       }

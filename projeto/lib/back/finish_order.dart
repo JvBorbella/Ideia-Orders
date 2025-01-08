@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:projeto/back/new_customer.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/pages/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 
 class FinishOrder {
@@ -26,16 +24,10 @@ class DataServiceFinishOrder {
     String token,
     String prevendaid,
     String numpedido,
-    // String nomeController,
-    // String cpfController,
-    // String telefonecontatoController,
-    // String pessoaid,
   ) async {
     String? message;
 
     try {
-      // await NewCustomer.AdjustOrder(context, urlBasic, token, nomeController,
-      //     cpfController, telefonecontatoController, prevendaid, pessoaid);
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
       var response = await http.post(urlPost, headers: {'auth-token': token});
 
@@ -44,8 +36,6 @@ class DataServiceFinishOrder {
 
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
           message = jsonData['message'];
-
-          print(urlPost);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -98,16 +88,10 @@ class DataServiceFinishOrderPrintLocal {
     String token,
     String prevendaid,
     String numpedido,
-    // String nomeController,
-    // String cpfController,
-    // String telefonecontatoController,
-    // String pessoaid,
   ) async {
     String? message;
 
     try {
-      // await NewCustomer.AdjustOrder(context, urlBasic, token, nomeController,
-      //     cpfController, telefonecontatoController, prevendaid, pessoaid);
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
       var response = await http.post(urlPost, headers: {'auth-token': token});
 
@@ -116,9 +100,6 @@ class DataServiceFinishOrderPrintLocal {
 
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
           message = jsonData['message'];
-
-          print(numpedido);
-          print(urlPost);
 
           var urlPrint =
               Uri.parse('$urlBasic/ideia/prevenda/impressao/$prevendaid');
@@ -221,21 +202,12 @@ class DataServiceFinishOrderPrintNetwork {
     String token,
     String prevendaid,
     String numpedido,
-    // String nomeController,
-    // String cpfController,
-    // String telefonecontatoController,
-    // String pessoaid,
   ) async {
     String? message;
 
     try {
-      // await NewCustomer.AdjustOrder(context, urlBasic, token, nomeController,
-      //     cpfController, telefonecontatoController, prevendaid, pessoaid);
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
       var response = await http.post(urlPost, headers: {'auth-token': token});
-
-      print(urlPost);
-      print(response.statusCode);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -247,16 +219,6 @@ class DataServiceFinishOrderPrintNetwork {
               '$urlBasic/ideia/prevenda/impressaocompleta/$prevendaid');
           var responsePrint =
               await http.get(urlPrint, headers: {'auth-token': token});
-
-          print(urlPrint);
-          print(responsePrint.statusCode);
-          print(responsePrint.body);
-
-          // var urlPrint = Uri.parse('$urlBasic/ideia/prevenda/impressaocompleta/$prevendaid');
-          // var responsePrint = await http.post(urlPost, headers: {'auth-token': token});
-
-          // print(urlPrint);
-          // print(responsePrint.body);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

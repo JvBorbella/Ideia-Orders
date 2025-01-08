@@ -48,7 +48,7 @@ android {
     }
         signingConfigs {
     release {
-        storeFile file("C:/Users/joaob/Documents/ideia_orders/projeto/upload-key.jks")
+        storeFile file("C:/Users/joaob/OneDrive/Documentos/GitHub/Pre-vendas-Mobile/projeto/upload-key.jks")
         storePassword "3edsw21qa"
         keyAlias "upload"
         keyPassword "3edsw21qa"

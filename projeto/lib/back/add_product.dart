@@ -49,11 +49,6 @@ class DataServiceAddProduct {
   ) async {
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/novoitemprevenda');
 
-    print(urlPost);
-    print(token);
-    print('Fracao? $flagunidadefracionada');
-    print(quantidadeController);
-
     String substituirVirgulaPorPonto(String texto) {
       return texto.replaceAll(',', '.');
     }
@@ -66,12 +61,8 @@ class DataServiceAddProduct {
         'prevenda_id': prevendaid,
         'produto_id': produtoid,
         'complemento': complementoController,
-        'quantidade':
-            double.parse(substituirVirgulaPorPonto(quantidadeController)),
-            // 'flagservico': flagservico
+        'quantidade': double.parse(substituirVirgulaPorPonto(quantidadeController)),
       });
-
-      print(body);
 
       try {
         var response = await http.post(
@@ -97,8 +88,6 @@ class DataServiceAddProduct {
                 backgroundColor: Style.sucefullColor,
               ),
             );
-            print('Dados enviados com sucesso com fração 1');
-            print('Resposta do servidor: ${response.body}');
             return true; // Retorna true quando o produto é inserido com sucesso
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -154,8 +143,6 @@ class DataServiceAddProduct {
           // 'flagservico': flagservico
         });
 
-        print(body);
-
         try {
           var response = await http.post(
             urlPost,
@@ -180,8 +167,6 @@ class DataServiceAddProduct {
                   backgroundColor: Style.sucefullColor,
                 ),
               );
-              print('Dados enviados com sucesso com fração 0');
-              print('Resposta do servidor: ${response.body}');
               return true; // Retorna true quando o produto é inserido com sucesso
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -208,22 +193,6 @@ class DataServiceAddProduct {
         }
       }
     }
-    // else {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       behavior: SnackBarBehavior.floating,
-    //       padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-    //       content: Text(
-    //         'Este produto não pode ser vendido fracionado!',
-    //         style: TextStyle(
-    //           fontSize: Style.SaveUrlMessageSize(context),
-    //           color: Style.tertiaryColor,
-    //         ),
-    //       ),
-    //       backgroundColor: Style.errorColor,
-    //     ),
-    //   );
-    // }
     return false; // Retorna false quando o produto não é inserido
   }
 }

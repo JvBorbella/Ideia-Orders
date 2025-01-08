@@ -176,7 +176,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         bottom: Style.height_8(context),
                       ),
                       child: Text(
-                        '⚙️Configurações',
+                        '⚙️ Configurações',
                         style: TextStyle(
                             fontSize: Style.height_15(context),
                             fontWeight: FontWeight.bold,
@@ -265,59 +265,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     )
                   ],
                 ),
-
-                // ListBody(
-                //   children: [
-                //     Container(
-                //       // padding: EdgeInsets.only(left: 15),
-                //       child: Column(
-                //         mainAxisAlignment: MainAxisAlignment.start,
-                //         crossAxisAlignment: CrossAxisAlignment.start,
-                //         children: [
-                //           SizedBox(
-                //             height: Style.ButtonDrawerSpace(context),
-                //           ),
-                //           TextButton(
-                //             onPressed: () {},
-                //             child: Text(
-                //               'Promoções',
-                //               style: TextStyle(
-                //                   color: Style.primaryColor,
-                //                   fontSize: Style.ButtonDrawerSize(context),
-                //                   fontFamily: 'Poppins-Regular'),
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             height: Style.ButtonDrawerSpace(context),
-                //           ),
-                //           TextButton(
-                //             onPressed: () {},
-                //             child: Text(
-                //               'Produtos negativos',
-                //               style: TextStyle(
-                //                   color: Style.primaryColor,
-                //                   fontSize: Style.ButtonDrawerSize(context),
-                //                   fontFamily: 'Poppins-Regular'),
-                //             ),
-                //           ),
-                //           SizedBox(
-                //             height: Style.ButtonDrawerSpace(context),
-                //           ),
-                //           TextButton(
-                //             onPressed: () {},
-                //             child: Text(
-                //               'Funcionários escalados',
-                //               style: TextStyle(
-                //                   color: Style.primaryColor,
-                //                   fontSize: Style.ButtonDrawerSize(context),
-                //                   fontFamily: 'Poppins-Regular'),
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     )
-                //   ],
-                // )
               ],
             )),
             onWillPop: () async {
@@ -342,8 +289,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedFlagService() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedFlagService = sharedPreferences.getBool('flagService') ??
-        true; // Carrega o valor salvo (padrão: true)
+    bool savedFlagService = sharedPreferences.getBool('flagService') ?? false; // Carrega o valor salvo (padrão: false)
     setState(() {
       flagService = savedFlagService; // Atualiza o estado com o valor salvo
     });
@@ -351,8 +297,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedCheckCPF() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedCheckCPF = sharedPreferences.getBool('checkCPF') ??
-        true; // Carrega o valor salvo (padrão: true)
+    bool savedCheckCPF = sharedPreferences.getBool('checkCPF') ?? true; // Carrega o valor salvo (padrão: true)
     setState(() {
       isCheckedCPF = savedCheckCPF; // Atualiza o estado com o valor salvo
     });
@@ -360,11 +305,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedCheckProduct() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ??
-        false; // Carrega o valor salvo (padrão: true)
+    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ?? false; // Carrega o valor salvo (padrão: false)
     setState(() {
-      isCheckedProduct =
-          savedCheckProduct; // Atualiza o estado com o valor salvo
+      isCheckedProduct = savedCheckProduct; // Atualiza o estado com o valor salvo
     });
   }
 

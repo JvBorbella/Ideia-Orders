@@ -42,8 +42,8 @@ String urlBasic = '';
 String token = '';
 
 String text = '';
-bool isCheckedProduct = true;
-bool flagService = true;
+bool isCheckedProduct = false;
+bool flagService = false;
 
 class _ProductAddState extends State<ProductAdd> {
   late TextEditingController _complementocontroller;
@@ -54,6 +54,9 @@ class _ProductAddState extends State<ProductAdd> {
   @override
   void initState() {
     super.initState();
+    _loadSavedUrlBasic();
+    _loadSavedToken();
+    _loadSavedFlagService();
     _loadSavedCheckProduct();
     _complementocontroller = TextEditingController();
     // _quantidadecontroller = TextEditingController();
@@ -63,10 +66,6 @@ class _ProductAddState extends State<ProductAdd> {
     } else {
       _quantidadecontroller = TextEditingController(text: '1,0');
     }
-    print(widget.flagunidadefracionada);
-    _loadSavedUrlBasic();
-    _loadSavedToken();
-    _loadSavedFlagService();
   }
 
   @override
@@ -554,18 +553,15 @@ class _ProductAddState extends State<ProductAdd> {
 
   Future<void> _loadSavedCheckProduct() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ??
-        true; // Carrega o valor salvo (padrão: true)
+    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ?? false; // Carrega o valor salvo (padrão: true)
     setState(() {
-      isCheckedProduct =
-          savedCheckProduct; // Atualiza o estado com o valor salvo
+      isCheckedProduct = savedCheckProduct; // Atualiza o estado com o valor salvo
     });
   }
 
   Future<void> _loadSavedFlagService() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedFlagService = sharedPreferences.getBool('flagService') ??
-        true; // Carrega o valor salvo (padrão: true)
+    bool savedFlagService = sharedPreferences.getBool('flagService') ?? false; // Carrega o valor salvo (padrão: true)
     setState(() {
       flagService = savedFlagService; // Atualiza o estado com o valor salvo
     });

@@ -147,19 +147,11 @@ class _ProductListState extends State<ProductList> {
                               children: [
                                 ProductAdd(
                                   prevendaid: widget.prevendaid,
-                                  produtoid:
-                                      services[index].produto_id.toString(),
+                                  produtoid: services[index].produto_id.toString(),
                                   nomeproduto: services[index].nome.toString(),
-                                  codigoproduto:
-                                      services[index].codigo.toString(),
-                                  // codigoean: services[index].codigoean.toString(),
-                                  // unidade: services[index].unidade.toString(),
-                                  // precopromocional: services[index].precopromocional.toDouble(),
-                                  precotabela:
-                                      services[index].precofinal.toDouble(),
-                                  // flagunidadefracionada: services[index].flagunidadefracionada,
-                                  onProductAdded:
-                                      _onProductAdded, // Chama a função ao adicionar o produto
+                                  codigoproduto: services[index].codigo.toString(),
+                                  precotabela: services[index].precofinal.toDouble(),
+                                  onProductAdded: _onProductAdded, // Chama a função ao adicionar o produto
                                 ),
                               ],
                             );
@@ -342,7 +334,7 @@ class _ProductListState extends State<ProductList> {
   Future<void> _loadSavedFlagService() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     bool savedFlagService = sharedPreferences.getBool('flagService') ??
-        true; // Carrega o valor salvo (padrão: true)
+        false; // Carrega o valor salvo (padrão: true)
     setState(() {
       flagService = savedFlagService; // Atualiza o estado com o valor salvo
     });
@@ -360,7 +352,6 @@ class _ProductListState extends State<ProductList> {
       await fetchDataServices();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(_focusNode);
-        print('Foco solicitado: ${_focusNode.hasFocus}');
       });
     } else {
       await Future.wait(
@@ -368,7 +359,6 @@ class _ProductListState extends State<ProductList> {
       await fetchDataProducts();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(_focusNode);
-        print('Foco solicitado: ${_focusNode.hasFocus}');
       });
     }
   }
@@ -431,7 +421,6 @@ class _ProductListState extends State<ProductList> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNode);
-      // print('Foco solicitado: ${_focusNode.hasFocus}');
     });
   }
 }

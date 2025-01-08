@@ -1,9 +1,7 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-// import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:projeto/back/get_cliente.dart';
-// import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/new_order.dart';
 import 'package:projeto/back/order_details.dart';
 import 'package:projeto/back/orders_endpoint.dart';
@@ -11,10 +9,11 @@ import 'package:projeto/back/products_endpoint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Home/Elements/drawer_button.dart';
 import 'package:projeto/front/components/Home/Elements/order_container.dart';
+import 'package:projeto/front/components/home/elements/modal_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
-// import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
+import 'package:projeto/front/pages/login.dart';
 import 'package:projeto/front/pages/new_order_page.dart';
 import 'package:projeto/front/pages/order_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -511,7 +510,8 @@ class _HomeState extends State<Home> {
               ),
             ),
             onWillPop: () async {
-              return false;
+              openModal(context);
+              return true;
             }));
   }
 
@@ -532,7 +532,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-   Future<void> _loadSavedUserId() async {
+  Future<void> _loadSavedUserId() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String savedUserId = sharedPreferences.getString('usuario_id') ?? '';
     setState(() {
@@ -643,5 +643,124 @@ class _HomeState extends State<Home> {
       uf = data['uf'].toString();
       codigo = data['codigo'].toString();
     });
+  }
+
+  late BuildContext modalContext;
+
+  void openModal(BuildContext context) {
+    //Código para abrir modal
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        modalContext = context;
+        return SizedBox(
+          //Configurações de tamanho e espaçamento do modal
+          height: Style.ModalSize(context),
+          child: WillPopScope(
+            child: Container(
+            //Tamanho e espaçamento interno do modal
+            height: Style.InternalModalSize(context),
+            margin: EdgeInsets.only(left: Style.ModalMargin(context), right: Style.ModalMargin(context)),
+            padding: EdgeInsets.all(Style.InternalModalPadding(context)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(Style.ModalBorderRadius(context))),
+            child: Column(
+              //Conteúdo interno do modal
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Deseja sair da aplicação?',
+                      style: TextStyle(
+                        fontSize: Style.height_15(context),
+                        color: Style.primaryColor,
+                      ),
+                      overflow: TextOverflow.clip,
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: Style.height_30(context),
+                ),
+                Row(
+                  //Espaçamento entre os Buttons
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    //Buttom de sair
+                    TextButton(
+                      onPressed: () async {
+                        _sair();
+                      },
+                      child: Container(
+                        width: Style.ButtonExitWidth(context),
+                        // height: Style.ButtonExitHeight(context),
+                        padding: EdgeInsets.all(Style.ButtonExitPadding(context)),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(Style.ButtonExitBorderRadius(context)),
+                            color: Style.primaryColor),
+                        child: Text(
+                          'Sair',
+                          style: TextStyle(
+                            color: Style.tertiaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: Style.height_10(context),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    //Buttom para fechar o modal
+                    TextButton(
+                      onPressed: () {
+                        _closeModal();
+                      },
+                      child: Container(
+                        // width: Style.ButtonCancelWidth(context),
+                        // height: Style.ButtonCancelHeight(context),
+                        padding: EdgeInsets.all(Style.ButtonCancelPadding(context)),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(Style.ButtonExitBorderRadius(context)),
+                          border:
+                              Border.all(width: Style.WidthBorderImageContainer(context), color: Style.secondaryColor),
+                          color: Style.tertiaryColor,
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: TextStyle(
+                            color: Style.secondaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: Style.height_10(context),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ), 
+            onWillPop: () async {
+              closeModal();
+              return true;
+            }
+            ) 
+            
+        );
+      },
+    );
+  }
+
+  void closeModal() {
+    //Função para fechar o modal
+    Navigator.of(modalContext).pop();
+  }
+
+  void _sair() {
+   Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(),
+        ),
+        (route) => false);
   }
 }

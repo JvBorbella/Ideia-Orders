@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.2.4+2
+version: 3.3.5+4
 
 environment:
   sdk: ">=3.1.5 <4.0.0"
@@ -46,6 +46,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   sunmi_printer_plus: ^2.1.3
+  path_provider: ^2.1.5
+  flutter_pdfview: ^1.4.0
+  pdf: ^3.11.1
+  share_plus: ^10.1.3
+  barcode: ^2.2.8
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +86,10 @@ flutter:
     - assets/images/icon_remove/icon_remove.png
     - assets/images/image_card/image_card.png
     - assets/images/image_product/Barcode.png
+    - assets/fonts/RobotoMono-Regular.ttf
+    - assets/fonts/RobotoMono-Bold.ttf
+    - assets/fonts/NotoSansMono-Regular.ttf
+    - assets/fonts/SpaceMono-Regular.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
