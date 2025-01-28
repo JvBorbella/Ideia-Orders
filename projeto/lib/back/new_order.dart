@@ -7,11 +7,13 @@ class NewOrder {
   late String nome;
   late String cpf;
   late String telefone;
+  late String tabelapreco_id;
 
   NewOrder({
     required this.nome,
     required this.cpf,
     required this.telefone,
+    required this.tabelapreco_id,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,6 +21,7 @@ class NewOrder {
       'cpf': cpf,
       'telefone': telefone,
       'nomepessoa': nome,
+      'tabelapreco_id': tabelapreco_id
     };
   }
 
@@ -27,6 +30,7 @@ class NewOrder {
       cpf: json['cpf'],
       telefone: json['telefone'],
       nome: json['nomepessoa'],
+      tabelapreco_id: json['tabelapreco_id'],
     );
   }
 }
@@ -35,11 +39,12 @@ class DataServiceNewOrder {
   static Future<void> sendDataOrder(
     BuildContext context,
     String urlBasic,
-    String token,    
+    String token,
     String cpfController,
     String telefonecontatoController,
     String nomeController,
     String pessoaid,
+    String tabelapreco_id,
   ) async {
     String getUnmaskedText(String maskedText) {
       // Remove todos os caracteres não numéricos
@@ -60,9 +65,11 @@ class DataServiceNewOrder {
       'cpf': cpfDefault,
       'nome': nomeController,
       'telefone': telDefault,
+      'tabelapreco_id' : tabelapreco_id,
     });
 
     print(headers);
+    print(body);
 
     try {
       var response = await http.post(

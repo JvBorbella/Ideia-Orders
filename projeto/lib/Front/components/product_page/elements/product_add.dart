@@ -51,6 +51,8 @@ class _ProductAddState extends State<ProductAdd> {
   NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: '');
 
+  bool isLoadingButton = false;
+
   @override
   void initState() {
     super.initState();
@@ -262,7 +264,11 @@ class _ProductAddState extends State<ProductAdd> {
                                 text: 'Adicionar produto',
                                 color: Style.primaryColor,
                                 width: Style.width_100(context),
+                                isLoadingButton: isLoadingButton,
                                 onPressed: () async {
+                                  setState(() {
+                                    isLoadingButton = true;
+                                  });
                                   // Adiciona o produto ao pedido
                                   if (flagService == true) {
                                     bool success = await DataServiceAddProduct
@@ -316,6 +322,9 @@ class _ProductAddState extends State<ProductAdd> {
                                       _quantidadecontroller.clear();
                                       _complementocontroller.clear();
                                     }
+                                    setState(() {
+                                      isLoadingButton = false;
+                                    });
                                   }
                                 },
                               ),
@@ -459,8 +468,10 @@ class _ProductAddState extends State<ProductAdd> {
                               onPressed: () async {
                                 if (isCheckedProduct == false) {
                                   _openModal(context);
-                                } else
-                                if (flagService == true) {
+                                } else if (flagService == true) {
+                                  setState(() {
+                                    isLoadingButton = true;
+                                  });
                                   bool success =
                                       await DataServiceAddProduct.sendDataOrder(
                                           context,
@@ -512,6 +523,10 @@ class _ProductAddState extends State<ProductAdd> {
                                     _quantidadecontroller.clear();
                                     _complementocontroller.clear();
                                   }
+
+                                  setState(() {
+                                    isLoadingButton = false;
+                                  });
                                 }
                               },
                               child: Text(
@@ -553,15 +568,18 @@ class _ProductAddState extends State<ProductAdd> {
 
   Future<void> _loadSavedCheckProduct() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ?? false; // Carrega o valor salvo (padrão: true)
+    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ??
+        false; // Carrega o valor salvo (padrão: true)
     setState(() {
-      isCheckedProduct = savedCheckProduct; // Atualiza o estado com o valor salvo
+      isCheckedProduct =
+          savedCheckProduct; // Atualiza o estado com o valor salvo
     });
   }
 
   Future<void> _loadSavedFlagService() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedFlagService = sharedPreferences.getBool('flagService') ?? false; // Carrega o valor salvo (padrão: true)
+    bool savedFlagService = sharedPreferences.getBool('flagService') ??
+        false; // Carrega o valor salvo (padrão: true)
     setState(() {
       flagService = savedFlagService; // Atualiza o estado com o valor salvo
     });

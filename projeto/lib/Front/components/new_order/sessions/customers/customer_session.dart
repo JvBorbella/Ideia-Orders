@@ -1,3 +1,4 @@
+import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:projeto/back/finish_order.dart';
@@ -68,6 +69,10 @@ class _CustomerSessionState extends State<CustomerSession> {
   bool isCheckedCPF = true;
 
   bool isLoading = true;
+  bool isLoadingButton = false;
+  bool isLoadingIconButton = false;
+  bool isLoadingSearchCPF = false;
+  bool isLoadingSearchCEP = false;
 
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
@@ -83,7 +88,7 @@ class _CustomerSessionState extends State<CustomerSession> {
   final _telefonecontatocontroller = TextEditingController();
   final _emailcontroller = TextEditingController();
 
-  final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
+  // final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
   final _cepMaskFormatter = MaskTextInputFormatter(mask: '#####-###');
 
@@ -104,9 +109,19 @@ class _CustomerSessionState extends State<CustomerSession> {
     _ufcontroller.text = widget.uf.toString();
     _logradourocontroller.text = widget.endereco.toString();
     _nomecontroller.text = widget.pessoanome == 'null' ? '' : widget.pessoanome;
-    _cpfcontroller.text = widget.cpfcnpj == 'null'
-        ? ''
-        : _cpfMaskFormatter.maskText(widget.cpfcnpj);
+    final cpfcnpj = widget.cpfcnpj ?? '';
+    final cleanedCpfCnpj = cpfcnpj.replaceAll(
+        RegExp(r'\D'), ''); // Remove caracteres não numéricos
+
+    if (cleanedCpfCnpj.isNotEmpty) {
+      _cpfcontroller.text = cleanedCpfCnpj.length > 11
+          ? MaskTextInputFormatter(mask: '##.###.###/####-##')
+              .maskText(cleanedCpfCnpj)
+          : MaskTextInputFormatter(mask: '###.###.###-##')
+              .maskText(cleanedCpfCnpj);
+    } else {
+      _cpfcontroller.text = ''; // Define vazio se não houver CPF ou CNPJ
+    }
     _telefonecontatocontroller.text = widget.telefone == 'null'
         ? ''
         : _telMaskFormatter.maskText(widget.telefone);
@@ -133,11 +148,19 @@ class _CustomerSessionState extends State<CustomerSession> {
                   text: 'CPF',
                   type: TextInputType.text,
                   controller: _cpfcontroller,
-                  inputFormatters: [MaskedInputFormatter('000.000.000-00')],
+                  isLoadingButton: isLoadingSearchCPF,
+                  inputFormatters: [
+                    CnpjCpfFormatter(
+                      eDocumentType: EDocumentType.BOTH,
+                    )
+                  ],
                   textAlign: TextAlign.start,
                   textInputAction: TextInputAction.unspecified,
                   IconButton: IconButton(
                       onPressed: () async {
+                        setState(() {
+                          isLoadingSearchCPF = true;
+                        });
                         await GetCliente.getcliente(
                           context,
                           urlBasic,
@@ -153,6 +176,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _cidadecontroller,
                           _emailcontroller,
                         );
+                        setState(() {
+                          isLoadingSearchCPF = false;
+                        });
                       },
                       icon: const Icon(Icons.person_search)),
                 ),
@@ -196,9 +222,13 @@ class _CustomerSessionState extends State<CustomerSession> {
                   type: TextInputType.number,
                   textAlign: TextAlign.start,
                   inputFormatters: [MaskedInputFormatter('00000-000')],
+                  isLoadingButton: isLoadingSearchCEP,
                   textInputAction: TextInputAction.unspecified,
                   IconButton: IconButton(
                       onPressed: () async {
+                        setState(() {
+                          isLoadingSearchCEP = true;
+                        });
                         await GetCep.getcep(
                           _cepcontroller.text,
                           _logradourocontroller,
@@ -209,6 +239,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                           _ibgecontroller,
                           ibge,
                         );
+                        setState(() {
+                          isLoadingSearchCEP = false;
+                        });
                       },
                       icon: const Icon(Icons.screen_search_desktop_sharp)),
                 ),
@@ -328,7 +361,11 @@ class _CustomerSessionState extends State<CustomerSession> {
                             text: 'Cadastrar cliente',
                             color: Style.primaryColor,
                             width: Style.width_150(context),
+                            isLoadingButton: isLoadingButton,
                             onPressed: () async {
+                              setState(() {
+                                isLoadingButton = true;
+                              });
                               await NewCustomer.getCostumer(
                                   context,
                                   urlBasic,
@@ -348,6 +385,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   _emailcontroller.text,
                                   _ufcontroller.text);
                               print('pessoa_id: ' + widget.pessoaid);
+                              setState(() {
+                                isLoadingButton = false;
+                              });
                             },
                           ),
                         ),
@@ -361,6 +401,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                             children: [
                               RegisterIconButton(
                                 onPressed: () async {
+                                  setState(() {
+                                    isLoadingIconButton = true;
+                                  });
                                   if (isCheckedCPF == true) {
                                     if (_cpfcontroller.text.isEmpty) {
                                       ScaffoldMessenger.of(context)
@@ -382,6 +425,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                           backgroundColor: Style.errorColor,
                                         ),
                                       );
+                                      setState(() {
+                                        isLoadingIconButton = false;
+                                      });
                                     } else if (_telefonecontatocontroller
                                         .text.isEmpty) {
                                       ScaffoldMessenger.of(context)
@@ -403,6 +449,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                           backgroundColor: Style.errorColor,
                                         ),
                                       );
+                                      setState(() {
+                                        isLoadingIconButton = false;
+                                      });
                                     } else if (_nomecontroller.text.isEmpty) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
@@ -423,6 +472,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                           backgroundColor: Style.errorColor,
                                         ),
                                       );
+                                      setState(() {
+                                        isLoadingIconButton = false;
+                                      });
                                     } else if (orders.isEmpty ||
                                         widget.noProduct == '1') {
                                       ScaffoldMessenger.of(context)
@@ -444,8 +496,14 @@ class _CustomerSessionState extends State<CustomerSession> {
                                           backgroundColor: Style.errorColor,
                                         ),
                                       );
+                                      setState(() {
+                                        isLoadingIconButton = false;
+                                      });
                                     } else {
                                       _openModal(context);
+                                      setState(() {
+                                        isLoadingIconButton = false;
+                                      });
                                     }
                                   } else if (orders.isEmpty ||
                                       widget.noProduct == '1') {
@@ -466,7 +524,13 @@ class _CustomerSessionState extends State<CustomerSession> {
                                         backgroundColor: Style.errorColor,
                                       ),
                                     );
+                                    setState(() {
+                                      isLoadingIconButton = false;
+                                    });
                                   } else {
+                                    setState(() {
+                                      isLoadingIconButton = true;
+                                    });
                                     final data = await DataServiceCliente2
                                         .fetchDataCliente2(urlBasic,
                                             _cpfcontroller.text, token);
@@ -483,12 +547,16 @@ class _CustomerSessionState extends State<CustomerSession> {
                                       pessoa_id,
                                     );
                                     _openModal(context);
+                                    setState(() {
+                                      isLoadingIconButton = false;
+                                    });
                                   }
                                 },
                                 text: 'Finalizar pedido',
                                 color: Style.sucefullColor,
                                 width: Style.width_150(context),
                                 icon: Icons.check_rounded,
+                                isLoadingButton: isLoadingIconButton,
                               ),
                             ],
                           ),

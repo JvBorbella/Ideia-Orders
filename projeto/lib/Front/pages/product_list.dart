@@ -147,11 +147,15 @@ class _ProductListState extends State<ProductList> {
                               children: [
                                 ProductAdd(
                                   prevendaid: widget.prevendaid,
-                                  produtoid: services[index].produto_id.toString(),
+                                  produtoid:
+                                      services[index].produto_id.toString(),
                                   nomeproduto: services[index].nome.toString(),
-                                  codigoproduto: services[index].codigo.toString(),
-                                  precotabela: services[index].precofinal.toDouble(),
-                                  onProductAdded: _onProductAdded, // Chama a função ao adicionar o produto
+                                  codigoproduto:
+                                      services[index].codigo.toString(),
+                                  precotabela:
+                                      services[index].precofinal.toDouble(),
+                                  onProductAdded:
+                                      _onProductAdded, // Chama a função ao adicionar o produto
                                 ),
                               ],
                             );
@@ -353,6 +357,7 @@ class _ProductListState extends State<ProductList> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(_focusNode);
       });
+     print('Services: $services');
     } else {
       await Future.wait(
           [_loadSavedUrlBasic(), _loadSavedToken(), _loadSavedFlagService()]);

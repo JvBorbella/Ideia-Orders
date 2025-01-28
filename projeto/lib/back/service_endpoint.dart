@@ -40,7 +40,7 @@ class DataServiceServices {
 
     try {
       var rawQuery =
-          '''produto%20p%20LEFT%20JOIN%20produtotabelapreco%20pt%20ON%20p.produto_id%20=%20pt.produto_id%20AND%20pt.tabelapreco_id%20=%20'$tabelapreco_id'%20WHERE%20p.flagservico%20=%201%20AND%20p.flagexcluido%20%3C%3E%201%20AND%20p.flagativo%20=%201%20AND%20p.codigo%20LIKE%20'$searchController%25'/''';
+          '''produto%20p%20LEFT%20JOIN%20produtotabelapreco%20pt%20ON%20p.produto_id%20=%20pt.produto_id%20AND%20pt.tabelapreco_id%20=%20'$tabelapreco_id'%20WHERE%20p.flagservico%20=%201%20AND%20p.flagexcluido%20%3C%3E%201%20AND%20p.flagativo%20=%201%20AND%20p.nome%20LIKE%20'%25$searchController%25'/''';
       // var endpointQuery =
       //     "produto p LEFT JOIN produtotabelapreco pt ON p.produto_id = pt.produto_id AND pt.tabelapreco_id = '$tabelapreco_id' WHERE p.flagservico = 1 AND p.flagexcluido <> 1 AND p.flagativo = 1 AND p.codigo LIKE ''$searchController%''/";
       var urlPost = Uri.parse('$urlBasic/ideia/core/getdata/$rawQuery');
@@ -69,6 +69,7 @@ class DataServiceServices {
             services = services.where((service) => service.precofinal != 0.0).toList();
 
             print('A chave dinâmica contém uma lista válida.');
+            print(response.body);
           } else {
             print('A chave dinâmica não contém uma lista válida.');
           }

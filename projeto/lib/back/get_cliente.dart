@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -28,7 +29,8 @@ class GetCliente {
 
       var cpf = cpfController.text;
       var cpfdefault = getUnmaskedText(cpf);
-      var authorization = Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpfdefault');
+      var authorization =
+          Uri.parse('$urlBasic/ideia/prevenda/pessoa/$cpfdefault');
       var response = await http.get(authorization);
 
       if (response.statusCode == 200) {
@@ -37,39 +39,53 @@ class GetCliente {
         if (jsonData.containsKey('data') &&
             jsonData['data'].containsKey('pessoa') &&
             jsonData['data']['pessoa'].isNotEmpty) {
-          var pessoaData = jsonData['data']['pessoa'][0]; // Alterado para acessar o primeiro item da lista
+          var pessoaData = jsonData['data']['pessoa']
+              [0]; // Alterado para acessar o primeiro item da lista
 
           // Garantindo que os dados são convertidos para String
           var nome = pessoaData['nome']?.toString() ?? '';
           var telefonecontato = pessoaData['telefone']?.toString() ?? '';
           var cpfcliente = pessoaData['cpf']?.toString() ?? '';
+          var cnpjcliente = pessoaData['cnpj']?.toString() ?? '';
           var endereco = pessoaData['endereco']?.toString() ?? '';
           var enderecocep = pessoaData['enderecocep']?.toString() ?? '';
           var uf = pessoaData['uf']?.toString() ?? '';
           var enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           var enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           var endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          var enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
+          var enderecocomplemento =
+              pessoaData['enderecocomplemento']?.toString() ?? '';
           var email = pessoaData['emailcontato']?.toString() ?? '';
 
-          var cpfFormatado = MaskedInputFormatter('###.###.###-##').formatEditUpdate(
-            TextEditingValue.empty,
-            TextEditingValue(text: cpfcliente),
-          ).text;
+          var cpfFormatado = CnpjCpfFormatter(
+            eDocumentType: EDocumentType.BOTH,
+          )
+              .formatEditUpdate(
+                TextEditingValue.empty,
+                TextEditingValue(
+                    text: cpfcliente.toString().isEmpty
+                        ? cnpjcliente
+                        : cpfcliente),
+              )
+              .text;
 
-          var telFormatado = MaskedInputFormatter('(##) #####-####').formatEditUpdate(
-            TextEditingValue.empty,
-            TextEditingValue(text: telefonecontato),
-          ).text;
+          var telFormatado = MaskedInputFormatter('(##) #####-####')
+              .formatEditUpdate(
+                TextEditingValue.empty,
+                TextEditingValue(text: telefonecontato),
+              )
+              .text;
 
-          var cepFormatado = MaskedInputFormatter('#####-###').formatEditUpdate(
-            TextEditingValue.empty,
-            TextEditingValue(text: enderecocep),
-          ).text;
+          var cepFormatado = MaskedInputFormatter('#####-###')
+              .formatEditUpdate(
+                TextEditingValue.empty,
+                TextEditingValue(text: enderecocep),
+              )
+              .text;
 
           // Atualiza os controllers
           nomeController.text = nome;
-          cpfController.text = cpfFormatado;
+          cpfController.text = cpfFormatado.toString();
           telefonecontatoController.text = telFormatado;
           cepController.text = cepFormatado;
           logradouroController.text = endereco;
@@ -121,38 +137,36 @@ class GetCliente2 {
   late String enderecocep;
   late String email;
 
-  GetCliente2({
-    required this.pessoaid,
-    required this.nome,
-    required this.cpf,
-    required this.codigo,
-    required this.telefone,
-    required this.endereco,
-    required this.uf,
-    required this.enderecobairro,
-    required this.enderecocidade,
-    required this.endereconumero,
-    required this.enderecocomplemento,
-    required this.enderecocep,
-    required this.email
-  });
+  GetCliente2(
+      {required this.pessoaid,
+      required this.nome,
+      required this.cpf,
+      required this.codigo,
+      required this.telefone,
+      required this.endereco,
+      required this.uf,
+      required this.enderecobairro,
+      required this.enderecocidade,
+      required this.endereconumero,
+      required this.enderecocomplemento,
+      required this.enderecocep,
+      required this.email});
 
   factory GetCliente2.fromJson(Map<String, dynamic> json) {
     return GetCliente2(
-      pessoaid: json['pessoa_id'] ?? '',
-      nome: json['nome'] ?? '',
-      codigo: json['codigo'] ?? '',
-      cpf: json['cpf'] ?? '',
-      telefone: json['telefone'] ?? '',
-      endereco: json['endereco'] ?? '',
-      enderecocep: json['enderecocep'] ?? '',
-      enderecobairro: json['enderecobairro'] ?? '',
-      enderecocidade: json['enderecocidade'] ?? '',
-      endereconumero: json['endereconumero'] ?? '',
-      enderecocomplemento: json['enderecocomplemento'] ?? '',
-      uf: json['uf'] ?? '',
-      email: json['emailcontato'] ?? ''
-    );
+        pessoaid: json['pessoa_id'] ?? '',
+        nome: json['nome'] ?? '',
+        codigo: json['codigo'] ?? '',
+        cpf: json['cpf'].toString().isEmpty ? json['cnpj'] : json['cpf'],
+        telefone: json['telefone'] ?? '',
+        endereco: json['endereco'] ?? '',
+        enderecocep: json['enderecocep'] ?? '',
+        enderecobairro: json['enderecobairro'] ?? '',
+        enderecocidade: json['enderecocidade'] ?? '',
+        endereconumero: json['endereconumero'] ?? '',
+        enderecocomplemento: json['enderecocomplemento'] ?? '',
+        uf: json['uf'] ?? '',
+        email: json['emailcontato'] ?? '');
   }
 }
 
@@ -174,8 +188,7 @@ class DataServiceCliente2 {
     String email = '';
 
     try {
-
-       String getUnmaskedText(String maskedText) {
+      String getUnmaskedText(String maskedText) {
         // Remove todos os caracteres não numéricos
         return maskedText.replaceAll(RegExp(r'\D'), '');
       }
@@ -199,17 +212,19 @@ class DataServiceCliente2 {
           pessoaid = pessoaData['pessoa_id']?.toString() ?? '';
           nome = pessoaData['nome']?.toString() ?? '';
           codigo = pessoaData['codigo']?.toString() ?? '';
-          cpf = pessoaData['cpf']?.toString() ?? '';
+          cpf = pessoaData['cpf'].toString().isEmpty
+              ? pessoaData['cnpj']
+              : pessoaData['cpf'];
           telefone = pessoaData['telefone']?.toString() ?? '';
           endereco = pessoaData['endereco']?.toString() ?? '';
           enderecocep = pessoaData['enderecocep']?.toString() ?? '';
           enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
+          enderecocomplemento =
+              pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
           email = pessoaData['emailcontato']?.toString() ?? '';
-
         } else {
           print('Dados não encontrados');
         }

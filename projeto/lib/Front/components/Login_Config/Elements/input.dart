@@ -16,6 +16,7 @@ class Input extends StatefulWidget {
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final onTap;
+  final isLoadingButton;
 
   const Input(
       {super.key,
@@ -28,8 +29,8 @@ class Input extends StatefulWidget {
       required this.textAlign,
       this.textInputAction,
       this.inputFormatters,
-      this.onTap
-      });
+      this.onTap,
+      this.isLoadingButton});
 
   @override
   State<Input> createState() => _InputState();
@@ -51,8 +52,7 @@ class _InputState extends State<Input> {
   Widget build(BuildContext context) {
     return Material(
       child: ConstrainedBox(
-        constraints:
-            const BoxConstraints(maxWidth: 1200),
+        constraints: const BoxConstraints(maxWidth: 1200),
         child: Container(
           margin: const EdgeInsets.only(left: 5.0, right: 5),
           child: Column(
@@ -60,23 +60,36 @@ class _InputState extends State<Input> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               TextField(
-                controller: _textController, 
+                controller: _textController,
                 style: TextStyle(
-                  fontSize: Style.height_12(context),
-                  fontFamily: 'Poppins-Regular'
-                ),
+                    fontSize: Style.height_12(context),
+                    fontFamily: 'Poppins-Regular'),
                 onSubmitted: (value) {
-                  FocusScope.of(context).nextFocus(); // Avança para o próximo campo ao pressionar Enter
+                  FocusScope.of(context)
+                      .nextFocus(); // Avança para o próximo campo ao pressionar Enter
                 },
                 keyboardType: widget.type,
                 textAlign: widget.textAlign,
                 obscureText: widget.obscureText ?? false,
                 cursorColor: Style.primaryColor,
-                textInputAction: widget.textInputAction ?? TextInputAction.unspecified,
+                textInputAction:
+                    widget.textInputAction ?? TextInputAction.unspecified,
                 inputFormatters: widget.inputFormatters,
                 onTap: widget.onTap,
                 decoration: InputDecoration(
-                  suffixIcon: widget.IconButton,
+                  suffixIcon: widget.isLoadingButton == true
+                      ? Container(
+                          width: Style.height_7(context),
+                          height: Style.height_7(context),
+                          padding: EdgeInsets.all(
+                            Style.height_10(context)
+                          ),
+                          child: CircularProgressIndicator(
+                            color: Style.primaryColor,
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      : widget.IconButton,
                   suffixIconColor: Style.primaryColor,
                   labelText: widget.text,
                   labelStyle: TextStyle(

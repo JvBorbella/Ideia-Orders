@@ -1,24 +1,23 @@
-import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
-import 'package:projeto/back/order_details.dart';
+
 import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/back/pdf_generator.dart';
 import 'package:projeto/back/reprint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:projeto/front/components/order_page/elements/name_inputblocked.dart';
-import 'package:projeto/front/components/order_page/elements/products_order.dart';
+
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/elements/navbar_button.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
-import 'package:projeto/front/components/order_page/elements/cancel_button.dart';
+
 import 'package:projeto/front/components/order_page/elements/input_blocked.dart';
 import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -107,14 +106,16 @@ class _OrderPageState extends State<OrderPage> {
 
   List<OrdersDetailsEndpoint> orders = [];
 
-   NumberFormat currencyFormat =
+  bool isLoadingButtonLocal = false;
+  bool isLoadingButtonNetwork = false;
+
+  NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
   final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
-  final _cepMaskFormatter = MaskTextInputFormatter(mask: '#####-###');
 
-      final cepFormatter = MaskTextInputFormatter(
+  final cepFormatter = MaskTextInputFormatter(
       mask: '#####-###', filter: {"#": RegExp(r'[0-9]')});
 
   bool isLoading = true;
@@ -179,8 +180,7 @@ class _OrderPageState extends State<OrderPage> {
                           Row(
                             children: [
                               Text(
-                                'Data do pedido - ${DateFormat('dd/MM/yyyy HH:mm:ss')
-                                        .format(widget.datahora)}',
+                                'Data do pedido - ${DateFormat('dd/MM/yyyy HH:mm:ss').format(widget.datahora)}',
                                 style: TextStyle(
                                     color: Style.primaryColor,
                                     fontSize: Style.height_12(context),
@@ -332,11 +332,7 @@ class _OrderPageState extends State<OrderPage> {
                                                       Row(
                                                         children: [
                                                           Text(
-                                                            '${currencyFormat
-                                                                    .format(orders[
-                                                                            index]
-                                                                        .valorunitario)} x ${orders[index]
-                                                                    .quantidade}',
+                                                            '${currencyFormat.format(orders[index].valorunitario)} x ${orders[index].quantidade}',
                                                             style: TextStyle(
                                                                 fontSize: Style
                                                                     .height_12(
@@ -349,10 +345,7 @@ class _OrderPageState extends State<OrderPage> {
                                                       Row(
                                                         children: [
                                                           Text(
-                                                            'Subtotal - ${currencyFormat
-                                                                    .format(orders[
-                                                                            index]
-                                                                        .valortotalitem)}',
+                                                            'Subtotal - ${currencyFormat.format(orders[index].valortotalitem)}',
                                                             style: TextStyle(
                                                                 fontSize: Style
                                                                     .height_10(
@@ -402,8 +395,7 @@ class _OrderPageState extends State<OrderPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const NameInputblocked(text: 'Nome'),
-                        InputBlocked(
-                            value: nome.isEmpty ? '' : nome),
+                        InputBlocked(value: nome.isEmpty ? '' : nome),
                         SizedBox(
                           height: Style.height_5(context),
                         ),
@@ -417,10 +409,10 @@ class _OrderPageState extends State<OrderPage> {
                                 children: [
                                   const NameInputblocked(text: 'CPF/CNPJ'),
                                   InputBlocked(
-                                    value: widget.cpfcnpj == 'null'
-                                        ? ''
-                                        : _cpfMaskFormatter.maskText(widget.cpfcnpj)
-                                  ),
+                                      value: widget.cpfcnpj == 'null'
+                                          ? ''
+                                          : _cpfMaskFormatter
+                                              .maskText(widget.cpfcnpj)),
                                 ],
                               ),
                             ),
@@ -431,10 +423,10 @@ class _OrderPageState extends State<OrderPage> {
                                 children: [
                                   const NameInputblocked(text: 'Telefone'),
                                   InputBlocked(
-                                    value: telefone == 'null'
-                                        ? ''
-                                        : _telMaskFormatter.maskText(telefone)
-                                  )
+                                      value: telefone == 'null'
+                                          ? ''
+                                          : _telMaskFormatter
+                                              .maskText(telefone))
                                 ],
                               ),
                             ),
@@ -444,32 +436,26 @@ class _OrderPageState extends State<OrderPage> {
                           height: Style.height_5(context),
                         ),
                         const NameInputblocked(text: 'Endereço'),
-                        InputBlocked(
-                            value:
-                                email ?? ''),
+                        InputBlocked(value: email ?? ''),
                         SizedBox(
                           height: Style.height_5(context),
                         ),
                         const NameInputblocked(text: 'CEP'),
-                                  InputBlocked(
-                                      value: cepFormatter.maskText(
-                                          enderecocep ?? '')),
-                        
+                        InputBlocked(
+                            value: cepFormatter.maskText(enderecocep ?? '')),
                         SizedBox(
                           height: Style.height_5(context),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                             SizedBox(
+                            SizedBox(
                               width: Style.width_215(context),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const NameInputblocked(text: 'Endereço'),
-                        InputBlocked(
-                            value:
-                                endereco ?? ''),
+                                  InputBlocked(value: endereco ?? ''),
                                 ],
                               ),
                             ),
@@ -479,14 +465,12 @@ class _OrderPageState extends State<OrderPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const NameInputblocked(text: 'UF'),
-                                  InputBlocked(
-                                      value: uf ?? '')
+                                  InputBlocked(value: uf ?? '')
                                 ],
                               ),
                             ),
                           ],
                         ),
-                       
                         SizedBox(
                           height: Style.height_5(context),
                         ),
@@ -499,8 +483,7 @@ class _OrderPageState extends State<OrderPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const NameInputblocked(text: 'Bairro'),
-                                  InputBlocked(
-                                      value: enderecobairro ?? '')
+                                  InputBlocked(value: enderecobairro ?? '')
                                 ],
                               ),
                             ),
@@ -528,9 +511,11 @@ class _OrderPageState extends State<OrderPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                 const NameInputblocked(text: 'Número'),
+                                  const NameInputblocked(text: 'Número'),
                                   InputBlocked(
-                                      value: endereconumero == null ? '' : endereconumero.toString())
+                                      value: endereconumero == null
+                                          ? ''
+                                          : endereconumero.toString())
                                 ],
                               ),
                             ),
@@ -540,8 +525,7 @@ class _OrderPageState extends State<OrderPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const NameInputblocked(text: 'Complemento'),
-                                  InputBlocked(
-                                      value: enderecocomplemento ?? '')
+                                  InputBlocked(value: enderecocomplemento ?? '')
                                 ],
                               ),
                             ),
@@ -556,30 +540,53 @@ class _OrderPageState extends State<OrderPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               RegisterIconButton(
-                            text: 'Reimprimir cupom',
-                            color: Style.warningColor,
-                            width: Style.width_150(context),
-                            icon: Icons.print,
-                            onPressed: () async {
-                              await DataServiceRePrintOrder
-                                  .fetchDataRePrintOrder(context, urlBasic,
-                                      token, widget.prevendaId, widget.numero);
-                            },
-                          ),
-                          RegisterIconButton(
-                            text: 'Reimprimir cupom na rede',
-                            color: Style.warningColor,
-                            width: Style.width_150(context),
-                            icon: Icons.wifi,
-                            onPressed: () async {
-                              await DataServiceRePrintOrderNetwork
-                                  .fetchDataRePrintOrderNetwork
-                                  (context, urlBasic,
-                                      token, widget.prevendaId, widget.numero);
-                            },
-                          ),
+                                text: 'Reimprimir cupom',
+                                color: Style.warningColor,
+                                width: Style.width_150(context),
+                                icon: Icons.print,
+                                isLoadingButton: isLoadingButtonLocal,
+                                onPressed: () async {
+                                  setState(() {
+                                    isLoadingButtonLocal = true;
+                                  });
+                                  await DataServiceRePrintOrder
+                                      .fetchDataRePrintOrder(
+                                          context,
+                                          urlBasic,
+                                          token,
+                                          widget.prevendaId,
+                                          widget.numero);
+
+                                  setState(() {
+                                    isLoadingButtonLocal = false;
+                                  });
+                                },
+                              ),
+                              RegisterIconButton(
+                                text: 'Reimprimir cupom na rede',
+                                color: Style.warningColor,
+                                width: Style.width_150(context),
+                                icon: Icons.wifi,
+                                isLoadingButton: isLoadingButtonNetwork,
+                                onPressed: () async {
+                                  setState(() {
+                                    isLoadingButtonNetwork = true;
+                                  });
+                                  await DataServiceRePrintOrderNetwork
+                                      .fetchDataRePrintOrderNetwork(
+                                          context,
+                                          urlBasic,
+                                          token,
+                                          widget.prevendaId,
+                                          widget.numero);
+
+                                  setState(() {
+                                    isLoadingButtonNetwork = false;
+                                  });
+                                },
+                              ),
                             ],
-                          ), 
+                          ),
                         ),
                         Container(
                           alignment: Alignment.center,
@@ -592,18 +599,18 @@ class _OrderPageState extends State<OrderPage> {
                                 urlBasic: urlBasic,
                                 token: token,
                               )
-                  //         RegisterIconButton(
-                  //           text: 'Gerar PDF',
-                  //           color: Style.warningColor,
-                  //           width: Style.width_150(context),
-                  //           icon: Icons.print,
-                  //           onPressed: () async {
-                  //             Navigator.of(context).pushReplacement(
-                  // MaterialPageRoute(builder: (context) => PdfGeneratorViewer()));
-                  //           },
-                  //         ),
+                              //         RegisterIconButton(
+                              //           text: 'Gerar PDF',
+                              //           color: Style.warningColor,
+                              //           width: Style.width_150(context),
+                              //           icon: Icons.print,
+                              //           onPressed: () async {
+                              //             Navigator.of(context).pushReplacement(
+                              // MaterialPageRoute(builder: (context) => PdfGeneratorViewer()));
+                              //           },
+                              //         ),
                             ],
-                          ), 
+                          ),
                         ),
                         SizedBox(
                           height: Style.height_10(context),
@@ -645,15 +652,15 @@ class _OrderPageState extends State<OrderPage> {
     await Future.wait([
       fetchDataCliente2(),
     ]);
-     await GetCep.getcep(
-      enderecocep, 
-      _logradourocontroller, 
-      _complementocontroller2, 
-      _bairrocontroller, 
-      _ufcontroller, 
-      _localidadecontroller, 
-      _ibgecontroller, 
-      ibge);
+    await GetCep.getcep(
+        enderecocep,
+        _logradourocontroller,
+        _complementocontroller2,
+        _bairrocontroller,
+        _ufcontroller,
+        _localidadecontroller,
+        _ibgecontroller,
+        ibge);
     await Future.wait([
       fetchDataOrders(),
       // fetchDataOrdersDetails2(widget.prevendaId),
@@ -669,8 +676,8 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   Future<void> fetchDataCliente2() async {
-    final data =
-        await DataServiceCliente2.fetchDataCliente2(urlBasic, widget.cpfcnpj, token);
+    final data = await DataServiceCliente2.fetchDataCliente2(
+        urlBasic, widget.cpfcnpj, token);
     setState(() {
       pessoaid = data['pessoa_id'].toString();
       nome = data['nome'].toString();

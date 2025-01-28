@@ -1,16 +1,21 @@
 import 'package:brasil_fields/brasil_fields.dart';
+import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:projeto/back/alter_table_endpoint.dart';
 import 'package:projeto/back/get_cliente.dart';
+import 'package:projeto/back/list_table_prices.dart';
 import 'package:projeto/back/new_order.dart';
 import 'package:projeto/back/order_details.dart';
 import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/back/products_endpoint.dart';
+import 'package:projeto/back/table_price.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Home/Elements/drawer_button.dart';
 import 'package:projeto/front/components/Home/Elements/order_container.dart';
 import 'package:projeto/front/components/home/elements/modal_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
+import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/pages/login.dart';
@@ -39,6 +44,7 @@ class _HomeState extends State<Home> {
   List<OrdersEndpoint> orders = [];
   List<ProductsEndpoint> products = [];
   List<OrdersDetailsEndpoint> ordersDetails = [];
+  List<ListTablePrices> tables_price = [];
   String urlController = '';
   bool isLoading = true;
   NumberFormat currencyFormat =
@@ -50,6 +56,12 @@ class _HomeState extends State<Home> {
   String token = '';
   String prevendaId = '';
   String flagFilter = '';
+
+  String empresaid = '';
+  String tabelapreco_id_company = '';
+  String tabelapreco_id = '';
+
+  String flagpermitiralterartabela = '';
 
   late String pessoanome = '';
   late String cpfcnpj = '';
@@ -67,6 +79,7 @@ class _HomeState extends State<Home> {
   late String nome = '';
   late String codigo = '';
   late String cpfcliente = '';
+  late String filterValue = '';
 
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
@@ -80,19 +93,6 @@ class _HomeState extends State<Home> {
   final _cpfcontroller = TextEditingController();
   final _nomecontroller = TextEditingController();
   final _telefonecontatocontroller = TextEditingController();
-
-  String formatCpfCnpj(String cpfCnpj) {
-    if (cpfCnpj.length == 11) {
-      // CPF
-      return UtilBrasilFields.obterCpf(cpfCnpj);
-    } else if (cpfCnpj.length == 14) {
-      // CNPJ
-      return UtilBrasilFields.obterCnpj(cpfCnpj);
-    } else {
-      // Não formatado
-      return cpfCnpj;
-    }
-  }
 
   String formatTel(String telefonecontato) {
     if (telefonecontato.length > 10) {
@@ -114,123 +114,292 @@ class _HomeState extends State<Home> {
     loadData();
   }
 
+  String tableprice = '';
+  String tableprice_id = '';
+
   void _openModal(BuildContext context) {
+    bool isLoadingButton = false;
+    bool isLoadingSearch = false;
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(Style.height_8(context)),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Style.primaryColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(Style.height_20(context)),
-                      topRight: Radius.circular(Style.height_20(context)),
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setModalState) {
+            return AlertDialog(
+              content: Container(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(Style.height_8(context)),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Style.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(Style.height_20(context)),
+                          topRight: Radius.circular(Style.height_20(context)),
+                        ),
+                      ),
+                      child: Text(
+                        'Abertura do pedido',
+                        style: TextStyle(
+                          fontSize: Style.height_15(context),
+                          fontWeight: FontWeight.bold,
+                          color: Style.tertiaryColor,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Abertura do pedido',
-                    style: TextStyle(
-                      fontSize: Style.height_15(context),
-                      fontWeight: FontWeight.bold,
-                      color: Style.tertiaryColor,
+                    SizedBox(
+                      height: Style.height_10(context),
                     ),
-                  ),
-                ),
-                SizedBox(
-                  height: Style.height_10(context),
-                ),
-                Input(
-                  text: 'CPF',
-                  type: TextInputType.text,
-                  textAlign: TextAlign.start,
-                  controller: _cpfcontroller,
-                  inputFormatters: [
-                    MaskedInputFormatter('000.000.000-00'), // Máscara de CPF
+                    Input(
+                      text: 'CPF',
+                      type: TextInputType.text,
+                      textAlign: TextAlign.start,
+                      controller: _cpfcontroller,
+                      inputFormatters: [
+                        CnpjCpfFormatter(
+                          eDocumentType: EDocumentType.BOTH,
+                        )
+
+                        /// Máscara de CPF
+                      ],
+                      textInputAction: TextInputAction.unspecified,
+                      isLoadingButton: isLoadingSearch,
+                      IconButton: IconButton(
+                        onPressed: () async {
+                          setModalState(
+                            () {
+                              isLoadingSearch = true;
+                            },
+                          );
+                          await GetCliente.getcliente(
+                            context,
+                            urlBasic,
+                            _nomecontroller,
+                            _cpfcontroller,
+                            _telefonecontatocontroller,
+                            _cepcontroller,
+                            _logradourocontroller,
+                            _ufcontroller,
+                            _bairrocontroller,
+                            _numerocontroller,
+                            _complementocontroller,
+                            _cidadecontroller,
+                            _emailcontroller,
+                          );
+                          setModalState(
+                            () {
+                              isLoadingSearch = false;
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.person_search),
+                      ),
+                    ),
+                    SizedBox(
+                      height: Style.height_10(context),
+                    ),
+                    Input(
+                      text: 'Telefone',
+                      type: TextInputType.text,
+                      controller: _telefonecontatocontroller,
+                      textAlign: TextAlign.start,
+                      textInputAction: TextInputAction.unspecified,
+                      inputFormatters: [
+                        MaskedInputFormatter(
+                            '(00) 00000-0000'), // Máscara de CPF
+                      ],
+                    ),
+                    SizedBox(
+                      height: Style.height_10(context),
+                    ),
+                    Input(
+                      text: 'Nome do cliente',
+                      type: TextInputType.text,
+                      controller: _nomecontroller,
+                      textInputAction: TextInputAction.unspecified,
+                      textAlign: TextAlign.start,
+                    ),
+                    SizedBox(
+                      height: Style.height_20(context),
+                    ),
+                    if (flagpermitiralterartabela == '1')
+                      Row(
+                        children: [
+                          SizedBox(
+                            height: Style.height_30(context),
+                            child: PopupMenuButton<String>(
+                              itemBuilder: (BuildContext context) =>
+                                  buildMenuItems(tables_price),
+                              onSelected: (value) async {
+                                setModalState(() {
+                                  tableprice = value;
+                                  print(tableprice);
+                                });
+                                await DataServiceTablePriceId
+                                    .fetchDataTablePriceId(
+                                        context, urlBasic, tableprice);
+                                setState(() {
+                                  tableprice = value;
+                                  fetchDataTablePriceId();
+                                  print(tabelapreco_id);
+                                });
+                              },
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.price_change_rounded,
+                                      color: Style.primaryColor,
+                                      size: Style.height_20(context),
+                                    ),
+                                    SizedBox(
+                                      width: Style.height_2(context),
+                                    ),
+                                    Container(
+                                      width: Style.width_150(context),
+                                      child: Text(
+                                        tableprice.isEmpty
+                                            ? 'Tabela de Preço'
+                                            : tableprice,
+                                        style: TextStyle(
+                                          color: Style.secondaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: Style.height_12(context),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow
+                                            .clip, // corta o texto no limite da largura
+                                        softWrap:
+                                            true, // permite a quebra de linha conforme necessário
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            // width: 150,
+                            child: Text(
+                              tableprice,
+                              style: TextStyle(
+                                color: Style.quarantineColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: Style.height_12(context),
+                              ),
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow
+                                  .clip, // corta o texto no limite da largura
+                              softWrap:
+                                  true, // permite a quebra de linha conforme necessário
+                            ),
+                          )
+                        ],
+                      ),
+                    SizedBox(
+                      height: Style.height_10(context),
+                    ),
+                    RegisterButton(
+                      text: 'Abrir Pedido',
+                      color: Style.primaryColor,
+                      width: Style.width_150(context),
+                      isLoadingButton: isLoadingButton,
+                      onPressed: () async {
+                        setModalState(() {
+                          isLoadingButton = true;
+                          print(isLoadingButton);
+                        });
+                        final data =
+                            await DataServiceCliente2.fetchDataCliente2(
+                                urlBasic, _cpfcontroller.text, token);
+                        var pessoa_id = data['pessoa_id'].toString();
+                        if (flagpermitiralterartabela == '1') {
+                          await DataServiceNewOrder.sendDataOrder(
+                              context,
+                              urlBasic,
+                              token,
+                              _cpfcontroller.text,
+                              _telefonecontatocontroller.text,
+                              _nomecontroller.text,
+                              pessoa_id,
+                              tabelapreco_id);
+                        } else {
+                          await DataServiceNewOrder.sendDataOrder(
+                              context,
+                              urlBasic,
+                              token,
+                              _cpfcontroller.text,
+                              _telefonecontatocontroller.text,
+                              _nomecontroller.text,
+                              pessoa_id,
+                              tabelapreco_id_company);
+                        }
+                        fetchDataOrders(
+                            ascending: true, flagFilter: flagFilter);
+                        setState(() {
+                          selectedOptionChild = _getFilterText(flagFilter);
+                        });
+                        setModalState(() {
+                          isLoadingButton = false;
+                          print(isLoadingButton);
+                        });
+                        _closeModal();
+                        _cpfcontroller.clear();
+                        _nomecontroller.clear();
+                        _telefonecontatocontroller.clear();
+                      },
+                    )
+                    // TextButton(
+                    //   onPressed: () async {
+                    //     setState(() {
+                    //       isLoadingButton = true;
+                    //     });
+                    //     final data = await DataServiceCliente2.fetchDataCliente2(
+                    //         urlBasic, _cpfcontroller.text, token);
+                    //     var pessoa_id = data['pessoa_id'].toString();
+                    //     await DataServiceNewOrder.sendDataOrder(
+                    //       context,
+                    //       urlBasic,
+                    //       token,
+                    //       _cpfcontroller.text,
+                    //       _telefonecontatocontroller.text,
+                    //       _nomecontroller.text,
+                    //       pessoa_id,
+                    //     );
+                    //     setState(() {
+                    //       fetchDataOrders(ascending: true, flagFilter: filterValue);
+                    //     });
+                    //     _closeModal();
+                    //     _cpfcontroller.clear();
+                    //     _nomecontroller.clear();
+                    //     _telefonecontatocontroller.clear();
+                    //     setState(() {
+                    //       isLoadingButton = false;
+                    //     });
+                    //   },
+                    //   child: isLoadingButton == true
+                    //       ? SizedBox(
+                    //           width: Style.height_15(context),
+                    //           height: Style.height_15(context),
+                    //           child: CircularProgressIndicator(
+                    //             color: Style.primaryColor,
+                    //             strokeWidth: 2.0,
+                    //           ),
+                    //         )
+                    //       : const Text('Abrir pedido'),
+                    // )
                   ],
-                  textInputAction: TextInputAction.unspecified,
-                  IconButton: IconButton(
-                    onPressed: () async {
-                      await GetCliente.getcliente(
-                        context,
-                        urlBasic,
-                        _nomecontroller,
-                        _cpfcontroller,
-                        _telefonecontatocontroller,
-                        _cepcontroller,
-                        _logradourocontroller,
-                        _ufcontroller,
-                        _bairrocontroller,
-                        _numerocontroller,
-                        _complementocontroller,
-                        _cidadecontroller,
-                        _emailcontroller,
-                      );
-                    },
-                    icon: const Icon(Icons.person_search),
-                  ),
                 ),
-                SizedBox(
-                  height: Style.height_10(context),
-                ),
-                Input(
-                  text: 'Telefone',
-                  type: TextInputType.text,
-                  controller: _telefonecontatocontroller,
-                  textAlign: TextAlign.start,
-                  textInputAction: TextInputAction.unspecified,
-                  inputFormatters: [
-                    MaskedInputFormatter('(00) 00000-0000'), // Máscara de CPF
-                  ],
-                ),
-                SizedBox(
-                  height: Style.height_10(context),
-                ),
-                Input(
-                  text: 'Nome do cliente',
-                  type: TextInputType.text,
-                  controller: _nomecontroller,
-                  textInputAction: TextInputAction.unspecified,
-                  textAlign: TextAlign.start,
-                ),
-                SizedBox(
-                  height: Style.height_20(context),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final data = await DataServiceCliente2.fetchDataCliente2(
-                        urlBasic, _cpfcontroller.text, token);
-                    var pessoa_id = data['pessoa_id'].toString();
-                    await DataServiceNewOrder.sendDataOrder(
-                      context,
-                      urlBasic,
-                      token,
-                      _cpfcontroller.text,
-                      _telefonecontatocontroller.text,
-                      _nomecontroller.text,
-                      pessoa_id,
-                    );
-                    setState(() {
-                      fetchDataOrders();
-                    });
-                    _closeModal();
-                    _cpfcontroller.clear();
-                    _nomecontroller.clear();
-                    _telefonecontatocontroller.clear();
-                  },
-                  child: const Text('Abrir pedido'),
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    ).then((_) {
+              ),
+            );
+          });
+        }).then((_) {
       _cpfcontroller.clear();
       _nomecontroller.clear();
       _telefonecontatocontroller.clear();
@@ -388,13 +557,21 @@ class _HomeState extends State<Home> {
                                 ),
                               ],
                               onSelected: (String value) async {
-                                String filterValue;
                                 if (value == 'finalizados') {
                                   filterValue = '1';
+                                  setState(() {
+                                    flagFilter = '1';
+                                  });
                                 } else if (value == 'abertos') {
                                   filterValue = '0';
+                                  setState(() {
+                                    flagFilter = '0';
+                                  });
                                 } else {
                                   filterValue = '';
+                                  setState(() {
+                                    flagFilter = '';
+                                  });
                                 }
                                 await _saveFilter(filterValue);
                                 await fetchDataOrders(
@@ -515,20 +692,19 @@ class _HomeState extends State<Home> {
             }));
   }
 
-  Future<void> loadData() async {
-    await Future.wait([
-      _loadSavedUrlBasic(),
-      _loadSavedUserId(),
-    ]);
-    await Future.wait(
-        [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
-  }
-
   Future<void> _loadSavedUrlBasic() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String savedUrlBasic = sharedPreferences.getString('urlBasic') ?? '';
     setState(() {
       urlBasic = savedUrlBasic;
+    });
+  }
+
+  Future<void> _loadSavedEmpresaID() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedEmpresaID = sharedPreferences.getString('empresa_id') ?? '';
+    setState(() {
+      empresaid = savedEmpresaID;
     });
   }
 
@@ -554,6 +730,26 @@ class _HomeState extends State<Home> {
     setState(() {
       token = savedToken;
     });
+  }
+
+  Future<void> loadData() async {
+    await Future.wait([
+      _loadSavedUrlBasic(),
+      _loadSavedUserId(),
+      _loadSavedEmpresaID(),
+      _loadSavedFilter(),
+    ]);
+    await fetchDataTablePriceCompany();
+    await fetchDataTablePriceName();
+    // await fetchDataTablePriceId();
+    await fetchDataTablePrice();
+    // await _loadSavedFlagPermiteAlterTable();
+    await fetchDataListTablesPrice();
+    // await _loadSavedFlagPermiteAlterTable();
+    print('flagpermitiralterartabela: $flagpermitiralterartabela');
+    print('FLAGFILTER: $flagFilter');
+    await Future.wait(
+        [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
   }
 
   Future<void> _refreshData() async {
@@ -582,6 +778,14 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<void> _loadSavedFlagPermiteAlterTable() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      flagpermitiralterartabela =
+          sharedPreferences.getString('flagpermitiralterartabela') ?? '';
+    });
+  }
+
   // Função para obter o texto do filtro com base no flagFilter
   String _getFilterText(String filter) {
     switch (filter) {
@@ -602,6 +806,7 @@ class _HomeState extends State<Home> {
     if (fetchData != null) {
       // Aplicando o filtro baseado no campo flagpermitefaturar
       if (flagFilter != null && flagFilter.isNotEmpty) {
+        print(flagFilter);
         fetchData = fetchData
             .where((order) => order.flagpermitefaturar == flagFilter)
             .toList();
@@ -654,99 +859,106 @@ class _HomeState extends State<Home> {
       builder: (BuildContext context) {
         modalContext = context;
         return SizedBox(
-          //Configurações de tamanho e espaçamento do modal
-          height: Style.ModalSize(context),
-          child: WillPopScope(
-            child: Container(
-            //Tamanho e espaçamento interno do modal
-            height: Style.InternalModalSize(context),
-            margin: EdgeInsets.only(left: Style.ModalMargin(context), right: Style.ModalMargin(context)),
-            padding: EdgeInsets.all(Style.InternalModalPadding(context)),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(Style.ModalBorderRadius(context))),
-            child: Column(
-              //Conteúdo interno do modal
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Deseja sair da aplicação?',
-                      style: TextStyle(
-                        fontSize: Style.height_15(context),
-                        color: Style.primaryColor,
-                      ),
-                      overflow: TextOverflow.clip,
-                      softWrap: true,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: Style.height_30(context),
-                ),
-                Row(
-                  //Espaçamento entre os Buttons
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    //Buttom de sair
-                    TextButton(
-                      onPressed: () async {
-                        _sair();
-                      },
-                      child: Container(
-                        width: Style.ButtonExitWidth(context),
-                        // height: Style.ButtonExitHeight(context),
-                        padding: EdgeInsets.all(Style.ButtonExitPadding(context)),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(Style.ButtonExitBorderRadius(context)),
-                            color: Style.primaryColor),
-                        child: Text(
-                          'Sair',
-                          style: TextStyle(
-                            color: Style.tertiaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: Style.height_10(context),
+            //Configurações de tamanho e espaçamento do modal
+            height: Style.ModalSize(context),
+            child: WillPopScope(
+                child: Container(
+                  //Tamanho e espaçamento interno do modal
+                  height: Style.InternalModalSize(context),
+                  margin: EdgeInsets.only(
+                      left: Style.ModalMargin(context),
+                      right: Style.ModalMargin(context)),
+                  padding: EdgeInsets.all(Style.InternalModalPadding(context)),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                          Style.ModalBorderRadius(context))),
+                  child: Column(
+                    //Conteúdo interno do modal
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Deseja sair da aplicação?',
+                            style: TextStyle(
+                              fontSize: Style.height_15(context),
+                              color: Style.primaryColor,
+                            ),
+                            overflow: TextOverflow.clip,
+                            softWrap: true,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                        ],
                       ),
-                    ),
-                    //Buttom para fechar o modal
-                    TextButton(
-                      onPressed: () {
-                        _closeModal();
-                      },
-                      child: Container(
-                        // width: Style.ButtonCancelWidth(context),
-                        // height: Style.ButtonCancelHeight(context),
-                        padding: EdgeInsets.all(Style.ButtonCancelPadding(context)),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(Style.ButtonExitBorderRadius(context)),
-                          border:
-                              Border.all(width: Style.WidthBorderImageContainer(context), color: Style.secondaryColor),
-                          color: Style.tertiaryColor,
-                        ),
-                        child: Text(
-                          'Cancelar',
-                          style: TextStyle(
-                            color: Style.secondaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: Style.height_10(context),
+                      SizedBox(
+                        height: Style.height_30(context),
+                      ),
+                      Row(
+                        //Espaçamento entre os Buttons
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          //Buttom de sair
+                          TextButton(
+                            onPressed: () async {
+                              _sair();
+                            },
+                            child: Container(
+                              width: Style.ButtonExitWidth(context),
+                              // height: Style.ButtonExitHeight(context),
+                              padding: EdgeInsets.all(
+                                  Style.ButtonExitPadding(context)),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      Style.ButtonExitBorderRadius(context)),
+                                  color: Style.primaryColor),
+                              child: Text(
+                                'Sair',
+                                style: TextStyle(
+                                  color: Style.tertiaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Style.height_10(context),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                          //Buttom para fechar o modal
+                          TextButton(
+                            onPressed: () {
+                              _closeModal();
+                            },
+                            child: Container(
+                              // width: Style.ButtonCancelWidth(context),
+                              // height: Style.ButtonCancelHeight(context),
+                              padding: EdgeInsets.all(
+                                  Style.ButtonCancelPadding(context)),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    Style.ButtonExitBorderRadius(context)),
+                                border: Border.all(
+                                    width: Style.WidthBorderImageContainer(
+                                        context),
+                                    color: Style.secondaryColor),
+                                color: Style.tertiaryColor,
+                              ),
+                              child: Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  color: Style.secondaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Style.height_10(context),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ), 
-            onWillPop: () async {
-              closeModal();
-              return true;
-            }
-            ) 
-            
-        );
+                onWillPop: () async {
+                  closeModal();
+                  return true;
+                }));
       },
     );
   }
@@ -757,10 +969,109 @@ class _HomeState extends State<Home> {
   }
 
   void _sair() {
-   Navigator.of(context).pushAndRemoveUntil(
+    Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) => const LoginPage(),
         ),
         (route) => false);
+  }
+
+  Future<void> fetchDataTablePriceCompany() async {
+    Map<String, dynamic>? fetchedDataTablePriceCompany =
+        await DataServiceTablePrice.fetchDataTablePrice(
+            context, urlBasic, empresaid);
+    if (fetchedDataTablePriceCompany != null) {
+      setState(() {
+        tabelapreco_id_company =
+            fetchedDataTablePriceCompany['tabelapreco_id'] ?? '';
+      });
+    }
+  }
+
+  Future<void> fetchDataTablePriceName() async {
+    Map<String, dynamic>? fetchedDataTablePriceName =
+        await DataServiceTablePriceName.fetchDataTablePriceName(
+            context, urlBasic, tabelapreco_id_company);
+    if (fetchedDataTablePriceName != null) {
+      setState(() {
+        tableprice = fetchedDataTablePriceName['nome'] ?? '';
+        print('nome tabelapreco: $tableprice');
+      });
+    }
+  }
+
+  Future<void> fetchDataTablePriceId() async {
+    Map<String, dynamic>? fetchedDataTablePriceId =
+        await DataServiceTablePriceId.fetchDataTablePriceId(
+            context, urlBasic, tableprice);
+    if (fetchedDataTablePriceId != null) {
+      setState(() {
+        tabelapreco_id = fetchedDataTablePriceId['tabelapreco_id'] ?? '';
+        print('tabelapreco_id: $tabelapreco_id');
+      });
+    }
+  }
+
+  Future<void> fetchDataTablePrice() async {
+    Map<dynamic, dynamic>? fetchedDataTablePrice =
+        await DataServiceAlterTableEndpoint.fetchDataAlterTableEndpoint(
+            context, urlBasic, empresaid);
+    print(fetchedDataTablePrice);
+    if (fetchedDataTablePrice != null) {
+      setState(() {
+        flagpermitiralterartabela =
+            fetchedDataTablePrice['flagpermitiralterartabela'] ?? '';
+      });
+    }
+  }
+
+  Future<void> fetchDataListTablesPrice() async {
+    List<ListTablePrices>? fetchedData =
+        await DataServiceListTablePrices.fetchDataListTablePrices(
+            context, urlBasic, token);
+    if (fetchedData != null) {
+      setState(() {
+        tables_price = fetchedData;
+      });
+    }
+  }
+
+  List<PopupMenuItem<String>> buildMenuItems(
+      List<ListTablePrices> tablesPrice) {
+    List<PopupMenuItem<String>> staticItems = [
+      PopupMenuItem(
+          enabled: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Style.height_5(context)),
+                    color: Style.errorColor),
+                child: IconButton(
+                  onPressed: () {
+                    _closeModal();
+                  },
+                  icon:
+                      Image.asset('assets/images/icon_remove/icon_remove.png'),
+                  style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor)),
+                ),
+              ),
+            ],
+          )),
+    ];
+    const PopupMenuDivider();
+
+    List<PopupMenuItem<String>> dynamicItems = tablesPrice.map((tables) {
+      return PopupMenuItem<String>(
+        value: tables.nome,
+        child: Text((tables.nome).toString()),
+      );
+    }).toList();
+
+    return staticItems + dynamicItems;
   }
 }
