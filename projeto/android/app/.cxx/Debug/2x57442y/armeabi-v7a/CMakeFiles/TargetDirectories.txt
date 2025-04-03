@@ -1,0 +1,2 @@
+C:/Users/joaob/OneDrive/Documentos/GitHub/Pre-vendas-Mobile/projeto/android/app/.cxx/Debug/2x57442y/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/joaob/OneDrive/Documentos/GitHub/Pre-vendas-Mobile/projeto/android/app/.cxx/Debug/2x57442y/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/pages/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 
 class FinishOrder {
@@ -19,59 +20,111 @@ class FinishOrder {
 
 class DataServiceFinishOrder {
   static Future<Map<String?, String?>> fetchDataFinishOrder(
-    BuildContext context,
-    String urlBasic,
-    String token,
-    String prevendaid,
-    String numpedido,
-  ) async {
+      BuildContext context,
+      String urlBasic,
+      String token,
+      String prevendaid,
+      String numpedido,
+      bool FlagGerarPedido) async {
     String? message;
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
-      var response = await http.post(urlPost, headers: {'auth-token': token});
+      var urlGerarPedido =
+          Uri.parse('$urlBasic/ideia/prevenda/gerarpedido/$prevendaid');
 
-      if (response.statusCode == 200) {
-        var jsonData = json.decode(response.body);
+      if (FlagGerarPedido == true) {
+        var responsePedido =
+            await http.post(urlGerarPedido, headers: {'auth-token': token});
+        var response = await http.post(urlPost, headers: {'auth-token': token});
 
-        if (jsonData.containsKey('success') && jsonData['success'] == true) {
-          message = jsonData['message'];
+        if (response.statusCode == 200 && responsePedido.statusCode == 200) {
+          var jsonData = json.decode(response.body);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-              content: Text(
-                'Pedido finalizado com sucesso!',
-                style: TextStyle(
-                  fontSize: Style.SaveUrlMessageSize(context),
-                  color: Style.tertiaryColor,
+          if (jsonData.containsKey('success') && jsonData['success'] == true) {
+            message = jsonData['message'];
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+                content: Text(
+                  'Pedido finalizado com sucesso!',
+                  style: TextStyle(
+                    fontSize: Style.SaveUrlMessageSize(context),
+                    color: Style.tertiaryColor,
+                  ),
                 ),
+                backgroundColor: Style.sucefullColor,
               ),
-              backgroundColor: Style.sucefullColor,
-            ),
-          );
+            );
 
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const Home()));
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const Home()));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+                content: Text(
+                  'Este pedido já foi finalizado ⚠️',
+                  style: TextStyle(
+                    fontSize: Style.SaveUrlMessageSize(context),
+                    color: Style.tertiaryColor,
+                  ),
+                ),
+                backgroundColor: Style.warningColor,
+              ),
+            );
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-              content: Text(
-                'Este pedido já foi finalizado ⚠️',
-                style: TextStyle(
-                  fontSize: Style.SaveUrlMessageSize(context),
-                  color: Style.tertiaryColor,
-                ),
-              ),
-              backgroundColor: Style.warningColor,
-            ),
-          );
+          print('Erro ao carregar dados: ${response.statusCode}');
         }
       } else {
-        print('Erro ao carregar dados: ${response.statusCode}');
+        var response = await http.post(urlPost, headers: {'auth-token': token});
+
+        if (response.statusCode == 200) {
+          var jsonData = json.decode(response.body);
+
+          if (jsonData.containsKey('success') && jsonData['success'] == true) {
+            message = jsonData['message'];
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+                content: Text(
+                  'Pedido finalizado com sucesso!',
+                  style: TextStyle(
+                    fontSize: Style.SaveUrlMessageSize(context),
+                    color: Style.tertiaryColor,
+                  ),
+                ),
+                backgroundColor: Style.sucefullColor,
+              ),
+            );
+
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const Home()));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+                content: Text(
+                  'Este pedido já foi finalizado ⚠️',
+                  style: TextStyle(
+                    fontSize: Style.SaveUrlMessageSize(context),
+                    color: Style.tertiaryColor,
+                  ),
+                ),
+                backgroundColor: Style.warningColor,
+              ),
+            );
+          }
+        } else {
+          print('Erro ao carregar dados: ${response.statusCode}');
+        }
       }
     } catch (e) {
       print('Erro durante a requisição OrderDetails: $e');
@@ -83,19 +136,23 @@ class DataServiceFinishOrder {
 
 class DataServiceFinishOrderPrintLocal {
   static Future<Map<String?, String?>> fetchDataFinishOrderPrintLocal(
-    BuildContext context,
-    String urlBasic,
-    String token,
-    String prevendaid,
-    String numpedido,
-  ) async {
+      BuildContext context,
+      String urlBasic,
+      String token,
+      String prevendaid,
+      String numpedido,
+      bool FlagGerarPedido) async {
     String? message;
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
-      var response = await http.post(urlPost, headers: {'auth-token': token});
+      var urlGerarPedido =
+          Uri.parse('$urlBasic/ideia/prevenda/gerarpedido/$prevendaid');
 
-      if (response.statusCode == 200) {
+      if (FlagGerarPedido == true) {
+        var responsePedido = await http.post(urlGerarPedido, headers: {'auth-token': token});
+          var response = await http.post(urlPost, headers: {'auth-token': token});
+        if (response.statusCode == 200 && responsePedido.statusCode == 200) {
         var jsonData = json.decode(response.body);
 
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
@@ -165,6 +222,82 @@ class DataServiceFinishOrderPrintLocal {
       } else {
         print('Erro ao carregar dados: ${response.statusCode}');
       }
+      } else {
+        
+          var response = await http.post(urlPost, headers: {'auth-token': token});
+        if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+
+        if (jsonData.containsKey('success') && jsonData['success'] == true) {
+          message = jsonData['message'];
+
+          var urlPrint =
+              Uri.parse('$urlBasic/ideia/prevenda/impressao/$prevendaid');
+          var responsePrint =
+              await http.get(urlPrint, headers: {'auth-token': token});
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Imprimindo pedido 🖨️',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.warningColor,
+            ),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Pedido finalizado com sucesso!',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.sucefullColor,
+            ),
+          );
+
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const Home()));
+
+          // Chama a função para imprimir com intervalo
+          await _imprimirComIntervalo(
+            numpedido: numpedido,
+            jsonData: jsonData,
+            intervalo: const Duration(seconds: 5),
+            repeticoes: 2,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Este pedido já foi finalizado ⚠️',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.warningColor,
+            ),
+          );
+        }
+      } else {
+        print('Erro ao carregar dados: ${response.statusCode}');
+      }
+      }
+
+      
     } catch (e) {
       print('Erro durante a requisição OrderDetails: $e');
     }
@@ -197,17 +330,102 @@ class DataServiceFinishOrderPrintLocal {
 
 class DataServiceFinishOrderPrintNetwork {
   static Future<Map<String?, String?>> fetchDataFinishOrderPrintNetwork(
-    BuildContext context,
-    String urlBasic,
-    String token,
-    String prevendaid,
-    String numpedido,
-  ) async {
+      BuildContext context,
+      String urlBasic,
+      String token,
+      String prevendaid,
+      String numpedido,
+      bool FlagGerarPedido) async {
     String? message;
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
-      var response = await http.post(urlPost, headers: {'auth-token': token});
+      var urlGerarPedido =
+          Uri.parse('$urlBasic/ideia/prevenda/gerarpedido/$prevendaid');
+
+      if (FlagGerarPedido) {
+        var responsePedido =
+            await http.post(urlGerarPedido, headers: {'auth-token': token});
+        var response = await http.post(urlPost, headers: {'auth-token': token});
+
+      if (response.statusCode == 200 && responsePedido.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+
+        if (jsonData.containsKey('success') && jsonData['success'] == true) {
+          message = jsonData['message'];
+
+          var urlPrint = Uri.parse(
+              '$urlBasic/ideia/prevenda/impressaocompleta/$prevendaid');
+          var responsePrint =
+              await http.get(urlPrint, headers: {'auth-token': token});
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Imprimindo pedido 🖨️',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.warningColor,
+            ),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Pedido finalizado!',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.sucefullColor,
+            ),
+          );
+
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const Home()));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Este pedido já foi finalizado ⚠️',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.warningColor,
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Erro ao finalizar pedido - ${response.statusCode} - ${response.body}',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
+              ),
+            ),
+            backgroundColor: Style.errorColor,
+          ),
+        );
+        print('Erro ao carregar dados: ${response.statusCode}');
+      }
+      } else{
+        var response = await http.post(urlPost, headers: {'auth-token': token});
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -285,6 +503,8 @@ class DataServiceFinishOrderPrintNetwork {
         );
         print('Erro ao carregar dados: ${response.statusCode}');
       }
+      }
+      
     } catch (e) {
       print('Erro durante a requisição OrderDetails: $e');
     }

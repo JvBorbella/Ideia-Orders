@@ -94,6 +94,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
   final _ufcontroller = TextEditingController();
   final _logradourocontroller = TextEditingController();
 
+  bool FlagGerarPedido = false;
+
   bool isLoading = true;
   @override
   void initState() {

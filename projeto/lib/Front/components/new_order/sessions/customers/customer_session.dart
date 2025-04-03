@@ -74,6 +74,8 @@ class _CustomerSessionState extends State<CustomerSession> {
   bool isLoadingSearchCPF = false;
   bool isLoadingSearchCEP = false;
 
+  bool FlagGerarPedido = false;
+
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
   final _bairrocontroller = TextEditingController();
@@ -623,6 +625,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                 token,
                                 widget.prevendaid,
                                 widget.numpedido,
+                                FlagGerarPedido
                                 // _nomecontroller.text,
                                 // _cpfcontroller.text,
                                 // _telefonecontatocontroller.text,
@@ -664,6 +667,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                 token,
                                 widget.prevendaid,
                                 widget.numpedido,
+                                FlagGerarPedido
                                 // _nomecontroller.text,
                                 // _cpfcontroller.text,
                                 // _telefonecontatocontroller.text,
@@ -709,6 +713,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                 token,
                                 widget.prevendaid,
                                 widget.numpedido.toString(),
+                                FlagGerarPedido
                                 // _nomecontroller.text,
                                 // _cpfcontroller.text,
                                 // _telefonecontatocontroller.text,
@@ -825,12 +830,21 @@ class _CustomerSessionState extends State<CustomerSession> {
     });
   }
 
+  Future<void> _loadSavedFlagGerarPedido() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedFlagGerarPedido = sharedPreferences.getBool('flagGerarPedido') ?? false;
+    setState(() {
+      FlagGerarPedido = savedFlagGerarPedido;
+    });
+  }
+
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
       _loadSavedToken(),
       _loadSavedIbge(),
-      _loadSavedCheckCPF()
+      _loadSavedCheckCPF(),
+      _loadSavedFlagGerarPedido()
     ]);
 
     await Future.wait([

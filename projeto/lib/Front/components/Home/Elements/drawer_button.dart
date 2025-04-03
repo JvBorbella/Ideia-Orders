@@ -25,6 +25,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   bool isCheckedProduct = false;
 
   bool flagService = false;
+  bool flagGerarPedido = false;
 
   @override
   void didChangeDependencies() {
@@ -265,6 +266,53 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     )
                   ],
                 ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: flagGerarPedido,
+                      onChanged: (value) async {
+                        setState(() {
+                          flagGerarPedido = value!;
+                        });
+                        SharedPreferences sharedPreferences =
+                            await SharedPreferences.getInstance();
+                        await sharedPreferences.setBool(
+                            'flagGerarPedido', flagGerarPedido);
+                      },
+                    ),
+                   Container(
+                      width: Style.width_225(context),
+                      child: Text(
+                        'Gerar pedido de venda ao finalizar pré-venda',
+                        style: TextStyle(
+                            color: Style.primaryColor,
+                            fontSize: Style.height_12(context)),
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                      ),
+                    ),
+                    Container(
+                      width: Style.height_30(context),
+                      height: Style.height_15(context),
+                      decoration: BoxDecoration(
+                        color: Style.primaryColor,
+                        borderRadius: BorderRadius.circular(
+                          Style.height_10(context)
+                        )
+                      ),
+                      child: Center(
+                        child: Text(
+                        'Beta',
+                        style: TextStyle(
+                          color: Style.tertiaryColor,
+                          fontSize: Style.height_8(context)
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      ) 
+                    )
+                  ],
+                ),
               ],
             )),
             onWillPop: () async {
@@ -284,6 +332,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       _loadSavedImage(),
       _loadSavedUrlBasic(),
       _loadSavedEmail(),
+      _loadSavedFlagGerarPedido(),
     ]);
   }
 
@@ -292,6 +341,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
     bool savedFlagService = sharedPreferences.getBool('flagService') ?? false; // Carrega o valor salvo (padrão: false)
     setState(() {
       flagService = savedFlagService; // Atualiza o estado com o valor salvo
+    });
+  }
+
+  Future<void> _loadSavedFlagGerarPedido() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedFlagGerarPedido = sharedPreferences.getBool('flagGerarPedido') ?? false;
+    setState(() {
+      flagGerarPedido = savedFlagGerarPedido;
     });
   }
 
