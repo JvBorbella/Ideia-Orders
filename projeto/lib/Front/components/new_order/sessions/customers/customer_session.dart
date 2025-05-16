@@ -1,4 +1,4 @@
-import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
+// import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:projeto/back/finish_order.dart';
@@ -152,9 +152,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                   controller: _cpfcontroller,
                   isLoadingButton: isLoadingSearchCPF,
                   inputFormatters: [
-                    CnpjCpfFormatter(
-                      eDocumentType: EDocumentType.BOTH,
-                    )
+                    // CnpjCpfFormatter(
+                    //   eDocumentType: EDocumentType.BOTH,
+                    // )
                   ],
                   textAlign: TextAlign.start,
                   textInputAction: TextInputAction.unspecified,

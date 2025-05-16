@@ -5,12 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:flutter_pdfview/flutter_pdfview.dart';
+// import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:projeto/front/components/product_page/elements/product_add.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/pages/order_page.dart';
 import 'package:share_plus/share_plus.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:barcode/barcode.dart';
 import 'package:http/http.dart' as http;
@@ -225,9 +226,9 @@ class PdfViewerScreen extends StatelessWidget {
       ),
       // backgroundColor: Style.quarantineColor,
 
-      body: PDFView(
-        filePath: filePath,
-      ),
+      // body: PDFView(
+      //   filePath: filePath,
+      // ),
     ));
   }
 
