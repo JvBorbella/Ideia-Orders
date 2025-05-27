@@ -84,6 +84,7 @@ class _ProductAddState extends State<ProductAdd> {
         return Center(
             child: SingleChildScrollView(
                 child: AlertDialog(
+                  backgroundColor: Style.defaultColor,
                     alignment: Alignment.center,
                     content: Container(
                         child:

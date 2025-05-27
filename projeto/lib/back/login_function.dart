@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-// import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/pages/home.dart';
@@ -26,7 +26,7 @@ class LoginFunction {
       //username: recebe o valor digitado no input de usuário na tela de login.
       var password = passwordController.text;
       // //password: recebe o valor digitado no input de senha na tela de login.
-      // var md5Password = md5.convert(utf8.encode(password)).toString();
+      var md5Password = md5.convert(utf8.encode(password)).toString();
       //md5Password: criptografa a senha digitada em md5 Hash pois o servidor só aceita requisição com a senha já criptografada.
       var authorization = Uri.parse('$url/ideia/secure/login');
       //authorization: define a url que fará a requisição post ao servidor.
@@ -37,7 +37,7 @@ class LoginFunction {
         headers: {
           //passando os parâmetros na header da requisição.
           'auth-user': username,
-          'auth-pass': password,
+          'auth-pass': md5Password,
         },
       );
       print(password);

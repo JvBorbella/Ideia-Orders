@@ -3,6 +3,7 @@ import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:projeto/back/alter_table_endpoint.dart';
+import 'package:projeto/back/company_list.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/list_table_prices.dart';
 import 'package:projeto/back/new_order.dart';
@@ -11,8 +12,9 @@ import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/back/products_endpoint.dart';
 import 'package:projeto/back/table_price.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
-import 'package:projeto/front/components/Home/Elements/drawer_button.dart';
+
 import 'package:projeto/front/components/Home/Elements/order_container.dart';
+import 'package:projeto/front/components/home/elements/drawer_button.dart';
 import 'package:projeto/front/components/home/elements/modal_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
@@ -94,6 +96,10 @@ class _HomeState extends State<Home> {
   final _nomecontroller = TextEditingController();
   final _telefonecontatocontroller = TextEditingController();
 
+  String empresa_id = '';
+  String empresa_nome = '';
+  String empresa_codigo = '';
+
   String formatTel(String telefonecontato) {
     if (telefonecontato.length > 10) {
       // CPF
@@ -125,6 +131,8 @@ class _HomeState extends State<Home> {
         builder: (context) {
           return StatefulBuilder(builder: (context, setModalState) {
             return AlertDialog(
+              contentPadding: EdgeInsets.all(0),
+              backgroundColor: Style.defaultColor,
               content: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -151,209 +159,220 @@ class _HomeState extends State<Home> {
                     SizedBox(
                       height: Style.height_10(context),
                     ),
-                    Input(
-                      text: 'CPF',
-                      type: TextInputType.text,
-                      textAlign: TextAlign.start,
-                      controller: _cpfcontroller,
-                      inputFormatters: [
-                        CnpjCpfFormatter(
-                          eDocumentType: EDocumentType.BOTH,
-                        )
-
-                        /// Máscara de CPF
-                      ],
-                      textInputAction: TextInputAction.unspecified,
-                      isLoadingButton: isLoadingSearch,
-                      IconButton: IconButton(
-                        onPressed: () async {
-                          setModalState(
-                            () {
-                              isLoadingSearch = true;
-                            },
-                          );
-                          await GetCliente.getcliente(
-                            context,
-                            urlBasic,
-                            _nomecontroller,
-                            _cpfcontroller,
-                            _telefonecontatocontroller,
-                            _cepcontroller,
-                            _logradourocontroller,
-                            _ufcontroller,
-                            _bairrocontroller,
-                            _numerocontroller,
-                            _complementocontroller,
-                            _cidadecontroller,
-                            _emailcontroller,
-                          );
-                          setModalState(
-                            () {
-                              isLoadingSearch = false;
-                            },
-                          );
-                        },
-                        icon: const Icon(Icons.person_search),
-                      ),
-                    ),
-                    SizedBox(
-                      height: Style.height_10(context),
-                    ),
-                    Input(
-                      text: 'Telefone',
-                      type: TextInputType.text,
-                      controller: _telefonecontatocontroller,
-                      textAlign: TextAlign.start,
-                      textInputAction: TextInputAction.unspecified,
-                      inputFormatters: [
-                        MaskedInputFormatter(
-                            '(00) 00000-0000'), // Máscara de CPF
-                      ],
-                    ),
-                    SizedBox(
-                      height: Style.height_10(context),
-                    ),
-                    Input(
-                      text: 'Nome do cliente',
-                      type: TextInputType.text,
-                      controller: _nomecontroller,
-                      textInputAction: TextInputAction.unspecified,
-                      textAlign: TextAlign.start,
-                    ),
-                    SizedBox(
-                      height: Style.height_20(context),
-                    ),
-                    if (flagpermitiralterartabela == '1')
-                      Row(
+                    Container(
+                      padding: EdgeInsets.all(Style.height_12(context)),
+                      child: Column(
                         children: [
-                          SizedBox(
-                            height: Style.height_30(context),
-                            child: PopupMenuButton<String>(
-                              itemBuilder: (BuildContext context) =>
-                                  buildMenuItems(tables_price),
-                              onSelected: (value) async {
-                                setModalState(() {
-                                  tableprice = value;
-                                  print(tableprice);
-                                });
-                                await DataServiceTablePriceId
-                                    .fetchDataTablePriceId(
-                                        context, urlBasic, tableprice);
-                                setState(() {
-                                  tableprice = value;
-                                  fetchDataTablePriceId();
-                                  print(tabelapreco_id);
-                                });
+                          Input(
+                            text: 'CPF',
+                            type: TextInputType.text,
+                            textAlign: TextAlign.start,
+                            controller: _cpfcontroller,
+                            inputFormatters: [
+                              CnpjCpfFormatter(
+                                eDocumentType: EDocumentType.BOTH,
+                              )
+
+                              /// Máscara de CPF
+                            ],
+                            textInputAction: TextInputAction.unspecified,
+                            isLoadingButton: isLoadingSearch,
+                            IconButton: IconButton(
+                              onPressed: () async {
+                                setModalState(
+                                  () {
+                                    isLoadingSearch = true;
+                                  },
+                                );
+                                await GetCliente.getcliente(
+                                  context,
+                                  urlBasic,
+                                  _nomecontroller,
+                                  _cpfcontroller,
+                                  _telefonecontatocontroller,
+                                  _cepcontroller,
+                                  _logradourocontroller,
+                                  _ufcontroller,
+                                  _bairrocontroller,
+                                  _numerocontroller,
+                                  _complementocontroller,
+                                  _cidadecontroller,
+                                  _emailcontroller,
+                                );
+                                setModalState(
+                                  () {
+                                    isLoadingSearch = false;
+                                  },
+                                );
                               },
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.price_change_rounded,
-                                      color: Style.primaryColor,
-                                      size: Style.height_20(context),
-                                    ),
-                                    SizedBox(
-                                      width: Style.height_2(context),
-                                    ),
-                                    Container(
-                                      width: Style.width_150(context),
-                                      child: Text(
-                                        tableprice.isEmpty
-                                            ? 'Tabela de Preço'
-                                            : tableprice,
-                                        style: TextStyle(
-                                          color: Style.secondaryColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: Style.height_12(context),
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow
-                                            .clip, // corta o texto no limite da largura
-                                        softWrap:
-                                            true, // permite a quebra de linha conforme necessário
-                                      ),
-                                    ),
-                                  ]),
+                              icon: const Icon(Icons.person_search),
                             ),
                           ),
-                        ],
-                      )
-                    else
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            // width: 150,
-                            child: Text(
-                              tableprice,
-                              style: TextStyle(
-                                color: Style.quarantineColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: Style.height_12(context),
-                              ),
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow
-                                  .clip, // corta o texto no limite da largura
-                              softWrap:
-                                  true, // permite a quebra de linha conforme necessário
+                          SizedBox(
+                            height: Style.height_10(context),
+                          ),
+                          Input(
+                            text: 'Telefone',
+                            type: TextInputType.text,
+                            controller: _telefonecontatocontroller,
+                            textAlign: TextAlign.start,
+                            textInputAction: TextInputAction.unspecified,
+                            inputFormatters: [
+                              MaskedInputFormatter(
+                                  '(00) 00000-0000'), // Máscara de CPF
+                            ],
+                          ),
+                          SizedBox(
+                            height: Style.height_10(context),
+                          ),
+                          Input(
+                            text: 'Nome do cliente',
+                            type: TextInputType.text,
+                            controller: _nomecontroller,
+                            textInputAction: TextInputAction.unspecified,
+                            textAlign: TextAlign.start,
+                          ),
+                          SizedBox(
+                            height: Style.height_20(context),
+                          ),
+                          if (flagpermitiralterartabela == '1')
+                            Row(
+                              children: [
+                                SizedBox(
+                                  height: Style.height_30(context),
+                                  child: PopupMenuButton<String>(
+                                    itemBuilder: (BuildContext context) =>
+                                        buildMenuItems(tables_price),
+                                    onSelected: (value) async {
+                                      setModalState(() {
+                                        tableprice = value;
+                                        print(tableprice);
+                                      });
+                                      await DataServiceTablePriceId
+                                          .fetchDataTablePriceId(
+                                              context, urlBasic, tableprice);
+                                      setState(() {
+                                        tableprice = value;
+                                        fetchDataTablePriceId();
+                                        print(tabelapreco_id);
+                                      });
+                                    },
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.price_change_rounded,
+                                            color: Style.primaryColor,
+                                            size: Style.height_20(context),
+                                          ),
+                                          SizedBox(
+                                            width: Style.height_2(context),
+                                          ),
+                                          Container(
+                                            width: Style.width_150(context),
+                                            child: Text(
+                                              tableprice.isEmpty
+                                                  ? 'Tabela de Preço'
+                                                  : tableprice,
+                                              style: TextStyle(
+                                                color: Style.secondaryColor,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize:
+                                                    Style.height_12(context),
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              overflow: TextOverflow
+                                                  .clip, // corta o texto no limite da largura
+                                              softWrap:
+                                                  true, // permite a quebra de linha conforme necessário
+                                            ),
+                                          ),
+                                        ]),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  // width: 150,
+                                  child: Text(
+                                    tableprice,
+                                    style: TextStyle(
+                                      color: Style.quarantineColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: Style.height_12(context),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow
+                                        .clip, // corta o texto no limite da largura
+                                    softWrap:
+                                        true, // permite a quebra de linha conforme necessário
+                                  ),
+                                )
+                              ],
                             ),
+                          SizedBox(
+                            height: Style.height_10(context),
+                          ),
+                          RegisterButton(
+                            text: 'Abrir Pedido',
+                            color: Style.primaryColor,
+                            width: Style.width_150(context),
+                            isLoadingButton: isLoadingButton,
+                            onPressed: () async {
+                              setModalState(() {
+                                isLoadingButton = true;
+                                print(isLoadingButton);
+                              });
+                              final data =
+                                  await DataServiceCliente2.fetchDataCliente2(
+                                      urlBasic, _cpfcontroller.text, token);
+                              var pessoa_id = data['pessoa_id'].toString();
+                              if (flagpermitiralterartabela == '1') {
+                                await DataServiceNewOrder.sendDataOrder(
+                                    context,
+                                    urlBasic,
+                                    token,
+                                    _cpfcontroller.text,
+                                    _telefonecontatocontroller.text,
+                                    _nomecontroller.text,
+                                    pessoa_id,
+                                    tabelapreco_id);
+                              } else {
+                                await DataServiceNewOrder.sendDataOrder(
+                                    context,
+                                    urlBasic,
+                                    token,
+                                    _cpfcontroller.text,
+                                    _telefonecontatocontroller.text,
+                                    _nomecontroller.text,
+                                    pessoa_id,
+                                    tabelapreco_id_company);
+                              }
+                              fetchDataOrders(
+                                  ascending: true, flagFilter: flagFilter);
+                              setState(() {
+                                selectedOptionChild =
+                                    _getFilterText(flagFilter);
+                              });
+                              setModalState(() {
+                                isLoadingButton = false;
+                                print(isLoadingButton);
+                              });
+                              _closeModal();
+                              _cpfcontroller.clear();
+                              _nomecontroller.clear();
+                              _telefonecontatocontroller.clear();
+                            },
                           )
                         ],
                       ),
-                    SizedBox(
-                      height: Style.height_10(context),
-                    ),
-                    RegisterButton(
-                      text: 'Abrir Pedido',
-                      color: Style.primaryColor,
-                      width: Style.width_150(context),
-                      isLoadingButton: isLoadingButton,
-                      onPressed: () async {
-                        setModalState(() {
-                          isLoadingButton = true;
-                          print(isLoadingButton);
-                        });
-                        final data =
-                            await DataServiceCliente2.fetchDataCliente2(
-                                urlBasic, _cpfcontroller.text, token);
-                        var pessoa_id = data['pessoa_id'].toString();
-                        if (flagpermitiralterartabela == '1') {
-                          await DataServiceNewOrder.sendDataOrder(
-                              context,
-                              urlBasic,
-                              token,
-                              _cpfcontroller.text,
-                              _telefonecontatocontroller.text,
-                              _nomecontroller.text,
-                              pessoa_id,
-                              tabelapreco_id);
-                        } else {
-                          await DataServiceNewOrder.sendDataOrder(
-                              context,
-                              urlBasic,
-                              token,
-                              _cpfcontroller.text,
-                              _telefonecontatocontroller.text,
-                              _nomecontroller.text,
-                              pessoa_id,
-                              tabelapreco_id_company);
-                        }
-                        fetchDataOrders(
-                            ascending: true, flagFilter: flagFilter);
-                        setState(() {
-                          selectedOptionChild = _getFilterText(flagFilter);
-                        });
-                        setModalState(() {
-                          isLoadingButton = false;
-                          print(isLoadingButton);
-                        });
-                        _closeModal();
-                        _cpfcontroller.clear();
-                        _nomecontroller.clear();
-                        _telefonecontatocontroller.clear();
-                      },
                     )
                     // TextButton(
                     //   onPressed: () async {
@@ -425,9 +444,11 @@ class _HomeState extends State<Home> {
         child: WillPopScope(
             child: Scaffold(
               drawer: Drawer(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: CustomDrawer(),
-              ),
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: CustomDrawer(
+                    empresa_codigo: empresa_codigo,
+                    empresa_nome: empresa_nome,
+                  )),
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.endFloat,
               floatingActionButton: SizedBox(
@@ -746,6 +767,7 @@ class _HomeState extends State<Home> {
     // await _loadSavedFlagPermiteAlterTable();
     await fetchDataListTablesPrice();
     // await _loadSavedFlagPermiteAlterTable();
+    await fetchDataCompany();
     print('flagpermitiralterartabela: $flagpermitiralterartabela');
     print('FLAGFILTER: $flagFilter');
     await Future.wait(
@@ -1028,7 +1050,7 @@ class _HomeState extends State<Home> {
   Future<void> fetchDataListTablesPrice() async {
     List<ListTablePrices>? fetchedData =
         await DataServiceListTablePrices.fetchDataListTablePrices(
-            context, urlBasic, token);
+            context, urlBasic, empresaid, token);
     if (fetchedData != null) {
       setState(() {
         tables_price = fetchedData;
@@ -1073,5 +1095,28 @@ class _HomeState extends State<Home> {
     }).toList();
 
     return staticItems + dynamicItems;
+  }
+
+  List<CompanyList> company = [];
+
+  Future<void> fetchDataCompany({bool? ascending}) async {
+    List<CompanyList>? fetchedData = await DataServiceCompany.fetchDataCompany(
+      context,
+      urlBasic,
+      empresaid,
+    );
+
+    if (fetchedData != null) {
+      setState(() {
+        company = fetchedData;
+      });
+      print(empresa_nome);
+      if (empresaid.isNotEmpty) {
+        setState(() {
+          empresa_nome = company.first.empresa_nome.toString();
+          empresa_codigo = company.first.empresa_codigo.toString();
+        });
+      }
+    }
   }
 }

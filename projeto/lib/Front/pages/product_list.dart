@@ -353,11 +353,12 @@ class _ProductListState extends State<ProductList> {
         _loadSavedToken(),
       ]);
       await fetchDataTablePrice();
-      await fetchDataServices();
+      await Future.wait([
+        fetchDataServices(),
+      ]);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(_focusNode);
       });
-     print('Services: $services');
     } else {
       await Future.wait(
           [_loadSavedUrlBasic(), _loadSavedToken(), _loadSavedFlagService()]);
@@ -394,6 +395,7 @@ class _ProductListState extends State<ProductList> {
       setState(() {
         services = fetchDataServices;
       });
+      print('Services: $services');
     }
     setState(() {
       isLoading = false;

@@ -5,7 +5,10 @@ import 'package:projeto/front/components/home/elements/modal_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomDrawer extends StatefulWidget {
-  const CustomDrawer({super.key});
+  final empresa_nome;
+  final empresa_codigo;
+
+  const CustomDrawer({Key? key, this.empresa_nome, this.empresa_codigo});
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -26,6 +29,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   bool flagService = false;
   bool flagGerarPedido = false;
+
+  String empresa_id = '';
 
   @override
   void didChangeDependencies() {
@@ -132,6 +137,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                           ),
                                         ],
                                       ),
+                                      if (empresa_id.isNotEmpty)
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${widget.empresa_codigo} - ${widget.empresa_nome}',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins-Medium',
+                                                fontSize: Style.EmailFontSize(
+                                                    context),
+                                                color: Style.tertiaryColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       Row(
                                         children: [
                                           Text(
@@ -333,6 +352,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       _loadSavedUrlBasic(),
       _loadSavedEmail(),
       _loadSavedFlagGerarPedido(),
+      _loadSavedEmpresa()
     ]);
   }
 
@@ -413,6 +433,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
     String savedEmail = sharedPreferences.getString('email') ?? '';
     setState(() {
       email = savedEmail;
+    });
+  }
+
+  Future<void> _loadSavedEmpresa() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedEmpresa = await sharedPreferences.getString('empresa_id') ?? '';
+    setState(() {
+      empresa_id = savedEmpresa;
     });
   }
 }
