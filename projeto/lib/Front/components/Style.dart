@@ -495,12 +495,28 @@ class Style {
     return MediaQuery.of(context).size.height * 0.56;
   }
 
+  static double height_380(BuildContext context) {
+    return MediaQuery.of(context).size.height * 0.608;
+  }
+
+  static double height_400(BuildContext context) {
+    return MediaQuery.of(context).size.height * 0.64;
+  }
+
+  static double height_420(BuildContext context) {
+    return MediaQuery.of(context).size.height * 0.672;
+  }
+
   static double width_250(BuildContext context) {
     return MediaQuery.of(context).size.width * 0.6944444444444444;
   }
 
   static double width_225(BuildContext context) {
     return MediaQuery.of(context).size.width * 0.625;
+  }
+
+  static double width_300(BuildContext context) {
+    return MediaQuery.of(context).size.width * 0.8333333333333333;
   }
 
   // static const double inputSpace = 25.0;

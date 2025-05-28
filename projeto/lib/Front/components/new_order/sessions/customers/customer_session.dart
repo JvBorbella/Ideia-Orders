@@ -8,9 +8,10 @@ import 'package:projeto/back/new_customer.dart';
 import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
-import 'package:projeto/front/components/Style.dart';
+
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
+import 'package:projeto/front/components/style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -583,7 +584,7 @@ class _CustomerSessionState extends State<CustomerSession> {
         modalContext = context;
         return SizedBox(
             //Configurações de tamanho e espaçamento do modal
-            height: Style.height_350(context),
+           height: Style.height_400(context),
             child: WillPopScope(
                 child: Container(
                   //Tamanho e espaçamento interno do modal
@@ -591,28 +592,51 @@ class _CustomerSessionState extends State<CustomerSession> {
                   margin: EdgeInsets.only(
                       left: Style.ModalMargin(context),
                       right: Style.ModalMargin(context)),
-                  padding: EdgeInsets.all(Style.InternalModalPadding(context)),
+                  //padding: EdgeInsets.all(Style.InternalModalPadding(context)),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(
                           Style.ModalBorderRadius(context))),
                   child: Column(
                     //Conteúdo interno do modal
                     children: [
-                      Row(
+                      Container(
+                        padding: EdgeInsets.all(
+                          Style.height_12(context)
+                        ),
+                        child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Como deseja finalizar este pedido?',
                             style: TextStyle(
-                              fontSize: Style.height_15(context),
-                              color: Style.primaryColor,
-                            ),
+                                fontSize: Style.height_12(context),
+                                color: Style.primaryColor,
+                                fontFamily: 'Poppins-Bold'),
                             overflow: TextOverflow.clip,
                             softWrap: true,
                           ),
+                          Container(
+                            width: Style.height_30(context),
+                            height: Style.height_30(context),
+                            decoration: BoxDecoration(
+                              color: Style.errorColor,
+                              borderRadius: BorderRadius.circular(
+                                Style.height_10(context)
+                              )
+                            ),
+                            child: IconButton(
+                                onPressed: () {
+                                  _closeModal();
+                                },
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Style.tertiaryColor,
+                                  size: Style.height_15(context),
+                                )
+                              ),
+                          )
                         ],
                       ),
-                      SizedBox(
-                        height: Style.height_30(context),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -620,29 +644,33 @@ class _CustomerSessionState extends State<CustomerSession> {
                           TextButton(
                             onPressed: () async {
                               await DataServiceFinishOrder.fetchDataFinishOrder(
-                                context,
-                                urlBasic,
-                                token,
-                                widget.prevendaid,
-                                widget.numpedido,
-                                FlagGerarPedido
-                                // _nomecontroller.text,
-                                // _cpfcontroller.text,
-                                // _telefonecontatocontroller.text,
-                                // widget.pessoaid
-                              );
+                                  context,
+                                  urlBasic,
+                                  token,
+                                  widget.prevendaid,
+                                  widget.numpedido,
+                                  FlagGerarPedido
+                                  );
                             },
                             child: Container(
-                              // width: Style.width_200(context),
-                              // height: Style.ButtonExitHeight(context),
+                              width: Style.width_300(context),
+                              height: Style.height_80(context),
                               padding: EdgeInsets.all(
                                   Style.ButtonExitPadding(context)),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                       Style.ButtonExitBorderRadius(context)),
                                   color: Style.primaryColor),
-                              child: Text(
-                                'Apenas Finalizar ✅',
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/finish_order.png',
+                                    height: Style.height_30(context),
+                                  ),
+                                  Text(
+                                'Apenas Finalizar >',
                                 style: TextStyle(
                                   color: Style.tertiaryColor,
                                   fontWeight: FontWeight.bold,
@@ -650,6 +678,8 @@ class _CustomerSessionState extends State<CustomerSession> {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
+                                ],
+                              ) 
                             ),
                           ),
                         ],
@@ -662,34 +692,33 @@ class _CustomerSessionState extends State<CustomerSession> {
                             onPressed: () async {
                               await DataServiceFinishOrderPrintLocal
                                   .fetchDataFinishOrderPrintLocal(
-                                context,
-                                urlBasic,
-                                token,
-                                widget.prevendaid,
-                                widget.numpedido,
-                                FlagGerarPedido
-                                // _nomecontroller.text,
-                                // _cpfcontroller.text,
-                                // _telefonecontatocontroller.text,
-                                // widget.pessoaid
-                              );
+                                      context,
+                                      urlBasic,
+                                      token,
+                                      widget.prevendaid,
+                                      widget.numpedido,
+                                      FlagGerarPedido
+                                      );
                             },
                             child: Container(
-                              // width: Style.ButtonCancelWidth(context),
-                              // height: Style.ButtonCancelHeight(context),
+                              width: Style.width_300(context),
+                              height: Style.height_80(context),
                               padding: EdgeInsets.all(
-                                  Style.ButtonCancelPadding(context)),
+                                  Style.ButtonExitPadding(context)),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    Style.ButtonExitBorderRadius(context)),
-                                border: Border.all(
-                                    width: Style.WidthBorderImageContainer(
-                                        context),
-                                    color: Style.tertiaryColor),
-                                color: Style.primaryColor,
-                              ),
-                              child: Text(
-                                'Finalizar e imprimir local 🖨️',
+                                  borderRadius: BorderRadius.circular(
+                                      Style.ButtonExitBorderRadius(context)),
+                                  color: Style.primaryColor),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/finish_local.png',
+                                    height: Style.height_30(context),
+                                  ),
+                                  Text(
+                                'Finalizar e imprimir local >',
                                 style: TextStyle(
                                   color: Style.tertiaryColor,
                                   fontWeight: FontWeight.bold,
@@ -697,6 +726,8 @@ class _CustomerSessionState extends State<CustomerSession> {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
+                                ],
+                              ) 
                             ),
                           ),
                         ],
@@ -708,34 +739,33 @@ class _CustomerSessionState extends State<CustomerSession> {
                             onPressed: () async {
                               await DataServiceFinishOrderPrintNetwork
                                   .fetchDataFinishOrderPrintNetwork(
-                                context,
-                                urlBasic,
-                                token,
-                                widget.prevendaid,
-                                widget.numpedido.toString(),
-                                FlagGerarPedido
-                                // _nomecontroller.text,
-                                // _cpfcontroller.text,
-                                // _telefonecontatocontroller.text,
-                                // widget.pessoaid
-                              );
+                                      context,
+                                      urlBasic,
+                                      token,
+                                      widget.prevendaid,
+                                      widget.numpedido.toString(),
+                                      FlagGerarPedido
+                                      );
                             },
                             child: Container(
-                              // width: Style.ButtonCancelWidth(context),
-                              // height: Style.ButtonCancelHeight(context),
+                              width: Style.width_300(context),
+                              height: Style.height_80(context),
                               padding: EdgeInsets.all(
-                                  Style.ButtonCancelPadding(context)),
+                                  Style.ButtonExitPadding(context)),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    Style.ButtonExitBorderRadius(context)),
-                                border: Border.all(
-                                    width: Style.WidthBorderImageContainer(
-                                        context),
-                                    color: Style.primaryColor),
-                                color: Style.primaryColor,
-                              ),
-                              child: Text(
-                                'Finalizar e imprimir na rede ⇅',
+                                  borderRadius: BorderRadius.circular(
+                                      Style.ButtonExitBorderRadius(context)),
+                                  color: Style.primaryColor),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/finish_network.png',
+                                    height: Style.height_30(context),
+                                  ),
+                                  Text(
+                                'Finalizar e imprimir na rede >',
                                 style: TextStyle(
                                   color: Style.tertiaryColor,
                                   fontWeight: FontWeight.bold,
@@ -743,44 +773,12 @@ class _CustomerSessionState extends State<CustomerSession> {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
+                                ],
+                              ) 
                             ),
                           ),
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          TextButton(
-                            onPressed: () async {
-                              _closeModal();
-                            },
-                            child: Container(
-                              // width: Style.ButtonCancelWidth(context),
-                              // height: Style.ButtonCancelHeight(context),
-                              padding: EdgeInsets.all(
-                                  Style.ButtonCancelPadding(context)),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    Style.ButtonExitBorderRadius(context)),
-                                border: Border.all(
-                                    width: Style.WidthBorderImageContainer(
-                                        context),
-                                    color: Style.errorColor),
-                                color: Style.errorColor,
-                              ),
-                              child: Text(
-                                'Cancelar finalização',
-                                style: TextStyle(
-                                  color: Style.tertiaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Style.height_10(context),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
                     ],
                   ),
                 ),
@@ -832,7 +830,8 @@ class _CustomerSessionState extends State<CustomerSession> {
 
   Future<void> _loadSavedFlagGerarPedido() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedFlagGerarPedido = sharedPreferences.getBool('flagGerarPedido') ?? false;
+    bool savedFlagGerarPedido =
+        sharedPreferences.getBool('flagGerarPedido') ?? false;
     setState(() {
       FlagGerarPedido = savedFlagGerarPedido;
     });
