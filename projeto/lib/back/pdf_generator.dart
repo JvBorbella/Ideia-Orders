@@ -2,10 +2,11 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
-// import 'package:flutter_pdfview/flutter_pdfview.dart';
+
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:projeto/front/components/product_page/elements/product_add.dart';
 import 'package:projeto/front/components/style.dart';
@@ -63,7 +64,7 @@ class _PdfGeneratorViewerState extends State<PdfGeneratorViewer> {
         message = result['message'] ?? 'Mensagem não encontrada';
       });
     }
-    // generateAndOpenPdf();
+     //generateAndOpenPdf();
     setState(() {
       isLoading = false;
     });
@@ -226,9 +227,9 @@ class PdfViewerScreen extends StatelessWidget {
       ),
       // backgroundColor: Style.quarantineColor,
 
-      // body: PDFView(
-      //   filePath: filePath,
-      // ),
+      body: PDFView(
+        filePath: filePath,
+      ),
     ));
   }
 
