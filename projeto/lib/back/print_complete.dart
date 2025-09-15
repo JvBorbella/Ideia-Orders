@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/style.dart';
+import 'package:sunmi_printer_plus/core/enums/enums.dart';
+import 'package:sunmi_printer_plus/core/styles/sunmi_barcode_style.dart';
+import 'package:sunmi_printer_plus/core/sunmi/sunmi_printer.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 
 class PrintComplete {
-
   // PrintComplete({
   // });
 
@@ -26,7 +28,8 @@ class DataServicePrintComplete {
     String? message;
 
     try {
-      var urlPost = Uri.parse('$urlBasic/ideia/prevenda/impressaocompleta/$prevendaid');
+      var urlPost =
+          Uri.parse('$urlBasic/ideia/prevenda/impressaocompleta/$prevendaid');
       var response = await http.get(urlPost, headers: {'auth-token': token});
 
       if (response.statusCode == 200) {
@@ -35,7 +38,6 @@ class DataServicePrintComplete {
         if (jsonData.containsKey('success') && jsonData['success'] == true) {
           message = jsonData['message'];
 
-          
           print(urlPost);
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -71,8 +73,17 @@ class DataServicePrintComplete {
           await SunmiPrinter.bindingPrinter();
           await SunmiPrinter.startTransactionPrint(true);
           await SunmiPrinter.printText(jsonData['message']);
-          await SunmiPrinter.printBarCode('PV$numpedido');
-          await SunmiPrinter.submitTransactionPrint();
+          await SunmiPrinter.printBarCode('PV$numpedido',
+              style: SunmiBarcodeStyle(
+                  type: SunmiBarcodeType.CODE128,
+                  textPos: SunmiBarcodeTextPos.TEXT_ABOVE,
+                  height: 70,
+                  align: SunmiPrintAlign.CENTER,
+                  size: 2));
+          // Adiciona linhas em branco para garantir que o cupom saia
+          await SunmiPrinter.printText('\n\n\n');
+          // Se o modelo suportar corte automático
+          await SunmiPrinter.cut();
           await SunmiPrinter.exitTransactionPrint(true);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

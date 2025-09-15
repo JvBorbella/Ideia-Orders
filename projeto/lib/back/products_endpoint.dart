@@ -47,12 +47,7 @@ class DataServiceProducts {
       var urlPost =
           Uri.parse('$urlBasic/ideia/prevenda/listaprodutos?busca=$text');
 
-      var response = await http.get(
-        urlPost,
-        //  headers: {
-        //   // 'auth-token': token,
-        //   });
-      );
+      var response = await http.get(urlPost);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -64,8 +59,8 @@ class DataServiceProducts {
               .map((e) => ProductsEndpoint.fromJson(e))
               .toList();
 
-          products = products.where((product) => product.precotabela > 0.0).toList();
-
+          products =
+              products.where((product) => product.precotabela > 0.0).toList();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

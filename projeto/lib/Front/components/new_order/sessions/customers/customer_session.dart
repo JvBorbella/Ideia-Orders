@@ -1,4 +1,5 @@
 // import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
+import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:projeto/back/finish_order.dart';
@@ -153,9 +154,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                   controller: _cpfcontroller,
                   isLoadingButton: isLoadingSearchCPF,
                   inputFormatters: [
-                    // CnpjCpfFormatter(
-                    //   eDocumentType: EDocumentType.BOTH,
-                    // )
+                    CnpjCpfFormatter(
+                      eDocumentType: EDocumentType.BOTH,
+                    )
                   ],
                   textAlign: TextAlign.start,
                   textInputAction: TextInputAction.unspecified,
@@ -251,104 +252,113 @@ class _CustomerSessionState extends State<CustomerSession> {
                 SizedBox(
                   height: Style.height_10(context),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_215(context),
-                          child: Input(
-                              controller: _logradourocontroller,
-                              textAlign: TextAlign.start,
-                              text: 'Endereço',
-                              textInputAction: TextInputAction.unspecified,
-                              type: TextInputType.text),
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_100(context),
-                          child: Input(
-                              controller: _ufcontroller,
-                              textAlign: TextAlign.start,
-                              text: 'UF',
-                              textInputAction: TextInputAction.unspecified,
-                              type: TextInputType.text),
-                        )
-                      ],
-                    )
-                  ],
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: Style.width_250(context),
+                            child: Input(
+                                controller: _logradourocontroller,
+                                textAlign: TextAlign.start,
+                                text: 'Endereço',
+                                textInputAction: TextInputAction.unspecified,
+                                type: TextInputType.text),
+                          )
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: Style.width_50(context),
+                            child: Input(
+                                controller: _ufcontroller,
+                                textAlign: TextAlign.start,
+                                text: 'UF',
+                                textInputAction: TextInputAction.unspecified,
+                                type: TextInputType.text),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_140(context),
-                          child: Input(
-                              controller: _bairrocontroller,
-                              textAlign: TextAlign.start,
-                              text: 'Bairro',
-                              textInputAction: TextInputAction.unspecified,
-                              type: TextInputType.text),
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_180(context),
-                          child: Input(
-                              controller: _localidadecontroller,
-                              textAlign: TextAlign.start,
-                              text: 'Cidade',
-                              textInputAction: TextInputAction.unspecified,
-                              type: TextInputType.text),
-                        )
-                      ],
-                    )
-                  ],
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: Style.width_140(context),
+                            child: Input(
+                                controller: _bairrocontroller,
+                                textAlign: TextAlign.start,
+                                text: 'Bairro',
+                                textInputAction: TextInputAction.unspecified,
+                                type: TextInputType.text),
+                          )
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: Style.width_180(context),
+                            child: Input(
+                                controller: _localidadecontroller,
+                                textAlign: TextAlign.start,
+                                text: 'Cidade',
+                                textInputAction: TextInputAction.unspecified,
+                                type: TextInputType.text),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
                 SizedBox(
                   height: Style.height_10(context),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_100(context),
-                          child: Input(
-                              controller: _numerocontroller,
-                              textAlign: TextAlign.start,
-                              text: 'Número',
-                              textInputAction: TextInputAction.unspecified,
-                              type: TextInputType.text),
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_215(context),
-                          child: Input(
-                              controller: _complementocontroller,
-                              textAlign: TextAlign.start,
-                              text: 'Complemento',
-                              textInputAction: TextInputAction.unspecified,
-                              type: TextInputType.text),
-                        )
-                      ],
-                    ),
-                  ],
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: Style.width_100(context),
+                            child: Input(
+                                controller: _numerocontroller,
+                                textAlign: TextAlign.start,
+                                text: 'Número',
+                                textInputAction: TextInputAction.unspecified,
+                                type: TextInputType.text),
+                          )
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: Style.width_215(context),
+                            child: Input(
+                                controller: _complementocontroller,
+                                textAlign: TextAlign.start,
+                                text: 'Complemento',
+                                textInputAction: TextInputAction.unspecified,
+                                type: TextInputType.text),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(
                   height: Style.height_20(context),
@@ -584,7 +594,7 @@ class _CustomerSessionState extends State<CustomerSession> {
         modalContext = context;
         return SizedBox(
             //Configurações de tamanho e espaçamento do modal
-           height: Style.height_400(context),
+            height: Style.height_400(context),
             child: WillPopScope(
                 child: Container(
                   //Tamanho e espaçamento interno do modal
@@ -600,43 +610,38 @@ class _CustomerSessionState extends State<CustomerSession> {
                     //Conteúdo interno do modal
                     children: [
                       Container(
-                        padding: EdgeInsets.all(
-                          Style.height_12(context)
-                        ),
+                        padding: EdgeInsets.all(Style.height_12(context)),
                         child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Como deseja finalizar este pedido?',
-                            style: TextStyle(
-                                fontSize: Style.height_12(context),
-                                color: Style.primaryColor,
-                                fontFamily: 'Poppins-Bold'),
-                            overflow: TextOverflow.clip,
-                            softWrap: true,
-                          ),
-                          Container(
-                            width: Style.height_30(context),
-                            height: Style.height_30(context),
-                            decoration: BoxDecoration(
-                              color: Style.errorColor,
-                              borderRadius: BorderRadius.circular(
-                                Style.height_10(context)
-                              )
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Como deseja finalizar este pedido?',
+                              style: TextStyle(
+                                  fontSize: Style.height_12(context),
+                                  color: Style.primaryColor,
+                                  fontFamily: 'Poppins-Bold'),
+                              overflow: TextOverflow.clip,
+                              softWrap: true,
                             ),
-                            child: IconButton(
-                                onPressed: () {
-                                  _closeModal();
-                                },
-                                icon: Icon(
-                                  Icons.close,
-                                  color: Style.tertiaryColor,
-                                  size: Style.height_15(context),
-                                )
-                              ),
-                          )
-                        ],
-                      ),
+                            Container(
+                              width: Style.height_30(context),
+                              height: Style.height_30(context),
+                              decoration: BoxDecoration(
+                                  color: Style.errorColor,
+                                  borderRadius: BorderRadius.circular(
+                                      Style.height_10(context))),
+                              child: IconButton(
+                                  onPressed: () {
+                                    _closeModal();
+                                  },
+                                  icon: Icon(
+                                    Icons.close,
+                                    color: Style.tertiaryColor,
+                                    size: Style.height_15(context),
+                                  )),
+                            )
+                          ],
+                        ),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -649,38 +654,36 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   token,
                                   widget.prevendaid,
                                   widget.numpedido,
-                                  FlagGerarPedido
-                                  );
+                                  FlagGerarPedido);
                             },
                             child: Container(
-                              width: Style.width_300(context),
-                              height: Style.height_80(context),
-                              padding: EdgeInsets.all(
-                                  Style.ButtonExitPadding(context)),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                      Style.ButtonExitBorderRadius(context)),
-                                  color: Style.primaryColor),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/finish_order.png',
-                                    height: Style.height_30(context),
-                                  ),
-                                  Text(
-                                'Apenas Finalizar >',
-                                style: TextStyle(
-                                  color: Style.tertiaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Style.height_10(context),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                                ],
-                              ) 
-                            ),
+                                width: Style.width_300(context),
+                                height: Style.height_80(context),
+                                padding: EdgeInsets.all(
+                                    Style.ButtonExitPadding(context)),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                        Style.ButtonExitBorderRadius(context)),
+                                    color: Style.primaryColor),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/finish_order.png',
+                                      height: Style.height_30(context),
+                                    ),
+                                    Text(
+                                      'Apenas Finalizar >',
+                                      style: TextStyle(
+                                        color: Style.tertiaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: Style.height_10(context),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                )),
                           ),
                         ],
                       ),
@@ -697,38 +700,36 @@ class _CustomerSessionState extends State<CustomerSession> {
                                       token,
                                       widget.prevendaid,
                                       widget.numpedido,
-                                      FlagGerarPedido
-                                      );
+                                      FlagGerarPedido);
                             },
                             child: Container(
-                              width: Style.width_300(context),
-                              height: Style.height_80(context),
-                              padding: EdgeInsets.all(
-                                  Style.ButtonExitPadding(context)),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                      Style.ButtonExitBorderRadius(context)),
-                                  color: Style.primaryColor),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/finish_local.png',
-                                    height: Style.height_30(context),
-                                  ),
-                                  Text(
-                                'Finalizar e imprimir local >',
-                                style: TextStyle(
-                                  color: Style.tertiaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Style.height_10(context),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                                ],
-                              ) 
-                            ),
+                                width: Style.width_300(context),
+                                height: Style.height_80(context),
+                                padding: EdgeInsets.all(
+                                    Style.ButtonExitPadding(context)),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                        Style.ButtonExitBorderRadius(context)),
+                                    color: Style.primaryColor),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/finish_local.png',
+                                      height: Style.height_30(context),
+                                    ),
+                                    Text(
+                                      'Finalizar e imprimir local >',
+                                      style: TextStyle(
+                                        color: Style.tertiaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: Style.height_10(context),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                )),
                           ),
                         ],
                       ),
@@ -744,38 +745,36 @@ class _CustomerSessionState extends State<CustomerSession> {
                                       token,
                                       widget.prevendaid,
                                       widget.numpedido.toString(),
-                                      FlagGerarPedido
-                                      );
+                                      FlagGerarPedido);
                             },
                             child: Container(
-                              width: Style.width_300(context),
-                              height: Style.height_80(context),
-                              padding: EdgeInsets.all(
-                                  Style.ButtonExitPadding(context)),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                      Style.ButtonExitBorderRadius(context)),
-                                  color: Style.primaryColor),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/finish_network.png',
-                                    height: Style.height_30(context),
-                                  ),
-                                  Text(
-                                'Finalizar e imprimir na rede >',
-                                style: TextStyle(
-                                  color: Style.tertiaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Style.height_10(context),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                                ],
-                              ) 
-                            ),
+                                width: Style.width_300(context),
+                                height: Style.height_80(context),
+                                padding: EdgeInsets.all(
+                                    Style.ButtonExitPadding(context)),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                        Style.ButtonExitBorderRadius(context)),
+                                    color: Style.primaryColor),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/finish_network.png',
+                                      height: Style.height_30(context),
+                                    ),
+                                    Text(
+                                      'Finalizar e imprimir na rede >',
+                                      style: TextStyle(
+                                        color: Style.tertiaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: Style.height_10(context),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                )),
                           ),
                         ],
                       ),

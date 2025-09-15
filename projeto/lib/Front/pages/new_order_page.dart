@@ -11,25 +11,23 @@ import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewOrderPage extends StatefulWidget {
-  final prevendaId;
-  final pessoaid;
-  final numero;
-  final pessoanome;
-  final cpfcnpj;
-  final telefone;
-  final endereco;
-  final bairro;
-  final cidade;
-  final cep;
-  final complemento;
-  final uf;
-
-  final datahora;
-  final valortotal;
-  final codigoproduto;
-
-  final noProduct;
-  final operador;
+  final prevendaId,
+      pessoaid,
+      numero,
+      pessoanome,
+      cpfcnpj,
+      telefone,
+      endereco,
+      bairro,
+      cidade,
+      cep,
+      complemento,
+      uf,
+      datahora,
+      valortotal,
+      codigoproduto,
+      noProduct,
+      operador;
 
   const NewOrderPage({
     super.key,
@@ -57,58 +55,48 @@ class NewOrderPage extends StatefulWidget {
 }
 
 class _NewOrderPageState extends State<NewOrderPage> {
-  String urlBasic = '';
-  String token = '';
-  String ibge = '';
-  String cidade = '';
+  String urlBasic = '', token = '', ibge = '', cidade = '';
 
-  late String pessoaid = '';
-  late String nome = '';
-  late String codigo = '';
-  late String pessoanome = '';
-  late String cpfcliente = '';
-  late String telefone = '';
-  late String enderecocep = '';
-  late String endereco = '';
-  late String enderecobairro = '';
-  late String enderecocidade = '';
-  late String endereconumero = '';
-  late String enderecocomplemento = '';
-  late String uf = '';
-  late String email = '';
+  late String pessoaid = '',
+      nome = '',
+      codigo = '',
+      pessoanome = '',
+      cpfcliente = '',
+      telefone = '',
+      enderecocep = '',
+      endereco = '',
+      enderecobairro = '',
+      enderecocidade = '',
+      endereconumero = '',
+      enderecocomplemento = '',
+      uf = '',
+      email = '',
+      nomeproduto = '',
+      codigoproduto = '',
+      imagemurl = '',
+      prevendaprodutoid = '',
+      produtoid = '';
 
-  late String nomeproduto = '';
-  late String codigoproduto = '';
-  late String imagemurl = '';
-  late String prevendaprodutoid = '';
-  late String produtoid = '';
-  late double valorunitario = 0.0;
-  late double valortotalitem = 0.0;
-  late double valortotal = 0.0;
-  late double quantidade = 0.0;
+  late double valorunitario = 0.0,
+      valortotalitem = 0.0,
+      valortotal = 0.0,
+      quantidade = 0.0;
 
-  final _complementocontroller2 = TextEditingController();
-  final _bairrocontroller = TextEditingController();
-  final _localidadecontroller = TextEditingController();
-  final _ibgecontroller = TextEditingController();
-  final _ufcontroller = TextEditingController();
-  final _logradourocontroller = TextEditingController();
+  bool FlagGerarPedido = false, isLoading = true;
 
-  bool FlagGerarPedido = false;
+  final _complementocontroller2 = TextEditingController(),
+      _bairrocontroller = TextEditingController(),
+      _localidadecontroller = TextEditingController(),
+      _ibgecontroller = TextEditingController(),
+      _ufcontroller = TextEditingController(),
+      _logradourocontroller = TextEditingController();
 
-  bool isLoading = true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _loadSavedUrlBasic();
-    _loadSavedToken();
     loadData();
     _refreshData();
-
-    print(widget.numero);
-
-    // cidade = _localidadecontroller.text;
   }
 
   @override
@@ -212,15 +200,9 @@ class _NewOrderPageState extends State<NewOrderPage> {
   // }
 
   Future<void> loadData() async {
-    await Future.wait([
-      _loadSavedUrlBasic(),
-      // _loadSavedCidade(),
-    ]);
-    await Future.wait([
-      fetchDataCliente2(),
-      fetchDataOrdersDetails2(widget.prevendaId)
-      // initializer(),
-    ]);
+    await Future.wait([_loadSavedUrlBasic(), _loadSavedToken()]);
+    await Future.wait(
+        [fetchDataCliente2(), fetchDataOrdersDetails2(widget.prevendaId)]);
     await GetCep.getcep(
         enderecocep,
         _logradourocontroller,

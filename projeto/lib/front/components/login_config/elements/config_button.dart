@@ -8,9 +8,10 @@ class ButtonConfig extends StatefulWidget {
   final onPressed;
   //Variável para definir o tamanho do button na página em que é chamado
   final double height;
+  final isLoadingButton;
 
   const ButtonConfig(
-      {super.key, required this.text, this.onPressed, required this.height});
+      {super.key, required this.text, this.onPressed, required this.height, this.isLoadingButton});
 
   @override
   State<ButtonConfig> createState() => _ButtonConfigState();
@@ -32,7 +33,16 @@ class _ButtonConfigState extends State<ButtonConfig> {
                 widget.onPressed();
               }
             },
-            child: Text(
+            child: widget.isLoadingButton == true
+            ? SizedBox(
+                width: Style.height_15(context),
+                height: Style.height_15(context),
+                child: CircularProgressIndicator(
+                  color: Style.secondaryColor,
+                  strokeWidth: 2.0,
+                ),
+              )
+            : Text(
               //Texto do button está sendo definido na página em que está sendo chamado.
               widget.text,
               //Estilização do button

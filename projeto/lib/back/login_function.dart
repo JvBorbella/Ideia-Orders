@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +16,6 @@ class LoginFunction {
     TextEditingController userController,
     TextEditingController passwordController,
   ) async {
-
     //Tentando fazer a requisição ao servidor.
     try {
       //Definindo variáveis que serão utilizadas na requisição
@@ -41,7 +39,7 @@ class LoginFunction {
         },
       );
       print(password);
-      print(response.body);
+      print(md5Password);
 
       //Caso o servidor aceite a conexão, o token será resgatado no json e armazenado no sharedpreferences.
       if (response.statusCode == 200) {
@@ -64,123 +62,73 @@ class LoginFunction {
           await sharedPreferences.setString('email', email);
           await sharedPreferences.setString('empresa_id', empresaid);
           print(token);
-        
-        // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
-       Navigator.of(context).pushReplacement(
+
+          // Feito o processo acima, a função redireciona para a página Home(), passando para ela os dados que serão utilizados.
+          Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-                builder: (context) => const Home(),
+              builder: (context) => const Home(),
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-              content: Text(
-                responseBody['message'],
-                style: TextStyle(
-                  fontSize: Style.SaveUrlMessageSize(context),
-                  color: Style.tertiaryColor,
-                ),
-              ),
-              backgroundColor: Style.errorColor,
-            ),
-          );
+          ErrorHandler.showSnackBar(context, responseBody['message']);
         }
-      } else if (response.statusCode == 404) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-            content: Text(
-              'Sem conexão com o servidor!',
-              style: TextStyle(
-                fontSize: Style.SaveUrlMessageSize(context),
-                color: Style.tertiaryColor,
-              ),
-            ),
-            backgroundColor: Style.errorColor,
-          ),
-        );
-      } else if (response.statusCode == 408) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-            content: Text(
-              'Não foi possível conectar-se dentro do tempo limite!',
-              style: TextStyle(
-                fontSize: Style.SaveUrlMessageSize(context),
-                color: Style.tertiaryColor,
-              ),
-            ),
-            backgroundColor: Style.errorColor,
-          ),
-        );
-      } else if (response.statusCode == 419) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-            content: Text(
-              'Não foi possível conectar-se dentro do tempo limite!',
-              style: TextStyle(
-                fontSize: Style.SaveUrlMessageSize(context),
-                color: Style.tertiaryColor,
-              ),
-            ),
-            backgroundColor: Style.errorColor,
-          ),
-        );
-      } else if (response.statusCode == 500) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-            content: Text(
-              'Ocorreu um erro inesperado com o servidor!',
-              style: TextStyle(
-                fontSize: Style.SaveUrlMessageSize(context),
-                color: Style.tertiaryColor,
-              ),
-            ),
-            backgroundColor: Style.errorColor,
-          ),
-        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-            content: Text(
-              'Não foi possível iniciar a sessão! - ${response.statusCode}',
-              style: TextStyle(
-                fontSize: Style.SaveUrlMessageSize(context),
-                color: Style.tertiaryColor,
-              ),
-            ),
-            backgroundColor: Style.errorColor,
-          ),
-        );
+        final msg = ErrorHandler.getMessage(null, response.statusCode);
+        ErrorHandler.showSnackBar(context, msg);
       }
       //Caso a tentativa de requisição não retorne o status 200, será exibida essa mensagem
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-          content: Text(
-            'Não foi possível iniciar a sessão - $e',
-            style: TextStyle(
-              fontSize: Style.SaveUrlMessageSize(context),
-              color: Style.tertiaryColor,
-            ),
-          ),
-          backgroundColor: Style.errorColor,
-        ),
-      );
-      //Exibindo no console o tipo de erro retornado.
-      print('Erro durante a solicitação HTTP: $e');
+      final msg = ErrorHandler.getMessage(e);
+      ErrorHandler.showSnackBar(context, msg);
+      print("Erro: $e");
     }
+  }
+}
+
+class ErrorHandler {
+  static String getMessage(dynamic error, [int? statusCode]) {
+    if (error is Exception) {
+      // Aqui você pode tratar exceções de rede
+      if (error.toString().contains("SocketException")) {
+        return "Sem conexão com o servidor.";
+      }
+      if (error.toString().contains("TimeoutException")) {
+        return "Tempo de conexão excedido.";
+      }
+      return "Erro inesperado. Tente novamente.";
+    }
+
+    // Tratamento por código HTTP
+    switch (statusCode) {
+      case 400:
+        return "Requisição inválida.";
+      case 401:
+        return "Usuário ou senha incorretos.";
+      case 403:
+        return "Você não tem permissão para acessar.";
+      case 404:
+        return "Servidor não encontrado.";
+      case 408:
+        return "Tempo de conexão excedido.";
+      case 419:
+        return "Sessão expirada. Faça login novamente.";
+      case 500:
+        return "Erro interno no servidor.";
+      default:
+        return "Não foi possível processar sua solicitação.";
+    }
+  }
+
+  static void showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

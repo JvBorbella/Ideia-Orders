@@ -15,7 +15,6 @@ import 'package:projeto/front/components/Global/Elements/text_title.dart';
 
 import 'package:projeto/front/components/Home/Elements/order_container.dart';
 import 'package:projeto/front/components/home/elements/drawer_button.dart';
-import 'package:projeto/front/components/home/elements/modal_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/style.dart';
@@ -113,7 +112,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _loadSavedId();
     _loadSavedUrlBasic();
     _loadSavedToken();
     _loadSavedFilter();
@@ -133,7 +131,8 @@ class _HomeState extends State<Home> {
             return AlertDialog(
               contentPadding: EdgeInsets.all(0),
               backgroundColor: Style.defaultColor,
-              content: Container(
+              content: SingleChildScrollView(
+                child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -374,47 +373,9 @@ class _HomeState extends State<Home> {
                         ],
                       ),
                     )
-                    // TextButton(
-                    //   onPressed: () async {
-                    //     setState(() {
-                    //       isLoadingButton = true;
-                    //     });
-                    //     final data = await DataServiceCliente2.fetchDataCliente2(
-                    //         urlBasic, _cpfcontroller.text, token);
-                    //     var pessoa_id = data['pessoa_id'].toString();
-                    //     await DataServiceNewOrder.sendDataOrder(
-                    //       context,
-                    //       urlBasic,
-                    //       token,
-                    //       _cpfcontroller.text,
-                    //       _telefonecontatocontroller.text,
-                    //       _nomecontroller.text,
-                    //       pessoa_id,
-                    //     );
-                    //     setState(() {
-                    //       fetchDataOrders(ascending: true, flagFilter: filterValue);
-                    //     });
-                    //     _closeModal();
-                    //     _cpfcontroller.clear();
-                    //     _nomecontroller.clear();
-                    //     _telefonecontatocontroller.clear();
-                    //     setState(() {
-                    //       isLoadingButton = false;
-                    //     });
-                    //   },
-                    //   child: isLoadingButton == true
-                    //       ? SizedBox(
-                    //           width: Style.height_15(context),
-                    //           height: Style.height_15(context),
-                    //           child: CircularProgressIndicator(
-                    //             color: Style.primaryColor,
-                    //             strokeWidth: 2.0,
-                    //           ),
-                    //         )
-                    //       : const Text('Abrir pedido'),
-                    // )
                   ],
                 ),
+              ),
               ),
             );
           });
@@ -755,23 +716,19 @@ class _HomeState extends State<Home> {
 
   Future<void> loadData() async {
     await Future.wait([
-      _loadSavedUrlBasic(),
       _loadSavedUserId(),
       _loadSavedEmpresaID(),
       _loadSavedFilter(),
     ]);
     await fetchDataTablePriceCompany();
     await fetchDataTablePriceName();
-    // await fetchDataTablePriceId();
     await fetchDataTablePrice();
-    // await _loadSavedFlagPermiteAlterTable();
     await fetchDataListTablesPrice();
-    // await _loadSavedFlagPermiteAlterTable();
     await fetchDataCompany();
-    print('flagpermitiralterartabela: $flagpermitiralterartabela');
-    print('FLAGFILTER: $flagFilter');
-    await Future.wait(
-        [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
+    await Future.wait([
+      fetchDataOrders(flagFilter: flagFilter), 
+      fetchDataCliente2()
+    ]);
   }
 
   Future<void> _refreshData() async {

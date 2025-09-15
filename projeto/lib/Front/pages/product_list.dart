@@ -43,18 +43,14 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
-  bool flagService = false;
+  bool flagService = false, isLoading = true, loadingList = false;
   List<ProductsEndpoint> products = [];
   List<ServiceEndpoint> services = [];
-  String urlBasic = '';
-  String empresaid = '';
-  String token = '';
+  String urlBasic = '', empresaid = '', token = '';
+  late String tabelapreco_id = '';
   final text = TextEditingController();
-  bool isLoading = true;
 
   final FocusNode _focusNode = FocusNode();
-
-  late String tabelapreco_id = '';
 
   @override
   void initState() {
@@ -110,6 +106,9 @@ class _ProductListState extends State<ProductList> {
                               TextStyle(fontSize: Style.height_10(context))),
                           controller: text,
                           onSubmitted: (value) async {
+                            setState(() {
+                              loadingList = true;
+                            });
                             await fetchDataServices(); // Chama a função de pesquisa ao pressionar "Enter"
                           },
                           constraints: const BoxConstraints(),
@@ -138,30 +137,38 @@ class _ProductListState extends State<ProductList> {
                       SizedBox(height: Style.height_10(context)),
                       const TextTitle(text: 'Lista de Serviços'),
                       SizedBox(height: Style.height_10(context)),
-                      Expanded(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: services.length,
-                          itemBuilder: (context, index) {
-                            return Column(
-                              children: [
-                                ProductAdd(
-                                  prevendaid: widget.prevendaid,
-                                  produtoid:
-                                      services[index].produto_id.toString(),
-                                  nomeproduto: services[index].nome.toString(),
-                                  codigoproduto:
-                                      services[index].codigo.toString(),
-                                  precotabela:
-                                      services[index].precofinal.toDouble(),
-                                  onProductAdded:
-                                      _onProductAdded, // Chama a função ao adicionar o produto
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      )
+                      if (loadingList == true)
+                        Expanded(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: services.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  ProductAdd(
+                                    prevendaid: widget.prevendaid,
+                                    produtoid:
+                                        services[index].produto_id.toString(),
+                                    nomeproduto:
+                                        services[index].nome.toString(),
+                                    codigoproduto:
+                                        services[index].codigo.toString(),
+                                    precotabela:
+                                        services[index].precofinal.toDouble(),
+                                    onProductAdded:
+                                        _onProductAdded, // Chama a função ao adicionar o produto
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        )
                     ],
                   ),
                 ),
@@ -228,6 +235,9 @@ class _ProductListState extends State<ProductList> {
                               TextStyle(fontSize: Style.height_10(context))),
                           controller: text,
                           onSubmitted: (value) async {
+                            setState(() {
+                              loadingList = true;
+                            });
                             await fetchDataProducts(); // Chama a função de pesquisa ao pressionar "Enter"
                           },
                           constraints: const BoxConstraints(),
@@ -252,38 +262,46 @@ class _ProductListState extends State<ProductList> {
                       SizedBox(height: Style.height_10(context)),
                       const TextTitle(text: 'Lista de produtos'),
                       SizedBox(height: Style.height_10(context)),
-                      Expanded(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            return Column(
-                              children: [
-                                ProductAdd(
-                                  prevendaid: widget.prevendaid,
-                                  produtoid:
-                                      products[index].produtoid.toString(),
-                                  nomeproduto: products[index].nome.toString(),
-                                  codigoproduto:
-                                      products[index].codigo.toString(),
-                                  codigoean:
-                                      products[index].codigoean.toString(),
-                                  unidade: products[index].unidade.toString(),
-                                  precopromocional: products[index]
-                                      .precopromocional
-                                      .toDouble(),
-                                  precotabela:
-                                      products[index].precotabela.toDouble(),
-                                  flagunidadefracionada:
-                                      products[index].flagunidadefracionada,
-                                  onProductAdded:
-                                      _onProductAdded, // Chama a função ao adicionar o produto
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      )
+                      if (loadingList == true)
+                        Expanded(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: products.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  ProductAdd(
+                                    prevendaid: widget.prevendaid,
+                                    produtoid:
+                                        products[index].produtoid.toString(),
+                                    nomeproduto:
+                                        products[index].nome.toString(),
+                                    codigoproduto:
+                                        products[index].codigo.toString(),
+                                    codigoean:
+                                        products[index].codigoean.toString(),
+                                    unidade: products[index].unidade.toString(),
+                                    precopromocional: products[index]
+                                        .precopromocional
+                                        .toDouble(),
+                                    precotabela:
+                                        products[index].precotabela.toDouble(),
+                                    flagunidadefracionada:
+                                        products[index].flagunidadefracionada,
+                                    onProductAdded:
+                                        _onProductAdded, // Chama a função ao adicionar o produto
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        )
                     ],
                   ),
                 ),
@@ -399,6 +417,7 @@ class _ProductListState extends State<ProductList> {
     }
     setState(() {
       isLoading = false;
+      loadingList = false;
     });
   }
 
@@ -413,6 +432,7 @@ class _ProductListState extends State<ProductList> {
     }
     setState(() {
       isLoading = false;
+      loadingList = false;
     });
   }
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/back/login_function.dart';
 import 'package:projeto/back/save_user_function.dart';
+import 'package:projeto/front/components/login_config/elements/button.dart';
+import 'package:projeto/front/components/login_config/elements/config_button.dart';
 
-import 'package:projeto/front/components/Login_Config/elements/button.dart';
-import 'package:projeto/front/components/Login_Config/elements/config_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
@@ -28,6 +28,8 @@ class _LoginPageState extends State<LoginPage> {
   final SaveUserService saveUserService = SaveUserService();
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool flagLoadEntrar = false;
 
   @override
   void initState() {
@@ -93,7 +95,8 @@ class _LoginPageState extends State<LoginPage> {
                           textAlign: TextAlign.start,
                           validator: (user) {
                             if (user == null || user.isEmpty) {
-                              saveUserService.saveUser(context, _userController.text);
+                              saveUserService.saveUser(
+                                  context, _userController.text);
                             }
                           },
                         ),
@@ -111,8 +114,12 @@ class _LoginPageState extends State<LoginPage> {
                           height: Style.InputToButtonSpace(context),
                         ),
                         ButtonConfig(
+                          isLoadingButton: flagLoadEntrar,
                           text: 'Entrar',
                           onPressed: () async {
+                            setState(() {
+                              flagLoadEntrar = true;
+                            });
                             if (_userController.text.isNotEmpty &&
                                 _passwordController.text.isNotEmpty) {
                               await LoginFunction.login(
@@ -136,13 +143,16 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               );
                             }
+                            setState(() {
+                              flagLoadEntrar = false;
+                            });
                           },
-                          height: MediaQuery.of(context).size.width * 0.05,
+                          height: Style.height_20(context),
                         ),
                         ButtomInitial(
                           text: 'Configurar',
                           destination: ConfigPage(initialUrl: urlController),
-                          height: MediaQuery.of(context).size.width * 0.05,
+                          height: Style.height_20(context),
                         ),
                       ],
                     ),
