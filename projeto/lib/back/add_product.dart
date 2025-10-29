@@ -5,20 +5,25 @@ import 'package:projeto/front/components/style.dart';
 
 class AddProduct {
   late String prevendaid;
+  late String empresaId;
   late String produtoid;
   late String complemento;
   late int quantidade;
+  late String expedicaoId;
 
   AddProduct({
     required this.prevendaid,
+    required this.empresaId,
     required this.produtoid,
     required this.complemento,
     required this.quantidade,
+    required this.expedicaoId,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'prevenda_id': prevendaid,
+      'empresa_id': empresaId,
       'produto_id': produtoid,
       'complemento': complemento,
       'quantidade': quantidade,
@@ -28,9 +33,11 @@ class AddProduct {
   factory AddProduct.fromJson(Map<String, dynamic> json) {
     return AddProduct(
       prevendaid: json['prevenda_id'],
+      empresaId: json['empresa_id'],
       produtoid: json['produto_id'],
       complemento: json['complemento'],
       quantidade: json['quantidade'],
+      expedicaoId: json['expedicao_id'],
     );
   }
 }
@@ -41,11 +48,13 @@ class DataServiceAddProduct {
     String urlBasic,
     String token,
     String prevendaid,
+    String empresaId,
     String produtoid,
     String complementoController,
     String quantidadeController,
     int flagunidadefracionada,
-    int flagservico
+    int flagservico,
+    String expedicaoId,
   ) async {
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/novoitemprevenda');
 
@@ -59,9 +68,11 @@ class DataServiceAddProduct {
       };
       var body = jsonEncode({
         'prevenda_id': prevendaid,
+        'empresa_id': empresaId,
         'produto_id': produtoid,
         'complemento': complementoController,
         'quantidade': double.parse(substituirVirgulaPorPonto(quantidadeController)),
+        'expedicao_id': expedicaoId,
       });
 
       try {
@@ -70,6 +81,8 @@ class DataServiceAddProduct {
           headers: headers,
           body: body,
         );
+
+        print(body); // Debug: Imprime o corpo da requisição
 
         if (response.statusCode == 200) {
           var responseBody = jsonDecode(response.body);

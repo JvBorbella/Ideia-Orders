@@ -27,7 +27,9 @@ class NewOrderPage extends StatefulWidget {
       valortotal,
       codigoproduto,
       noProduct,
-      operador;
+      operador,
+      empresa_id,
+      valordesconto;
 
   const NewOrderPage({
     super.key,
@@ -47,7 +49,9 @@ class NewOrderPage extends StatefulWidget {
     this.valortotal,
     this.codigoproduto,
     this.operador,
-    this.noProduct = '0', // valor padrão
+    this.noProduct = '0',
+    this.empresa_id,
+    this.valordesconto
   });
 
   @override
@@ -56,6 +60,9 @@ class NewOrderPage extends StatefulWidget {
 
 class _NewOrderPageState extends State<NewOrderPage> {
   String urlBasic = '', token = '', ibge = '', cidade = '';
+
+  final GlobalKey<CustomerSessionState> customerKey =
+      GlobalKey<CustomerSessionState>();
 
   late String pessoaid = '',
       nome = '',
@@ -82,7 +89,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
       valortotal = 0.0,
       quantidade = 0.0;
 
-  bool FlagGerarPedido = false, isLoading = true;
+  bool FlagGerarPedido = false, isLoading = true, loadSaveOrder = false;
 
   final _complementocontroller2 = TextEditingController(),
       _bairrocontroller = TextEditingController(),
@@ -111,15 +118,34 @@ class _NewOrderPageState extends State<NewOrderPage> {
     return SafeArea(
         child: WillPopScope(
             child: Scaffold(
-              body: ListView(
+              body: Column(
                 children: [
-                  const Navbar(text: 'Novo pedido', children: [
-                    NavbarButton(
-                        destination: Home(), Icons: Icons.arrow_back_ios_new)
+                  Navbar(text: 'Novo pedido', children: [
+                    const NavbarButton(
+                        destination: Home(), Icons: Icons.arrow_back_ios_new),
+                    Container(
+                      padding: EdgeInsets.all(Style.height_2(context)),
+                      child: IconButton(
+                        onPressed: loadSaveOrder == true ? null : () async {
+                            setState(() {
+                              loadSaveOrder = true;
+                            });
+                            await customerKey.currentState?.saveOrder();
+                            setState(() {
+                              loadSaveOrder = false;
+                            });
+                          }, 
+                        icon: Icon(
+                          Icons.save_rounded,
+                          color: Style.tertiaryColor,
+                          size: Style.height_25(context),
+                        )
+                      )
+                    ),
                   ]),
-                  SizedBox(
-                    height: Style.height_10(context),
-                  ),
+                  Expanded(
+                    child: ListView(
+                children: [
                   ProductSession(
                       prevendaid: widget.prevendaId.toString(),
                       pessoaid: pessoaid.toString(),
@@ -141,11 +167,14 @@ class _NewOrderPageState extends State<NewOrderPage> {
                       valortotal: valortotal.toDouble(),
                       quantidade: quantidade.toDouble(),
                       imagemurl: imagemurl.toString(),
-                      onProductRemoved: _onProductRemoved),
+                      onProductRemoved: _onProductRemoved,
+                      empresa_id: widget.empresa_id,
+                      ),
                   SizedBox(
-                    height: Style.height_30(context),
+                    height: Style.height_15(context),
                   ),
                   CustomerSession(
+                    key: customerKey,
                     pessoanome: widget.pessoanome,
                     pessoaid: pessoaid,
                     cpfcnpj: widget.cpfcnpj,
@@ -161,12 +190,16 @@ class _NewOrderPageState extends State<NewOrderPage> {
                     prevendaid: widget.prevendaId,
                     numpedido: widget.numero.toString(),
                     noProduct: widget.noProduct,
+                    valordesconto: widget.valordesconto
                   ),
                   SizedBox(
                     height: Style.height_30(context),
                   ),
                 ],
               ),
+                  )
+                ],
+              )
             ),
             onWillPop: () async {
               Navigator.of(context).pushReplacement(

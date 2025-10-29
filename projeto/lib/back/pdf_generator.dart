@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -22,14 +23,17 @@ class PdfGeneratorViewer extends StatefulWidget {
   final numero;
   final urlBasic;
   final token;
+  final vendedor;
+  final valordesconto;
 
-  const PdfGeneratorViewer({
-    super.key,
-    this.prevenda_id,
-    this.numero,
-    this.urlBasic,
-    this.token,
-  });
+  const PdfGeneratorViewer(
+      {super.key,
+      this.prevenda_id,
+      this.numero,
+      this.urlBasic,
+      this.token,
+      this.vendedor,
+      this.valordesconto});
 
   @override
   State<PdfGeneratorViewer> createState() => _PdfGeneratorViewerState();
@@ -52,31 +56,33 @@ class _PdfGeneratorViewerState extends State<PdfGeneratorViewer> {
 
   Future<void> _loadData() async {
     final result = await fetchDataGeneratePdf(
-      context,
-      widget.urlBasic,
-      widget.token,
-      widget.prevenda_id,
-      widget.numero,
-    );
+        context,
+        widget.urlBasic,
+        widget.token,
+        widget.prevenda_id,
+        widget.numero,
+        widget.vendedor,
+        widget.valordesconto);
 
     if (mounted) {
       setState(() {
         message = result['message'] ?? 'Mensagem não encontrada';
       });
     }
-     //generateAndOpenPdf();
+    //generateAndOpenPdf();
     setState(() {
       isLoading = false;
     });
   }
 
   static Future<Map<String?, String?>> fetchDataGeneratePdf(
-    BuildContext context,
-    String urlBasic,
-    String token,
-    String prevendaid,
-    String numpedido,
-  ) async {
+      BuildContext context,
+      String urlBasic,
+      String token,
+      String prevendaid,
+      String numpedido,
+      String vendedor,
+      double valordesconto) async {
     String? message;
 
     try {
@@ -116,6 +122,9 @@ class _PdfGeneratorViewerState extends State<PdfGeneratorViewer> {
     return {'message': message};
   }
 
+  NumberFormat currencyFormat =
+      NumberFormat.currency(locale: 'pt_BR', symbol: '');
+  bool isLoadingButtonPDF = false;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -126,10 +135,16 @@ class _PdfGeneratorViewerState extends State<PdfGeneratorViewer> {
                 color: Style.warningColor,
                 width: Style.width_150(context),
                 icon: Icons.description_rounded,
-                onPressed: () {
-                  // await fetchDataGeneratePdf(
-                  //     context, urlBasic, token, widget.prevenda_id, widget.numero);
-                  generateAndOpenPdf();
+                isLoadingButton: isLoadingButtonPDF,
+                onPressed: () async {
+                  setState(() {
+                    isLoadingButtonPDF = true;
+                  });
+                  await generateAndOpenPdf(
+                      widget.vendedor, widget.valordesconto);
+                  setState(() {
+                    isLoadingButtonPDF = false;
+                  });
                 })
             : RegisterIconButton(
                 text: 'Visualizar PDF',
@@ -142,10 +157,13 @@ class _PdfGeneratorViewerState extends State<PdfGeneratorViewer> {
   }
 
   // Função para gerar o PDF
-  Future<void> generateAndOpenPdf() async {
-    final RobotoMono = pw.Font.ttf(await rootBundle.load('assets/fonts/RobotoMono-Regular.ttf'));
-    final NotoSansMono = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSansMono-Regular.ttf'));
-    final SpaceMono = pw.Font.ttf(await rootBundle.load('assets/fonts/SpaceMono-Regular.ttf'));
+  Future<void> generateAndOpenPdf(String vendedor, double valordesconto) async {
+    final RobotoMono = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/RobotoMono-Regular.ttf'));
+    final NotoSansMono = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansMono-Regular.ttf'));
+    final SpaceMono = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/SpaceMono-Regular.ttf'));
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -157,11 +175,29 @@ class _PdfGeneratorViewerState extends State<PdfGeneratorViewer> {
               // textAlign: pw.TextAlign.center,
               style: pw.TextStyle(
                 fontSize: 24,
-                font: RobotoMono, 
-                ),
+                font: RobotoMono,
+              ),
             ),
-            pw.SizedBox(
-                height: 20), // Espaçamento entre o texto e o código de barras
+            pw.Container(
+              width: 450,
+              child: pw.Text(
+              'Desconto: ${currencyFormat.format(valordesconto)}',
+              textAlign: pw.TextAlign.right,
+              style: pw.TextStyle(
+                fontSize: 24,
+                font: RobotoMono,
+              ),
+            ),
+            ),
+            pw.SizedBox(height: 5),
+            pw.Text(
+              vendedor.isNotEmpty ? 'Vendedor - $vendedor' : '',
+              style: pw.TextStyle(
+                fontSize: 24,
+                font: RobotoMono,
+              ),
+            ),
+            pw.SizedBox(height: 10),
             pw.BarcodeWidget(
               data: 'PV${widget.numero}',
               barcode: barcode,

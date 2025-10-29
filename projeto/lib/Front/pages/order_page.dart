@@ -1,26 +1,25 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
-
 import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/back/pdf_generator.dart';
 import 'package:projeto/back/reprint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:projeto/front/components/order_page/elements/name_inputblocked.dart';
-
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/elements/navbar_button.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
-
 import 'package:projeto/front/components/order_page/elements/input_blocked.dart';
 import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class OrderPage extends StatefulWidget {
   final prevendaId;
@@ -36,30 +35,33 @@ class OrderPage extends StatefulWidget {
   final uf;
   final operador;
   final pessoaid;
+  final vendedorId;
 
   final datahora;
   final valortotal;
   final codigoproduto;
+  final valordesconto;
 
-  const OrderPage({
-    super.key,
-    this.prevendaId,
-    this.numero,
-    this.pessoanome,
-    this.cpfcnpj,
-    this.telefone,
-    this.endereco,
-    this.bairro,
-    this.cidade,
-    this.cep,
-    this.complemento,
-    this.uf,
-    this.datahora,
-    this.valortotal,
-    this.codigoproduto,
-    this.operador,
-    this.pessoaid,
-  });
+  const OrderPage(
+      {super.key,
+      this.prevendaId,
+      this.numero,
+      this.pessoanome,
+      this.cpfcnpj,
+      this.telefone,
+      this.endereco,
+      this.bairro,
+      this.cidade,
+      this.cep,
+      this.complemento,
+      this.uf,
+      this.datahora,
+      this.valortotal,
+      this.codigoproduto,
+      this.operador,
+      this.pessoaid,
+      this.vendedorId,
+      this.valordesconto});
 
   @override
   State<OrderPage> createState() => _OrderPageState();
@@ -106,6 +108,7 @@ class _OrderPageState extends State<OrderPage> {
 
   List<OrdersDetailsEndpoint> orders = [];
 
+  
   bool isLoadingButtonLocal = false;
   bool isLoadingButtonNetwork = false;
 
@@ -117,6 +120,9 @@ class _OrderPageState extends State<OrderPage> {
 
   final cepFormatter = MaskTextInputFormatter(
       mask: '#####-###', filter: {"#": RegExp(r'[0-9]')});
+
+  String vendedorCodigo = '';
+  String vendedorNome = '';
 
   bool isLoading = true;
   @override
@@ -194,7 +200,21 @@ class _OrderPageState extends State<OrderPage> {
                           Row(
                             children: [
                               Text(
-                                'Vendedor - ${widget.operador}',
+                                'Usuário - ${widget.operador}',
+                                style: TextStyle(
+                                    color: Style.primaryColor,
+                                    fontSize: Style.height_12(context),
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: Style.height_5(context),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Vendedor: ${vendedorCodigo} - ${vendedorNome}',
                                 style: TextStyle(
                                     color: Style.primaryColor,
                                     fontSize: Style.height_12(context),
@@ -376,12 +396,33 @@ class _OrderPageState extends State<OrderPage> {
                   ),
                   Center(
                     child: Text(
-                      'Total - ${currencyFormat.format(widget.valortotal)}',
+                      'Total dos produtos - ${currencyFormat.format(widget.valortotal)}',
                       style: TextStyle(
                           color: Style.primaryColor,
                           fontSize: Style.height_15(context),
                           fontWeight: FontWeight.bold),
                     ),
+                  ),
+                  Center(
+                    child: Text(
+                      'Desconto - ${currencyFormat.format(widget.valordesconto)}',
+                      style: TextStyle(
+                          color: Style.primaryColor,
+                          fontSize: Style.height_15(context),
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      'Valor Total - ${currencyFormat.format(widget.valortotal - widget.valordesconto)}',
+                      style: TextStyle(
+                          color: Style.warningColor,
+                          fontSize: Style.height_15(context),
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  SizedBox(
+                    height: Style.height_10(context),
                   ),
                   const TextTitle(text: 'Dados do Cliente'),
                   SizedBox(
@@ -594,11 +635,12 @@ class _OrderPageState extends State<OrderPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               PdfGeneratorViewer(
-                                prevenda_id: widget.prevendaId,
-                                numero: widget.numero,
-                                urlBasic: urlBasic,
-                                token: token,
-                              )
+                                  prevenda_id: widget.prevendaId,
+                                  numero: widget.numero,
+                                  urlBasic: urlBasic,
+                                  token: token,
+                                  vendedor: vendedorNome,
+                                  valordesconto: widget.valordesconto)
                               //         RegisterIconButton(
                               //           text: 'Gerar PDF',
                               //           color: Style.warningColor,
@@ -652,6 +694,7 @@ class _OrderPageState extends State<OrderPage> {
     await Future.wait([
       fetchDataCliente2(),
     ]);
+    await fetchDataSeller();
     await GetCep.getcep(
         enderecocep,
         _logradourocontroller,
@@ -708,5 +751,48 @@ class _OrderPageState extends State<OrderPage> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  Future<void> fetchDataSeller() async {
+    try {
+      var urlGet = Uri.parse(
+          '''$urlBasic/ideia/core/getdata/prevenda%20p%20LEFT%20JOIN%20pessoa%20pp%20ON%20pp.pessoa_id%20=%20p.vendedor_pessoa_id%20WHERE%20p.prevenda_id%20=%20'${widget.prevendaId}'/''');
+      var response = await http.get(
+        urlGet,
+        headers: {'Accept': 'text/html'},
+      );
+
+      print(urlGet);
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        var dynamicKey = jsonData['data'].keys.first;
+        print('Chave dinâmica encontrada: $dynamicKey');
+
+        // Verifica se o valor associado à chave é uma lista
+        var dataList = jsonData['data'][dynamicKey];
+        var data = dataList;
+        //var vendedor_pessoa_id = data[0]['vendedor_pessoa_id'];
+        var codigo = data[0]['codigo'];
+        var nome = data[0]['nome'];
+        // Tenta imprimir o pessoa_id de forma segura
+        try {
+          if (data is List && data.isNotEmpty) {
+            print('data is list ' + data[0]['vendedor_pessoa_id']);
+            setState(() {
+              vendedorCodigo = '$codigo';
+              vendedorNome = '$nome';
+            });
+          } else {
+            print('Estrutura inesperada em data.');
+          }
+        } catch (e) {
+          print('Erro ao acessar pessoa_id: $e');
+        }
+      } else {
+        print('Erro na requisição: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro ao pesquisar vendedor: $e');
+    }
   }
 }

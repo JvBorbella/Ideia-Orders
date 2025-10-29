@@ -40,8 +40,7 @@ class DataServiceFinishOrder {
           Uri.parse('$urlBasic/ideia/prevenda/gerarpedido/$prevendaid');
 
       if (FlagGerarPedido == true) {
-        var responsePedido =
-            await http.post(urlGerarPedido, headers: {'auth-token': token});
+        var responsePedido = await http.post(urlGerarPedido, headers: {'auth-token': token});
         var response = await http.post(urlPost, headers: {'auth-token': token});
 
         if (response.statusCode == 200 && responsePedido.statusCode == 200) {

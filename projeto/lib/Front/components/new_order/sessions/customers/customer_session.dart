@@ -1,20 +1,30 @@
 // import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
+import 'dart:convert';
+
 import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:intl/intl.dart';
 import 'package:projeto/back/finish_order.dart';
 import 'package:projeto/back/get_cep.dart';
 import 'package:projeto/back/get_cliente.dart';
 import 'package:projeto/back/new_customer.dart';
 import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
+import 'package:projeto/front/components/login_config/elements/button.dart';
+import 'package:projeto/front/components/login_config/elements/config_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
+import 'package:projeto/front/components/product_page/elements/product_add.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+
+final GlobalKey<CustomerSessionState> customerKey =
+    GlobalKey<CustomerSessionState>();
 
 class CustomerSession extends StatefulWidget {
   final prevendaid;
@@ -32,10 +42,9 @@ class CustomerSession extends StatefulWidget {
   final cidade;
   final uf;
   final email;
-
   final numpedido;
-
   final noProduct;
+  final valordesconto;
 
   const CustomerSession(
       {Key? key,
@@ -55,25 +64,42 @@ class CustomerSession extends StatefulWidget {
       this.uf,
       this.numpedido,
       this.noProduct,
-      this.email});
+      this.email,
+      this.valordesconto})
+      : super(key: key);
 
   @override
-  State<CustomerSession> createState() => _CustomerSessionState();
+  State<CustomerSession> createState() => CustomerSessionState();
 }
 
-class _CustomerSessionState extends State<CustomerSession> {
+class CustomerSessionState extends State<CustomerSession> {
+  Future<void> saveOrder() async {
+    await NewCustomer.AdjustOrder(
+        context,
+        urlBasic,
+        token,
+        _nomecontroller.text,
+        _cpfcontroller.text,
+        _telefonecontatocontroller.text,
+        widget.prevendaid,
+        pessoa_id.toString(),
+        vendedorId,
+        double.parse(valordescontoController.text) ?? 0.0);
+  }
+
   late BuildContext modalContext;
 
   String urlBasic = '';
   String token = '';
   String ibge = '';
   String cpf = '';
+  String vendedorId = '';
   bool isCheckedCPF = true;
 
   bool isLoading = true;
   bool isLoadingButton = false;
   bool isLoadingIconButton = false;
-  bool isLoadingSearchCPF = false;
+  bool isLoadingSearchCPF = false, isLoadingSearchSeller = false;
   bool isLoadingSearchCEP = false;
 
   bool FlagGerarPedido = false;
@@ -91,10 +117,14 @@ class _CustomerSessionState extends State<CustomerSession> {
   final _nomecontroller = TextEditingController();
   final _telefonecontatocontroller = TextEditingController();
   final _emailcontroller = TextEditingController();
+  final vendedorController = TextEditingController();
+  final valordescontoController = TextEditingController();
 
   // final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
   final _cepMaskFormatter = MaskTextInputFormatter(mask: '#####-###');
+  NumberFormat currencyFormat =
+      NumberFormat.currency(locale: 'pt_BR', symbol: '');
 
   final pessoa_id = String;
 
@@ -113,6 +143,18 @@ class _CustomerSessionState extends State<CustomerSession> {
     _ufcontroller.text = widget.uf.toString();
     _logradourocontroller.text = widget.endereco.toString();
     _nomecontroller.text = widget.pessoanome == 'null' ? '' : widget.pessoanome;
+    final formatter = NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: '',
+  );
+
+  // se widget.valordesconto vier como número (ex: double)
+  if (widget.valordesconto != null && widget.valordesconto!.isNotEmpty) {
+  final value = double.tryParse(widget.valordesconto!) ?? 0.0;
+  valordescontoController.text = formatter.format(value);
+} else {
+  valordescontoController.text = '';
+}
     final cpfcnpj = widget.cpfcnpj ?? '';
     final cleanedCpfCnpj = cpfcnpj.replaceAll(
         RegExp(r'\D'), ''); // Remove caracteres não numéricos
@@ -135,11 +177,68 @@ class _CustomerSessionState extends State<CustomerSession> {
     print('Número: ' + widget.numpedido);
   }
 
+  String substituirVirgulaPorPonto(String texto) {
+    return texto.replaceAll(',', '.');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Column(
         children: [
+          const TextTitle(text: 'Desconto'),
+          SizedBox(
+            height: Style.height_5(context),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: Style.height_15(context)),
+            child: Input(
+              text: 'Desconto total',
+              controller: valordescontoController,
+              type: TextInputType.number,
+              textAlign: TextAlign.center,
+              inputFormatters: [
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  try {
+                    if (newValue.text.isEmpty) return newValue;
+                    final number = double.parse(
+                            newValue.text.replaceAll(RegExp(r'[^0-9]'), '')) /
+                        100;
+                    final formatted = currencyFormat.format(number);
+                    return TextEditingValue(
+                      text: formatted,
+                      selection:
+                          TextSelection.collapsed(offset: formatted.length),
+                    );
+                  } catch (e) {
+                    return oldValue;
+                  }
+                }),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: Style.height_10(context),
+          ),
+          ButtonConfig(
+            text: 'Aplicar Desconto',
+            height: Style.height_12(context),
+            onPressed: () async {
+              await NewCustomer.AdjustOrder(
+                  context,
+                  urlBasic,
+                  token,
+                  _nomecontroller.text,
+                  _cpfcontroller.text,
+                  _telefonecontatocontroller.text,
+                  widget.prevendaid,
+                  pessoa_id.toString(),
+                  vendedorId,
+                  double.parse(substituirVirgulaPorPonto(
+                          valordescontoController.text)) ??
+                      0.0);
+            },
+          ),
           const TextTitle(text: 'Dados do cliente'),
           SizedBox(
             height: Style.height_5(context),
@@ -216,6 +315,81 @@ class _CustomerSessionState extends State<CustomerSession> {
                   controller: _emailcontroller,
                   textAlign: TextAlign.start,
                   textInputAction: TextInputAction.unspecified,
+                ),
+                SizedBox(
+                  height: Style.height_10(context),
+                ),
+                Input(
+                  text: 'Pesquise pelo Vendedor',
+                  controller: vendedorController,
+                  type: TextInputType.text,
+                  textAlign: TextAlign.start,
+                  textInputAction: TextInputAction.unspecified,
+                  IconButton: Icon(Icons.person_search_rounded),
+                  onTap: () async {
+                    setState(() {
+                      isLoadingSearchSeller = true;
+                    });
+                    try {
+                      var urlGet = Uri.parse(
+                          '''$urlBasic/ideia/core/getdata/pessoa%20p%20WHERE%20p.flagvendedor%20=%201%20AND%20p.codigo%20='${vendedorController.text}'/''');
+                      var response = await http.get(
+                        urlGet,
+                        headers: {'Accept': 'text/html'},
+                      );
+
+                      print(urlGet);
+                      if (response.statusCode == 200) {
+                        var jsonData = json.decode(response.body);
+                        var dynamicKey = jsonData['data'].keys.first;
+                        print('Chave dinâmica encontrada: $dynamicKey');
+
+                        // Verifica se o valor associado à chave é uma lista
+                        var dataList = jsonData['data'][dynamicKey];
+                        var data = dataList;
+                        var vendedor_id = data[0]['pessoa_id'];
+                        var codigo = data[0]['codigo'];
+                        var nome = data[0]['nome'];
+                        // Tenta imprimir o pessoa_id de forma segura
+                        try {
+                          if (data is List && data.isNotEmpty) {
+                            print('data is list ' + data[0]['pessoa_id']);
+                            setState(() {
+                              vendedorId = vendedor_id;
+                            });
+                            print(vendedorId);
+                          } else {
+                            print('Estrutura inesperada em data.');
+                          }
+                        } catch (e) {
+                          print('Erro ao acessar pessoa_id: $e');
+                        }
+
+                        if (data != null &&
+                            (data is List ? data.isNotEmpty : true)) {
+                          setState(() {
+                            vendedorId = data is List
+                                ? data[0]['pessoa_id'].toString()
+                                : data['pessoa_id'].toString();
+                            vendedorController.text = '$codigo - $nome';
+                          }); // Ajuste conforme a estrutura real dos dados
+                          print('ID do vendedor encontrado: $vendedorId');
+                        } else {
+                          setState(() {
+                            vendedorController.text = 'Vendedor não encontrado';
+                          });
+                          print('Vendedor não encontrado.');
+                        }
+                      } else {
+                        print('Erro na requisição: ${response.statusCode}');
+                      }
+                    } catch (e) {
+                      print('Erro ao pesquisar vendedor: $e');
+                    }
+                    setState(() {
+                      isLoadingSearchSeller = false;
+                    });
+                  },
                 ),
                 SizedBox(
                   height: Style.height_10(context),
@@ -385,6 +559,7 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   token,
                                   widget.prevendaid,
                                   widget.pessoaid,
+                                  vendedorId,
                                   _nomecontroller.text,
                                   _cpfcontroller.text,
                                   _telefonecontatocontroller.text,
@@ -396,7 +571,9 @@ class _CustomerSessionState extends State<CustomerSession> {
                                   _numerocontroller.text,
                                   ibge,
                                   _emailcontroller.text,
-                                  _ufcontroller.text);
+                                  _ufcontroller.text,
+                                  double.parse(valordescontoController.text) ??
+                                      0.0);
                               print('pessoa_id: ' + widget.pessoaid);
                               setState(() {
                                 isLoadingButton = false;
@@ -550,15 +727,18 @@ class _CustomerSessionState extends State<CustomerSession> {
                                     var pessoa_id =
                                         data['pessoa_id'].toString();
                                     await NewCustomer.AdjustOrder(
-                                      context,
-                                      urlBasic,
-                                      token,
-                                      _nomecontroller.text,
-                                      _cpfcontroller.text,
-                                      _telefonecontatocontroller.text,
-                                      widget.prevendaid,
-                                      pessoa_id,
-                                    );
+                                        context,
+                                        urlBasic,
+                                        token,
+                                        _nomecontroller.text,
+                                        _cpfcontroller.text,
+                                        _telefonecontatocontroller.text,
+                                        widget.prevendaid,
+                                        pessoa_id,
+                                        vendedorId,
+                                        double.parse(
+                                                valordescontoController.text) ??
+                                            0.0);
                                     _openModal(context);
                                     setState(() {
                                       isLoadingIconButton = false;
@@ -848,6 +1028,9 @@ class _CustomerSessionState extends State<CustomerSession> {
     await Future.wait([
       fetchDataOrders(),
     ]);
+    await Future.wait([
+      fetchDataSeller(),
+    ]);
   }
 
   Future<void> fetchDataOrders() async {
@@ -862,5 +1045,63 @@ class _CustomerSessionState extends State<CustomerSession> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  Future<void> fetchDataSeller() async {
+    try {
+      var urlGet = Uri.parse(
+          '''$urlBasic/ideia/core/getdata/prevenda%20p%20LEFT%20JOIN%20pessoa%20pp%20ON%20pp.pessoa_id%20=%20p.vendedor_pessoa_id%20WHERE%20p.prevenda_id%20=%20'${widget.prevendaid}'/''');
+      var response = await http.get(
+        urlGet,
+        headers: {'Accept': 'text/html'},
+      );
+
+      print(urlGet);
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        var dynamicKey = jsonData['data'].keys.first;
+        print('Chave dinâmica encontrada: $dynamicKey');
+
+        // Verifica se o valor associado à chave é uma lista
+        var dataList = jsonData['data'][dynamicKey];
+        var data = dataList;
+        var vendedor_pessoa_id = data[0]['vendedor_pessoa_id'];
+        var codigo = data[0]['codigo'];
+        var nome = data[0]['nome'];
+        // Tenta imprimir o pessoa_id de forma segura
+        try {
+          if (data is List && data.isNotEmpty) {
+            print('data is list ' + data[0]['vendedor_pessoa_id']);
+            setState(() {
+              vendedorId = vendedor_pessoa_id.toString();
+              vendedorController.text = '$codigo - $nome';
+            });
+            print(vendedorId);
+          } else {
+            print('Estrutura inesperada em data.');
+          }
+        } catch (e) {
+          print('Erro ao acessar pessoa_id: $e');
+        }
+        // if (data != null && (data is List ? data.isNotEmpty : true)) {
+        //   setState(() {
+        //     vendedorId = data is List
+        //         ? data[0]['vendedor_pessoa_id'].toString()
+        //         : data['vendedor_pessoa_id'].toString();
+        //     vendedorController.text = '$codigo - $nome';
+        //   }); // Ajuste conforme a estrutura real dos dados
+        //   print('ID do vendedor encontrado: $vendedorId');
+        // } else {
+        //   setState(() {
+        //     vendedorController.text = 'Vendedor não encontrado';
+        //   });
+        //   print('Vendedor não encontrado.');
+        // }
+      } else {
+        print('Erro na requisição: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro ao pesquisar vendedor: $e');
+    }
   }
 }

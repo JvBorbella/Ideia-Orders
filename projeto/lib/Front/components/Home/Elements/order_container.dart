@@ -8,6 +8,7 @@ class OrderContainer extends StatefulWidget {
   final DateTime data;
   final String numero;
   final flagpermitefaturar;
+  final valordesconto;
 
   const OrderContainer({
     super.key, 
@@ -16,13 +17,14 @@ class OrderContainer extends StatefulWidget {
   required this.nomepessoa,
   required this.numero,
   this.flagpermitefaturar,
+  this.valordesconto
   });
 
   @override
   State<OrderContainer> createState() => _OrderContainerState();
 }
-
 class _OrderContainerState extends State<OrderContainer> {
+  double get valorfinal => widget.valortotal - (widget.valordesconto ?? 0.0);
    NumberFormat currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   @override
   Widget build(BuildContext context) {
@@ -119,7 +121,7 @@ class _OrderContainerState extends State<OrderContainer> {
                             ),
                       ),
                       Text(
-                        currencyFormat.format(widget.valortotal),
+                        currencyFormat.format(valorfinal),
                         style: TextStyle(
                           color: Style.primaryColor,
                           fontSize: Style.height_10(context),

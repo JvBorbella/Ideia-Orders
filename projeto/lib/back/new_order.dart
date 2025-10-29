@@ -45,6 +45,7 @@ class DataServiceNewOrder {
     String nomeController,
     String pessoaid,
     String tabelapreco_id,
+    String empresa_id,
   ) async {
     String getUnmaskedText(String maskedText) {
       // Remove todos os caracteres não numéricos
@@ -66,6 +67,7 @@ class DataServiceNewOrder {
       'nome': nomeController,
       'telefone': telDefault,
       'tabelapreco_id' : tabelapreco_id,
+      'empresa_id': empresa_id
     });
 
     print(headers);

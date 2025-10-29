@@ -10,8 +10,8 @@ class ProductsEndpoint {
   late String codigoean;
   late String unidade;
   late int flagunidadefracionada;
-  late double precopromocional;
-  late double precotabela;
+  //late double precopromocional;
+  late double precofinal;
 
   ProductsEndpoint({
     required this.produtoid,
@@ -20,8 +20,8 @@ class ProductsEndpoint {
     required this.codigoean,
     required this.unidade,
     required this.flagunidadefracionada,
-    required this.precopromocional,
-    required this.precotabela,
+    //required this.precopromocional,
+    required this.precofinal,
   });
 
   factory ProductsEndpoint.fromJson(Map<String, dynamic> json) {
@@ -29,38 +29,55 @@ class ProductsEndpoint {
       produtoid: json['produto_id'] ?? '',
       nome: json['nome'] ?? '',
       codigo: json['codigo'] ?? '',
-      codigoean: json['codigoean'] ?? '',
-      unidade: json['unidade'] ?? '',
+      codigoean: json['eantributavel'] ?? '',
+      unidade: json['nome_1'] ?? '',
       flagunidadefracionada: json['flagunidadefracionada'] ?? 0,
-      precopromocional: (json['precopromocional'] as num).toDouble(),
-      precotabela: (json['precotabela'] as num).toDouble(),
+      //precopromocional: (json['precopromocional'] as num).toDouble(),
+      precofinal: (json['precofinal'] as num).toDouble(),
     );
   }
 }
 
 class DataServiceProducts {
   static Future<List<ProductsEndpoint>?> fetchDataProducts(
-      BuildContext context, String urlBasic, String token, String text) async {
+      BuildContext context, String urlBasic, String token, String text, String tabelapreco_id) async {
     List<ProductsEndpoint>? products;
 
     try {
-      var urlPost =
-          Uri.parse('$urlBasic/ideia/prevenda/listaprodutos?busca=$text');
+      var urlPost = Uri.parse(
+        '''$urlBasic/ideia/core/getdata/produto%20p%20LEFT%20JOIN%20produtotabelapreco%20pt%20ON%20p.produto_id%20=%20pt.produto_id%20AND%20pt.tabelapreco_id%20=%20'$tabelapreco_id'%20LEFT%20JOIN%20unidademedida%20u%20ON%20u.unidademedida_id%20=%20p.unidademedida_id%20WHERE%20p.flagexcluido%20%3C%3E%201%20AND%20(p.codigo%20LIKE%20'%25$text%25'%20OR%20p.eantributavel%20LIKE%20'%25$text%25'%20OR%20p.nome%20LIKE%20'%25$text%25')%20AND%20pt.precofinal%20IS%20NOT%20NULL%20LIMIT%2050/'''
+       // '$urlBasic/ideia/prevenda/listaprodutos?busca=$text'
+      );
 
-      var response = await http.get(urlPost);
+      var response = await http.get(
+        urlPost,
+        headers: {
+          'Accept': 'text/html',
+        },
+      );
+
+      print('URL de requisição: $urlPost');
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
 
-        if (jsonData.containsKey('data') &&
-            jsonData['data'].containsKey('produtos') &&
-            jsonData['data']['produtos'].isNotEmpty) {
-          products = (jsonData['data']['produtos'] as List)
-              .map((e) => ProductsEndpoint.fromJson(e))
-              .toList();
+        if (jsonData.containsKey('data') && jsonData['data'] is Map) {
+          // Busca a primeira chave dentro de 'data', pois ela é dinâmica
+          var dynamicKey = jsonData['data'].keys.first;
+          print('Chave dinâmica encontrada: $dynamicKey');
 
-          products =
-              products.where((product) => product.precotabela > 0.0).toList();
+          // Verifica se o valor associado à chave é uma lista
+          var dataList = jsonData['data'][dynamicKey];
+          if (dataList != null && dataList is List) {
+            products = dataList.map((e) => ProductsEndpoint.fromJson(e)).toList();
+
+            products = products.where((product) => product.precofinal != 0.0).toList();
+
+            print('A chave dinâmica contém uma lista válida.');
+            print(response.body);
+          } else {
+            print('A chave dinâmica não contém uma lista válida.');
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

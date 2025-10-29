@@ -13,6 +13,7 @@ class NewCustomer {
       String token,
       String prevendaid,
       String pessoaid,
+      String vendedorId,
       String nomeController,
       String cpfController,
       String telefonecontatoController,
@@ -24,7 +25,8 @@ class NewCustomer {
       String numeroController,
       String ibge,
       String emailController,
-      String uf) async {
+      String uf,
+      double valordesconto) async {
     String getUnmaskedText(String maskedText) {
       // Remove todos os caracteres não numéricos
       return maskedText.replaceAll(RegExp(r'\D'), '');
@@ -108,7 +110,9 @@ class NewCustomer {
                                           cpfController,
                                           telefonecontatoController,
                                           prevendaid,
-                                          pessoaid);
+                                          pessoaid,
+                                          vendedorId,
+                                          valordesconto ?? 0.0);
                                       await NewCustomer.newCostumer(
                                           context,
                                           urlBasic,
@@ -217,7 +221,9 @@ class NewCustomer {
               cpfController,
               telefonecontatoController,
               prevendaid,
-              pessoaid);
+              pessoaid,
+              vendedorId,
+              valordesconto ?? 0.0);
           await NewCustomer.newCostumer(
               context,
               urlBasic,
@@ -398,6 +404,8 @@ class NewCustomer {
     String telefonecontatoController,
     String prevendaid,
     String pessoaid,
+    String vendedorId,
+    double valordesconto
   ) async {
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/ajustapedido');
 
@@ -418,6 +426,8 @@ class NewCustomer {
       'telefone': telDefault,
       'prevenda_id': prevendaid,
       'pessoa_id': pessoaid,
+      'vendedor_id': vendedorId,
+      'valordesconto': valordesconto
     });
     print(body);
     print(cpfDefault);
@@ -431,20 +441,20 @@ class NewCustomer {
 
       if (response.statusCode == 200) {
         print('Dados enviados com sucesso');
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     behavior: SnackBarBehavior.floating,
-        //     padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
-        //     content: Text(
-        //       'Cliente cadastrado com sucesso!',
-        //       style: TextStyle(
-        //         fontSize: Style.SaveUrlMessageSize(context),
-        //         color: Style.tertiaryColor,
-        //       ),
-        //     ),
-        //     backgroundColor: Style.sucefullColor,
-        //   ),
-        // );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Pedido Gravado',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
+              ),
+            ),
+            backgroundColor: Style.sucefullColor,
+          ),
+        );
       } else {
         print('Erro ao enviar dados: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(

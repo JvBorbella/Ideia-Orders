@@ -24,6 +24,7 @@ class _NavbarState extends State<Navbar> {
             //Chamando os elementos internos da NavBar (Buttons)
             Container(
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: widget.children,
               ),
             ),

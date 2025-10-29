@@ -4,7 +4,9 @@ import 'package:projeto/back/orders_endpoint.dart';
 import 'package:projeto/back/rm_product.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Style.dart';
+import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
+import 'package:projeto/front/components/new_order/sessions/customers/customer_session.dart';
 import 'package:projeto/front/pages/product_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +32,8 @@ class ProductSession extends StatefulWidget {
   final valortotal;
   final quantidade;
   final imagemurl;
+  final empresa_id;
+  final valordesconto;
 
   final VoidCallback? onProductRemoved;
 
@@ -55,13 +59,17 @@ class ProductSession extends StatefulWidget {
       this.valortotal,
       this.quantidade,
       this.imagemurl,
-      this.onProductRemoved});
+      this.onProductRemoved,
+      this.empresa_id,
+      this.valordesconto});
 
   @override
   State<ProductSession> createState() => _ProductSessionState();
 }
 
 class _ProductSessionState extends State<ProductSession> {
+  final GlobalKey<CustomerSessionState> customerKey =
+      GlobalKey<CustomerSessionState>();
   NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: '');
   List<OrdersDetailsEndpoint> orders = [];
@@ -71,6 +79,8 @@ class _ProductSessionState extends State<ProductSession> {
   String token = '';
 
   double totalValue = 0.0;
+
+  TextEditingController valordescontoController = TextEditingController();
 
   @override
   void initState() {
@@ -223,7 +233,10 @@ class _ProductSessionState extends State<ProductSession> {
                                               children: [
                                                 Text(
                                                   'Subtotal - ' +
-                                                      currencyFormat.format(orders[index].valortotalitem).toString(),
+                                                      currencyFormat
+                                                          .format(orders[index]
+                                                              .valortotalitem)
+                                                          .toString(),
                                                   style: TextStyle(
                                                       fontSize: Style.height_10(
                                                           context),
@@ -288,21 +301,29 @@ class _ProductSessionState extends State<ProductSession> {
                                                                         context,
                                                                         urlBasic,
                                                                         token,
-                                                                        widget.prevendaid,
-                                                                        orders[index].prevendaprodutoid);
+                                                                        widget
+                                                                            .prevendaid,
+                                                                        orders[index]
+                                                                            .prevendaprodutoid);
                                                                     _closeModal();
 
-                                                                    setState(() {
-                                                                      orders.removeAt(index);
-                                                                      totalValue = _calculateTotal();
+                                                                    setState(
+                                                                        () {
+                                                                      orders.removeAt(
+                                                                          index);
+                                                                      totalValue =
+                                                                          _calculateTotal();
                                                                     });
 
-                                                                    if (orders.isEmpty) {
-                                                                      setState(() {
-
-                                                                      });
-                                                                      if (widget.onProductRemoved != null) {
-                                                                        widget.onProductRemoved!();
+                                                                    if (orders
+                                                                        .isEmpty) {
+                                                                      setState(
+                                                                          () {});
+                                                                      if (widget
+                                                                              .onProductRemoved !=
+                                                                          null) {
+                                                                        widget
+                                                                            .onProductRemoved!();
                                                                       } // Força uma atualização da UI quando a lista estiver vazia
                                                                     }
                                                                   },
@@ -445,6 +466,7 @@ class _ProductSessionState extends State<ProductSession> {
                         bairro: widget.bairro.toString(),
                         endereco: widget.endereco.toString(),
                         complemento: widget.complemento.toString(),
+                        empresa_id: widget.empresa_id.toString(),
                       )));
             }),
       ],
