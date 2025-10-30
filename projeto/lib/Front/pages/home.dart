@@ -116,7 +116,6 @@ class _HomeState extends State<Home> {
     _loadSavedToken();
     _loadSavedFilter();
     loadData();
-    print('EMPRESA AIDI - $empresaid');
   }
 
   String tableprice = '';
@@ -204,7 +203,6 @@ class _HomeState extends State<Home> {
                                             tabelapreco_id =
                                                 tabelapreco_id_company;
                                           });
-                                          print(tabelapreco_id);
                                         } else {
                                           setState(() {
                                             empresaid = '';
@@ -368,7 +366,6 @@ class _HomeState extends State<Home> {
                                       onSelected: (value) async {
                                         setModalState(() {
                                           tableprice = value;
-                                          print(tableprice);
                                         });
                                         await DataServiceTablePriceId
                                             .fetchDataTablePriceId(
@@ -376,7 +373,6 @@ class _HomeState extends State<Home> {
                                         setState(() {
                                           tableprice = value;
                                           fetchDataTablePriceId();
-                                          print(tabelapreco_id);
                                         });
                                       },
                                       child: Row(
@@ -450,7 +446,6 @@ class _HomeState extends State<Home> {
                               onPressed: () async {
                                 setModalState(() {
                                   isLoadingButton = true;
-                                  print(isLoadingButton);
                                 });
                                 final data =
                                     await DataServiceCliente2.fetchDataCliente2(
@@ -487,7 +482,6 @@ class _HomeState extends State<Home> {
                                 });
                                 setModalState(() {
                                   isLoadingButton = false;
-                                  print(isLoadingButton);
                                 });
                                 _closeModal();
                                 _cpfcontroller.clear();
@@ -732,7 +726,6 @@ class _HomeState extends State<Home> {
                         shrinkWrap: true,
                         itemCount: orders.length,
                         itemBuilder: (context, index) {
-                          print(orders[index].flagpermitefaturar);
                           return GestureDetector(
                             onTap: () async {
                               await fetchDataOrdersDetails2(
@@ -777,12 +770,8 @@ class _HomeState extends State<Home> {
                                         valortotal: orders[index].valortotal,
                                         codigoproduto: codigoproduto,
                                         operador: orders[index].operador,
-                                        empresa_id:
-                                            orders[index].empresaId.toString(),
-                                        valordesconto: orders[index]
-                                            .valordesconto
-                                            .toString()
-                                        // Passe outros campos conforme necessário
+                                        empresa_id: orders[index].empresaId.toString(),
+                                        valordesconto: orders[index].valordesconto.toString()
                                         ),
                                   ),
                                 );
@@ -924,7 +913,6 @@ class _HomeState extends State<Home> {
       setState(() {
         orders = fetchData!;
       });
-      print('Carrega aí bicho $fetchData');
     }
     setState(() {
       isLoading = false;
@@ -1106,7 +1094,6 @@ class _HomeState extends State<Home> {
     if (fetchedDataTablePriceName != null) {
       setState(() {
         tableprice = fetchedDataTablePriceName['nome'] ?? '';
-        print('nome tabelapreco: $tableprice');
       });
     }
   }
@@ -1118,7 +1105,6 @@ class _HomeState extends State<Home> {
     if (fetchedDataTablePriceId != null) {
       setState(() {
         tabelapreco_id = fetchedDataTablePriceId['tabelapreco_id'] ?? '';
-        print('tabelapreco_id: $tabelapreco_id');
       });
     }
   }
@@ -1127,7 +1113,6 @@ class _HomeState extends State<Home> {
     Map<dynamic, dynamic>? fetchedDataTablePrice =
         await DataServiceAlterTableEndpoint.fetchDataAlterTableEndpoint(
             context, urlBasic, empresa_id);
-    print(fetchedDataTablePrice);
     if (fetchedDataTablePrice != null) {
       setState(() {
         flagpermitiralterartabela =
@@ -1240,7 +1225,6 @@ class _HomeState extends State<Home> {
       setState(() {
         company = fetchedData;
       });
-      print(empresa_nome);
       if (empresaid.isNotEmpty) {
         setState(() {
           empresa_nome = company.first.empresa_nome.toString();

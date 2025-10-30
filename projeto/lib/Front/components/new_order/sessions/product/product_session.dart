@@ -456,18 +456,18 @@ class _ProductSessionState extends State<ProductSession> {
             onPressed: () {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => ProductList(
-                        prevendaid: widget.prevendaid.toString(),
-                        pessoaid: widget.pessoaid.toString(),
-                        numpedido: widget.numpedido.toString(),
-                        pessoanome: widget.pessoanome.toString(),
-                        cpfcnpj: widget.cpfcnpj.toString(),
-                        telefone: widget.telefone.toString(),
-                        cep: widget.cep.toString(),
-                        bairro: widget.bairro.toString(),
-                        endereco: widget.endereco.toString(),
-                        complemento: widget.complemento.toString(),
-                        empresa_id: widget.empresa_id.toString(),
-                      )));
+                      prevendaid: widget.prevendaid.toString(),
+                      pessoaid: widget.pessoaid.toString(),
+                      numpedido: widget.numpedido.toString(),
+                      pessoanome: widget.pessoanome.toString(),
+                      cpfcnpj: widget.cpfcnpj.toString(),
+                      telefone: widget.telefone.toString(),
+                      cep: widget.cep.toString(),
+                      bairro: widget.bairro.toString(),
+                      endereco: widget.endereco.toString(),
+                      complemento: widget.complemento.toString(),
+                      empresa_id: widget.empresa_id.toString(),
+                      valordesconto: widget.valordesconto)));
             }),
       ],
     ));

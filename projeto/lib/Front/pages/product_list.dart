@@ -11,6 +11,7 @@ import 'package:projeto/front/components/global/elements/navbar_button.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/product_page/elements/product_add.dart';
 import 'package:projeto/front/pages/new_order_page.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,6 +27,7 @@ class ProductList extends StatefulWidget {
   final String? endereco;
   final String? complemento;
   final empresa_id;
+  final valordesconto;
 
   final flagService;
 
@@ -42,7 +44,8 @@ class ProductList extends StatefulWidget {
       this.endereco,
       this.complemento,
       this.flagService,
-      this.empresa_id});
+      this.empresa_id,
+      this.valordesconto});
 
   @override
   State<ProductList> createState() => _ProductListState();
@@ -65,6 +68,8 @@ class _ProductListState extends State<ProductList> {
       expedicaoId = '';
   late String tabelapreco_id = '';
   final text = TextEditingController();
+
+  String desc = '';
 
   final FocusNode _focusNode = FocusNode();
 
@@ -108,6 +113,7 @@ class _ProductListState extends State<ProductList> {
                               endereco: widget.endereco,
                               complemento: widget.complemento,
                               empresa_id: widget.empresa_id,
+                              valordesconto: widget.valordesconto,
                             ),
                             Icons: Icons.arrow_back_ios_new,
                           )
@@ -235,7 +241,8 @@ class _ProductListState extends State<ProductList> {
                                   bairro: widget.bairro,
                                   endereco: widget.endereco,
                                   complemento: widget.complemento,
-                                  empresa_id: widget.empresa_id),
+                                  empresa_id: widget.empresa_id,
+                                  valordesconto: widget.valordesconto),
                               Icons: Icons.arrow_back_ios_new,
                             ),
                             IconButton(
@@ -446,15 +453,13 @@ class _ProductListState extends State<ProductList> {
                                   codigoean:
                                       products[index].codigoean.toString(),
                                   unidade: products[index].unidade.toString(),
-                                  // precopromocional: products[index]
-                                  //     .precopromocional
-                                  //     .toDouble(),
                                   precotabela:
                                       products[index].precofinal.toDouble(),
                                   flagunidadefracionada:
                                       products[index].flagunidadefracionada,
                                   onProductAdded: _onProductAdded,
-                                  expedicaoId: expedicaoId, // Chama a função ao adicionar o produto
+                                  expedicaoId:
+                                      expedicaoId, // Chama a função ao adicionar o produto
                                 ),
                               ],
                             );
@@ -479,6 +484,8 @@ class _ProductListState extends State<ProductList> {
                       bairro: widget.bairro.toString(),
                       endereco: widget.endereco.toString(),
                       complemento: widget.complemento.toString(),
+                      empresa_id: widget.empresa_id,
+                      valordesconto: widget.valordesconto,
                       // Passe outros campos conforme necessário
                     ),
                   ),
@@ -532,7 +539,6 @@ class _ProductListState extends State<ProductList> {
   }
 
   Future<void> loadData() async {
-    print(widget.empresa_id);
     await Future.wait([_loadSavedFlagService()]);
     if (flagService == true) {
       await Future.wait([

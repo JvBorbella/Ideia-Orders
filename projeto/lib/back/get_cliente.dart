@@ -200,6 +200,7 @@ class DataServiceCliente2 {
       var response = await http.get(urlPost, headers: {
         // 'Accept': 'text/html',
       });
+      print(urlPost);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
@@ -212,7 +213,7 @@ class DataServiceCliente2 {
           pessoaid = pessoaData['pessoa_id']?.toString() ?? '';
           nome = pessoaData['nome']?.toString() ?? '';
           codigo = pessoaData['codigo']?.toString() ?? '';
-          cpf = pessoaData['cpf'].toString().isEmpty
+          cpf = pessoaData['cpf'] == null
               ? pessoaData['cnpj']
               : pessoaData['cpf'];
           telefone = pessoaData['telefone']?.toString() ?? '';
@@ -221,8 +222,7 @@ class DataServiceCliente2 {
           enderecobairro = pessoaData['enderecobairro']?.toString() ?? '';
           enderecocidade = pessoaData['enderecocidade']?.toString() ?? '';
           endereconumero = pessoaData['endereconumero']?.toString() ?? '';
-          enderecocomplemento =
-              pessoaData['enderecocomplemento']?.toString() ?? '';
+          enderecocomplemento = pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
           email = pessoaData['emailcontato']?.toString() ?? '';
         } else {
@@ -232,7 +232,7 @@ class DataServiceCliente2 {
         print('Erro ao carregar dados: ${response.statusCode}');
       }
     } catch (e) {
-      print('Erro durante a requisição: $e');
+      print('Erro durante a requisição client2: $e');
     }
 
     return {

@@ -169,6 +169,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
                       imagemurl: imagemurl.toString(),
                       onProductRemoved: _onProductRemoved,
                       empresa_id: widget.empresa_id,
+                      valordesconto: widget.valordesconto,
                       ),
                   SizedBox(
                     height: Style.height_15(context),

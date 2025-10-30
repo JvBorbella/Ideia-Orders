@@ -82,9 +82,9 @@ class CustomerSessionState extends State<CustomerSession> {
         _cpfcontroller.text,
         _telefonecontatocontroller.text,
         widget.prevendaid,
-        pessoa_id.toString(),
+        widget.pessoaid,
         vendedorId,
-        double.parse(valordescontoController.text) ?? 0.0);
+        double.parse(substituirVirgulaPorPonto(valordescontoController.text)) ?? 0.0);
   }
 
   late BuildContext modalContext;
@@ -130,6 +130,10 @@ class CustomerSessionState extends State<CustomerSession> {
 
   List<OrdersDetailsEndpoint> orders = [];
 
+  String substituirVirgulaPorPonto(String texto) {
+    return texto.replaceAll(',', '.');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -144,17 +148,17 @@ class CustomerSessionState extends State<CustomerSession> {
     _logradourocontroller.text = widget.endereco.toString();
     _nomecontroller.text = widget.pessoanome == 'null' ? '' : widget.pessoanome;
     final formatter = NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: '',
-  );
+      locale: 'pt_BR',
+      symbol: '',
+    );
 
-  // se widget.valordesconto vier como número (ex: double)
-  if (widget.valordesconto != null && widget.valordesconto!.isNotEmpty) {
-  final value = double.tryParse(widget.valordesconto!) ?? 0.0;
-  valordescontoController.text = formatter.format(value);
-} else {
-  valordescontoController.text = '';
-}
+    // se widget.valordesconto vier como número (ex: double)
+    if (widget.valordesconto != null && widget.valordesconto!.isNotEmpty) {
+      final value = double.tryParse(widget.valordesconto!) ?? 0.0;
+      valordescontoController.text = formatter.format(value);
+    } else {
+      valordescontoController.text = '0,00';
+    }
     final cpfcnpj = widget.cpfcnpj ?? '';
     final cleanedCpfCnpj = cpfcnpj.replaceAll(
         RegExp(r'\D'), ''); // Remove caracteres não numéricos
@@ -175,10 +179,6 @@ class CustomerSessionState extends State<CustomerSession> {
 
     print('Número: ' + widget.numero);
     print('Número: ' + widget.numpedido);
-  }
-
-  String substituirVirgulaPorPonto(String texto) {
-    return texto.replaceAll(',', '.');
   }
 
   @override
@@ -572,7 +572,7 @@ class CustomerSessionState extends State<CustomerSession> {
                                   ibge,
                                   _emailcontroller.text,
                                   _ufcontroller.text,
-                                  double.parse(valordescontoController.text) ??
+                                  double.parse(substituirVirgulaPorPonto(valordescontoController.text)) ??
                                       0.0);
                               print('pessoa_id: ' + widget.pessoaid);
                               setState(() {
@@ -736,8 +736,9 @@ class CustomerSessionState extends State<CustomerSession> {
                                         widget.prevendaid,
                                         pessoa_id,
                                         vendedorId,
-                                        double.parse(
-                                                valordescontoController.text) ??
+                                        double.parse(substituirVirgulaPorPonto(
+                                                valordescontoController
+                                                    .text)) ??
                                             0.0);
                                     _openModal(context);
                                     setState(() {

@@ -260,6 +260,7 @@ class _ProductAddState extends State<ProductAdd> {
                                           setState(() {
                                             expedicaoId = value;
                                           });
+                                          print(expedicaoId);
                                         } else {
                                           setState(() {
                                             expedicaoId = '';
@@ -402,8 +403,7 @@ class _ProductAddState extends State<ProductAdd> {
                                               _quantidadecontroller.text,
                                               widget.flagunidadefracionada ?? 0,
                                               1,
-                                              widget.expedicaoId ??
-                                                  expedicaoId);
+                                              expedicaoId);
 
                                       // Só chama o callback se o produto foi adicionado com sucesso
                                       if (success &&
@@ -431,8 +431,7 @@ class _ProductAddState extends State<ProductAdd> {
                                               _quantidadecontroller.text,
                                               widget.flagunidadefracionada ?? 0,
                                               0,
-                                              widget.expedicaoId ??
-                                                  expedicaoId);
+                                              expedicaoId);
 
                                       // Só chama o callback se o produto foi adicionado com sucesso
                                       if (success &&
