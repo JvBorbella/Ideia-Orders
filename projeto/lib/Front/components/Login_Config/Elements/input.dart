@@ -16,6 +16,7 @@ class Input extends StatefulWidget {
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final onTap;
+  final onSubmitted;
   final isLoadingButton;
 
   const Input(
@@ -30,6 +31,7 @@ class Input extends StatefulWidget {
       this.textInputAction,
       this.inputFormatters,
       this.onTap,
+      this.onSubmitted,
       this.isLoadingButton});
 
   @override
@@ -64,10 +66,7 @@ class _InputState extends State<Input> {
                 style: TextStyle(
                     fontSize: Style.height_12(context),
                     fontFamily: 'Poppins-Regular'),
-                onSubmitted: (value) {
-                  FocusScope.of(context)
-                      .nextFocus(); // Avança para o próximo campo ao pressionar Enter
-                },
+                onSubmitted: widget.onSubmitted,
                 keyboardType: widget.type,
                 textAlign: widget.textAlign,
                 obscureText: widget.obscureText ?? false,

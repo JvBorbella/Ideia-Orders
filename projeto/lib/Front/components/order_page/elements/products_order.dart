@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/back/products_endpoint.dart';
+import 'package:projeto/back/products/products_endpoint.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

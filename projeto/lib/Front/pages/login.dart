@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/back/login_function.dart';
-import 'package:projeto/back/save_user_function.dart';
+import 'package:projeto/back/system/login_function.dart';
+import 'package:projeto/back/system/save_user_function.dart';
 import 'package:projeto/front/components/login_config/elements/button.dart';
 import 'package:projeto/front/components/login_config/elements/config_button.dart';
 
 import 'package:projeto/front/components/login_config/elements/input.dart';
+import 'package:projeto/front/components/login_config/elements/input_action.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/login_config/structure/form_card.dart';
@@ -103,12 +104,20 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(
                           height: Style.InputSpace(context),
                         ),
-                        Input(
+                        InputAction(
                           text: 'Senha',
                           type: TextInputType.text,
                           obscureText: true,
                           controller: _passwordController,
                           textAlign: TextAlign.start,
+                          onSubmitted: (value) async {
+                              await LoginFunction.login(
+                                context,
+                                urlController,
+                                _userController,
+                                _passwordController,
+                              );
+                            },
                         ),
                         SizedBox(
                           height: Style.InputToButtonSpace(context),

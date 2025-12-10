@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:projeto/back/get_cep.dart';
-import 'package:projeto/back/get_cliente.dart';
-import 'package:projeto/back/orders_endpoint.dart';
-import 'package:projeto/back/pdf_generator.dart';
-import 'package:projeto/back/reprint.dart';
+import 'package:projeto/back/customer/get_cep.dart';
+import 'package:projeto/back/customer/get_cliente.dart';
+import 'package:projeto/back/orders/orders_endpoint.dart';
+import 'package:projeto/back/system/pdf_generator.dart';
+import 'package:projeto/back/system/reprint.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:projeto/front/components/order_page/elements/name_inputblocked.dart';
@@ -68,10 +68,7 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  String urlBasic = '';
-  String token = '';
-  String ibge = '';
-  String cidade = '';
+  String urlBasic = '', token = '', ibge = '', cidade = '';
 
   late String pessoaid = '';
   late String nome = '';
@@ -107,8 +104,8 @@ class _OrderPageState extends State<OrderPage> {
   final _logradourocontroller = TextEditingController();
 
   List<OrdersDetailsEndpoint> orders = [];
+  List<dynamic> options = [];
 
-  
   bool isLoadingButtonLocal = false;
   bool isLoadingButtonNetwork = false;
 
@@ -149,9 +146,49 @@ class _OrderPageState extends State<OrderPage> {
             child: Scaffold(
               body: ListView(
                 children: [
-                  const Navbar(text: 'Pedido', children: [
-                    NavbarButton(
-                        destination: Home(), Icons: Icons.arrow_back_ios_new)
+                  Navbar(text: 'Novo pedido', children: [
+                    const NavbarButton(
+                        destination: Home(), Icons: Icons.arrow_back_ios_new),
+                    Container(
+                      padding: EdgeInsets.only(right: Style.height_5(context)),
+                      child: PopupMenuButton<String>(
+                        itemBuilder: (BuildContext context) =>
+                            buildMenuItems(options),
+                        onSelected: (value) async {
+                          switch (value) {
+                            case 'pdf':
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) => PdfGeneratorViewer(
+                                          prevenda_id: widget.prevendaId,
+                                          numero: widget.numero,
+                                          urlBasic: urlBasic,
+                                          token: token,
+                                          vendedor: vendedorNome,
+                                          valordesconto:
+                                              widget.valordesconto)));
+                            case 'local':
+                              await DataServiceRePrintOrder
+                                  .fetchDataRePrintOrder(context, urlBasic,
+                                      token, widget.prevendaId, widget.numero);
+                            case 'rede':
+                              await DataServiceRePrintOrderNetwork
+                                  .fetchDataRePrintOrderNetwork(
+                                      context,
+                                      urlBasic,
+                                      token,
+                                      widget.prevendaId,
+                                      widget.numero);
+                              break;
+                          }
+                        },
+                        child: Icon(
+                          Icons.more_vert_rounded,
+                          color: Style.tertiaryColor,
+                          size: Style.height_20(context),
+                        ),
+                      ),
+                    )
                   ]),
                   SizedBox(
                     height: Style.height_10(context),
@@ -166,7 +203,7 @@ class _OrderPageState extends State<OrderPage> {
                     decoration: BoxDecoration(
                       color: Style.primaryColor,
                       borderRadius:
-                          BorderRadius.circular(Style.height_15(context)),
+                          BorderRadius.circular(Style.height_5(context)),
                     ),
                     child: Text(
                       'Nº do pedido - PV${widget.numero}',
@@ -242,149 +279,171 @@ class _OrderPageState extends State<OrderPage> {
                               child: Column(
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.only(
-                                      left: Style.width_10(context),
-                                      top: Style.height_5(context),
-                                      right: Style.width_10(context),
-                                      bottom: Style.height_5(context),
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Style.defaultColor,
-                                      border: BorderDirectional(
-                                        bottom: BorderSide(
-                                            width: Style.height_05(context),
-                                            color: Style.quarantineColor),
-                                        top: BorderSide(
-                                            width: Style.height_05(context),
-                                            color: Style.quarantineColor),
+                                      padding: EdgeInsets.only(
+                                        left: Style.width_10(context),
+                                        top: Style.height_5(context),
+                                        right: Style.width_10(context),
+                                        bottom: Style.height_5(context),
                                       ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              child: Row(
+                                      decoration: BoxDecoration(
+                                        color: Style.defaultColor,
+                                        border: BorderDirectional(
+                                          bottom: BorderSide(
+                                              width: Style.height_05(context),
+                                              color: Style.quarantineColor),
+                                          top: BorderSide(
+                                              width: Style.height_05(context),
+                                              color: Style.quarantineColor),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
                                                 children: [
-                                                  Column(
-                                                    children: [
-                                                      Image.asset(
-                                                          "assets/images/image_product/Barcode.png")
-                                                    ],
-                                                  ),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          SizedBox(
-                                                            width:
-                                                                Style.width_150(
-                                                                    context),
-                                                            child: Text(
-                                                              orders[index]
-                                                                      .nomeproduto
-                                                                      .isEmpty
-                                                                  ? ''
-                                                                  : orders[
-                                                                          index]
-                                                                      .nomeproduto,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              softWrap: true,
-                                                              style: TextStyle(
-                                                                  color: Style
-                                                                      .primaryColor,
-                                                                  fontSize: Style
-                                                                      .height_12(
+                                                  Container(
+                                                    child: Row(
+                                                      children: [
+                                                        Column(
+                                                          children: [
+                                                            Image.asset(
+                                                                "assets/images/image_product/Barcode.png")
+                                                          ],
+                                                        ),
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: Style
+                                                                      .width_150(
                                                                           context),
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
+                                                                  child: Text(
+                                                                    orders[index]
+                                                                            .nomeproduto
+                                                                            .isEmpty
+                                                                        ? ''
+                                                                        : orders[index]
+                                                                            .nomeproduto,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .clip,
+                                                                    softWrap:
+                                                                        true,
+                                                                    style: TextStyle(
+                                                                        color: Style
+                                                                            .primaryColor,
+                                                                        fontSize:
+                                                                            Style.height_12(
+                                                                                context),
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                                )
+                                                              ],
                                                             ),
-                                                          )
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            orders[index]
-                                                                    .codigoproduto
-                                                                    .isEmpty
-                                                                ? ''
-                                                                : orders[index]
-                                                                    .codigoproduto,
-                                                            style: TextStyle(
-                                                              fontSize: Style
-                                                                  .height_10(
-                                                                      context),
-                                                              color: Style
-                                                                  .quarantineColor,
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  orders[index]
+                                                                          .codigoproduto
+                                                                          .isEmpty
+                                                                      ? ''
+                                                                      : orders[
+                                                                              index]
+                                                                          .codigoproduto,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize: Style
+                                                                        .height_10(
+                                                                            context),
+                                                                    color: Style
+                                                                        .quarantineColor,
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Container(
-                                              child: Row(
-                                                children: [
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            '${currencyFormat.format(orders[index].valorunitario)} x ${orders[index].quantidade}',
-                                                            style: TextStyle(
-                                                                fontSize: Style
-                                                                    .height_12(
-                                                                        context),
-                                                                color: Style
-                                                                    .primaryColor),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Subtotal - ${currencyFormat.format(orders[index].valortotalitem)}',
-                                                            style: TextStyle(
-                                                                fontSize: Style
-                                                                    .height_10(
-                                                                        context),
-                                                                color: Style
-                                                                    .warningColor),
-                                                          )
-                                                        ],
-                                                      )
-                                                    ],
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Container(
+                                                    child: Row(
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  '${currencyFormat.format(orders[index].valorunitario)} x ${orders[index].quantidade}',
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          Style.height_12(
+                                                                              context),
+                                                                      color: Style
+                                                                          .primaryColor),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Subtotal - ${currencyFormat.format(orders[index].valortotalitem)}',
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          Style.height_10(
+                                                                              context),
+                                                                      color: Style
+                                                                          .warningColor),
+                                                                )
+                                                              ],
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          if (orders[index]
+                                              .nomeexpedicao
+                                              .isNotEmpty)
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  orders[index].nomeexpedicao,
+                                                  style: TextStyle(
+                                                    fontSize: Style.height_10(
+                                                        context),
+                                                    color: Style.primaryColor,
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                        ],
+                                      )),
                                 ],
                               ),
                             ),
@@ -572,91 +631,91 @@ class _OrderPageState extends State<OrderPage> {
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: Style.height_20(context),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              RegisterIconButton(
-                                text: 'Reimprimir cupom',
-                                color: Style.warningColor,
-                                width: Style.width_150(context),
-                                icon: Icons.print,
-                                isLoadingButton: isLoadingButtonLocal,
-                                onPressed: () async {
-                                  setState(() {
-                                    isLoadingButtonLocal = true;
-                                  });
-                                  await DataServiceRePrintOrder
-                                      .fetchDataRePrintOrder(
-                                          context,
-                                          urlBasic,
-                                          token,
-                                          widget.prevendaId,
-                                          widget.numero);
+                        // SizedBox(
+                        //   height: Style.height_20(context),
+                        // ),
+                        // Container(
+                        //   alignment: Alignment.center,
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        //     children: [
+                        //       RegisterIconButton(
+                        //         text: 'Reimprimir cupom',
+                        //         color: Style.warningColor,
+                        //         width: Style.width_150(context),
+                        //         icon: Icons.print,
+                        //         isLoadingButton: isLoadingButtonLocal,
+                        //         onPressed: () async {
+                        //           setState(() {
+                        //             isLoadingButtonLocal = true;
+                        //           });
+                        //           await DataServiceRePrintOrder
+                        //               .fetchDataRePrintOrder(
+                        //                   context,
+                        //                   urlBasic,
+                        //                   token,
+                        //                   widget.prevendaId,
+                        //                   widget.numero);
 
-                                  setState(() {
-                                    isLoadingButtonLocal = false;
-                                  });
-                                },
-                              ),
-                              RegisterIconButton(
-                                text: 'Reimprimir cupom na rede',
-                                color: Style.warningColor,
-                                width: Style.width_150(context),
-                                icon: Icons.wifi,
-                                isLoadingButton: isLoadingButtonNetwork,
-                                onPressed: () async {
-                                  setState(() {
-                                    isLoadingButtonNetwork = true;
-                                  });
-                                  await DataServiceRePrintOrderNetwork
-                                      .fetchDataRePrintOrderNetwork(
-                                          context,
-                                          urlBasic,
-                                          token,
-                                          widget.prevendaId,
-                                          widget.numero);
+                        //           setState(() {
+                        //             isLoadingButtonLocal = false;
+                        //           });
+                        //         },
+                        //       ),
+                        //       RegisterIconButton(
+                        //         text: 'Reimprimir cupom na rede',
+                        //         color: Style.warningColor,
+                        //         width: Style.width_150(context),
+                        //         icon: Icons.wifi,
+                        //         isLoadingButton: isLoadingButtonNetwork,
+                        //         onPressed: () async {
+                        //           setState(() {
+                        //             isLoadingButtonNetwork = true;
+                        //           });
+                        //           await DataServiceRePrintOrderNetwork
+                        //               .fetchDataRePrintOrderNetwork(
+                        //                   context,
+                        //                   urlBasic,
+                        //                   token,
+                        //                   widget.prevendaId,
+                        //                   widget.numero);
 
-                                  setState(() {
-                                    isLoadingButtonNetwork = false;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              PdfGeneratorViewer(
-                                  prevenda_id: widget.prevendaId,
-                                  numero: widget.numero,
-                                  urlBasic: urlBasic,
-                                  token: token,
-                                  vendedor: vendedorNome,
-                                  valordesconto: widget.valordesconto)
-                              //         RegisterIconButton(
-                              //           text: 'Gerar PDF',
-                              //           color: Style.warningColor,
-                              //           width: Style.width_150(context),
-                              //           icon: Icons.print,
-                              //           onPressed: () async {
-                              //             Navigator.of(context).pushReplacement(
-                              // MaterialPageRoute(builder: (context) => PdfGeneratorViewer()));
-                              //           },
-                              //         ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: Style.height_10(context),
-                        )
+                        //           setState(() {
+                        //             isLoadingButtonNetwork = false;
+                        //           });
+                        //         },
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+                        // Container(
+                        //   alignment: Alignment.center,
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        //     children: [
+                        //       PdfGeneratorViewer(
+                        //           prevenda_id: widget.prevendaId,
+                        //           numero: widget.numero,
+                        //           urlBasic: urlBasic,
+                        //           token: token,
+                        //           vendedor: vendedorNome,
+                        //           valordesconto: widget.valordesconto)
+                        //       //         RegisterIconButton(
+                        //       //           text: 'Gerar PDF',
+                        //       //           color: Style.warningColor,
+                        //       //           width: Style.width_150(context),
+                        //       //           icon: Icons.print,
+                        //       //           onPressed: () async {
+                        //       //             Navigator.of(context).pushReplacement(
+                        //       // MaterialPageRoute(builder: (context) => PdfGeneratorViewer()));
+                        //       //           },
+                        //       //         ),
+                        //     ],
+                        //   ),
+                        // ),
+                        // SizedBox(
+                        //   height: Style.height_10(context),
+                        // )
                       ],
                     ),
                   )
@@ -794,5 +853,57 @@ class _OrderPageState extends State<OrderPage> {
     } catch (e) {
       print('Erro ao pesquisar vendedor: $e');
     }
+  }
+
+  List<PopupMenuItem<String>> buildMenuItems(List<dynamic> options) {
+    List<PopupMenuItem<String>> staticItems = [
+      PopupMenuItem(
+          enabled: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              //Text('Empresa'),
+              Container(
+                margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Style.height_5(context)),
+                    color: Style.errorColor),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon:
+                      Image.asset('assets/images/icon_remove/icon_remove.png'),
+                  style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor)),
+                ),
+              ),
+            ],
+          )),
+    ];
+    const PopupMenuDivider();
+
+    List<PopupMenuItem<String>> optionItems = [
+      PopupMenuItem(
+        value: 'pdf',
+        child: Text('Gerar PDF'),
+      ),
+      PopupMenuItem(
+        value: 'local',
+        child: Text('Reimprimir cupom'),
+      ),
+      PopupMenuItem(
+        value: 'rede',
+        child: Text(
+          'Reimprimir via rede',
+          //style: TextStyle(fontSize: Style.height_10(context)),
+        ),
+      ),
+    ];
+
+    const PopupMenuDivider();
+
+    return staticItems + optionItems;
   }
 }

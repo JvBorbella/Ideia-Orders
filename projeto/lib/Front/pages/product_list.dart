@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:projeto/back/products_endpoint.dart';
-import 'package:projeto/back/service_endpoint.dart';
-import 'package:projeto/back/table_price.dart';
+import 'package:projeto/back/checK_internet.dart';
+import 'package:projeto/back/products/products_endpoint.dart';
+import 'package:projeto/back/products/service_endpoint.dart';
+import 'package:projeto/back/company/table_price.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/elements/navbar_button.dart';
@@ -77,6 +78,7 @@ class _ProductListState extends State<ProductList> {
   void initState() {
     super.initState();
     loadData();
+    print(widget.cpfcnpj);
   }
 
   @override
@@ -539,6 +541,7 @@ class _ProductListState extends State<ProductList> {
   }
 
   Future<void> loadData() async {
+    final hasInternet = await hasInternetConnection();
     await Future.wait([_loadSavedFlagService()]);
     if (flagService == true) {
       await Future.wait([
@@ -548,13 +551,17 @@ class _ProductListState extends State<ProductList> {
         _loadSavedCheckProduct(),
         _loadSavedFlagGerarPedido()
       ]);
-      await fetchDataTablePrice(widget.empresa_id);
-      await Future.wait([
-        fetchDataServices(),
-      ]);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(_focusNode);
-      });
+
+      if (!hasInternet) {
+      } else {
+        await fetchDataTablePrice(widget.empresa_id);
+        await Future.wait([
+          fetchDataServices(),
+        ]);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(_focusNode);
+        });
+      }
     } else {
       await Future.wait([
         _loadSavedUrlBasic(),
@@ -564,12 +571,15 @@ class _ProductListState extends State<ProductList> {
         _loadSavedCheckProduct(),
         _loadSavedFlagGerarPedido()
       ]);
-      await fetchDataTablePrice(widget.empresa_id);
-      await fetchDataProducts();
-      await fetchDataExpedtion();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(_focusNode);
-      });
+      if (!hasInternet) {
+      } else {
+        await fetchDataTablePrice(widget.empresa_id);
+        await fetchDataProducts();
+        await fetchDataExpedtion();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(_focusNode);
+        });
+      }
     }
   }
 
@@ -599,7 +609,6 @@ class _ProductListState extends State<ProductList> {
       setState(() {
         services = fetchDataServices;
       });
-      print('Services: $services');
     }
     setState(() {
       isLoading = false;
@@ -714,7 +723,6 @@ class _ProductListState extends State<ProductList> {
         setState(() {
           expedition = dataList;
         });
-        print(expedition);
       }
     } catch (e) {
       print('Erro durante a requisição: $e');

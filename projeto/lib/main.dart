@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:projeto/back/checK_internet.dart';
 import 'package:projeto/front/pages/splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -24,7 +26,8 @@ class _MyAppState extends State<MyApp> {
       // O método `checkForUpdate()` é a forma mais simples de começar.
       AppUpdateInfo appUpdateInfo = await InAppUpdate.checkForUpdate();
 
-      if (appUpdateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+      if (appUpdateInfo.updateAvailability ==
+          UpdateAvailability.updateAvailable) {
         // Se houver uma atualização disponível, inicie o fluxo de atualização flexível.
         final result = await InAppUpdate.startFlexibleUpdate();
 
@@ -51,6 +54,15 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  // Future<bool> checkConnection() async {
+  //   final hasInternet = await hasInternetConnection();
+  //   if (!hasInternet) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -59,31 +71,29 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         // scaffoldBackgroundColor: Colors.white,
         textTheme: TextTheme(
-           bodySmall: TextStyle(
+          bodySmall: TextStyle(
+            fontFamily: 'Poppins-Regular',
+            fontSize: MediaQuery.of(context).size.height * 0.012,
+          ),
+          bodyMedium: TextStyle(
               fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.height * 0.012,
-            ),
-            bodyMedium: TextStyle(
+              fontSize: MediaQuery.of(context).size.height * 0.018),
+          bodyLarge: TextStyle(
+            fontFamily: 'Poppins-Regular',
+            fontSize: MediaQuery.of(context).size.width * 0.025,
+          ),
+          labelSmall: TextStyle(
               fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.height * 0.018
-            ),
-            bodyLarge: TextStyle(
-              fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.width * 0.025,
-            ),
-            labelSmall: TextStyle(
-              fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.height * 0.012
-            ),
-            labelMedium: TextStyle(
-              fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.height * 0.018,
-            ),
-            labelLarge: TextStyle(
-              fontFamily: 'Poppins-Regular',
-              fontSize: MediaQuery.of(context).size.height * 0.025,
-            ),
-            ),
+              fontSize: MediaQuery.of(context).size.height * 0.012),
+          labelMedium: TextStyle(
+            fontFamily: 'Poppins-Regular',
+            fontSize: MediaQuery.of(context).size.height * 0.018,
+          ),
+          labelLarge: TextStyle(
+            fontFamily: 'Poppins-Regular',
+            fontSize: MediaQuery.of(context).size.height * 0.025,
+          ),
+        ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
@@ -93,15 +103,26 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class MyHttpOverrides extends HttpOverrides{
+class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext? context){
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
 
-void main(){
+Future<void> clearCache() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setBool('editarPrevenda', false);
+    await sharedPreferences.setBool('aplicarDesconto', false);
+    await sharedPreferences.setBool('cadastrarCliente', false);
+    await sharedPreferences.setBool('editarCliente', false);
+    await sharedPreferences.setBool('criarPedido', false);
+  }
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   print('Page size estimate: ${Platform.operatingSystemVersion}');
   HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());

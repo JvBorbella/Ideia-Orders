@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/home/elements/modal_button.dart';
+import 'package:projeto/front/pages/home.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,13 +23,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
   String urlBasic = '';
   String email = '';
 
-  // bool check = true;
-
-  bool isCheckedCPF = true;
-  bool isCheckedProduct = false;
-
-  bool flagService = false;
-  bool flagGerarPedido = false;
+  bool isCheckedCPF = true,
+      isCheckedProduct = false,
+      flagService = false,
+      flagGerarPedido = false,
+      permCriarPedido = false;
 
   String empresa_id = '';
 
@@ -125,16 +124,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                     children: [
                                       Row(
                                         children: [
-                                          Text(
-                                            'Olá, $login!',
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins-Regular',
-                                              fontSize:
-                                                  Style.LoginFontSize(context),
-                                              color: Style.tertiaryColor,
+                                          Container(
+                                            width: Style.width_200(context),
+                                            child: Text(
+                                              'Olá, $login!',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins-Regular',
+                                                fontSize: Style.LoginFontSize(
+                                                    context),
+                                                color: Style.tertiaryColor,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.start,
                                             ),
-                                            textAlign: TextAlign.start,
-                                          ),
+                                          )
                                         ],
                                       ),
                                       if (empresa_id.isNotEmpty)
@@ -205,7 +208,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     ),
                   ],
                 ),
-
                 Row(
                   children: [
                     Checkbox(
@@ -289,47 +291,47 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   children: [
                     Checkbox(
                       value: flagGerarPedido,
-                      onChanged: (value) async {
-                        setState(() {
-                          flagGerarPedido = value!;
-                        });
-                        SharedPreferences sharedPreferences =
-                            await SharedPreferences.getInstance();
-                        await sharedPreferences.setBool(
-                            'flagGerarPedido', flagGerarPedido);
-                      },
+                      onChanged: permCriarPedido == false
+                          ? null
+                          : (value) async {
+                              setState(() {
+                                flagGerarPedido = value!;
+                              });
+                              SharedPreferences sharedPreferences =
+                                  await SharedPreferences.getInstance();
+                              await sharedPreferences.setBool(
+                                  'flagGerarPedido', flagGerarPedido);
+                            },
                     ),
-                   Container(
+                    Container(
                       width: Style.width_225(context),
                       child: Text(
                         'Gerar pedido de venda ao finalizar pré-venda',
                         style: TextStyle(
-                            color: Style.primaryColor,
+                            color: permCriarPedido == false
+                                ? Style.quarantineColor
+                                : Style.primaryColor,
                             fontSize: Style.height_12(context)),
                         softWrap: true,
                         overflow: TextOverflow.clip,
                       ),
                     ),
-                    Container(
-                      width: Style.height_30(context),
-                      height: Style.height_15(context),
-                      decoration: BoxDecoration(
-                        color: Style.primaryColor,
-                        borderRadius: BorderRadius.circular(
-                          Style.height_10(context)
-                        )
-                      ),
-                      child: Center(
-                        child: Text(
-                        'Beta',
-                        style: TextStyle(
-                          color: Style.tertiaryColor,
-                          fontSize: Style.height_8(context)
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      ) 
-                    )
+                    // Container(
+                    //     width: Style.height_30(context),
+                    //     height: Style.height_15(context),
+                    //     decoration: BoxDecoration(
+                    //         color: Style.primaryColor,
+                    //         borderRadius: BorderRadius.circular(
+                    //             Style.height_10(context))),
+                    //     child: Center(
+                    //       child: Text(
+                    //         'Beta',
+                    //         style: TextStyle(
+                    //             color: Style.tertiaryColor,
+                    //             fontSize: Style.height_8(context)),
+                    //         textAlign: TextAlign.center,
+                    //       ),
+                    //     ))
                   ],
                 ),
               ],
@@ -351,30 +353,49 @@ class _CustomDrawerState extends State<CustomDrawer> {
       _loadSavedImage(),
       _loadSavedUrlBasic(),
       _loadSavedEmail(),
+      _loadSavedPermNovoPedido(),
       _loadSavedFlagGerarPedido(),
-      _loadSavedEmpresa()
+      _loadSavedEmpresa(),
     ]);
   }
 
   Future<void> _loadSavedFlagService() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedFlagService = sharedPreferences.getBool('flagService') ?? false; // Carrega o valor salvo (padrão: false)
+    bool savedFlagService = sharedPreferences.getBool('flagService') ??
+        false; // Carrega o valor salvo (padrão: false)
     setState(() {
       flagService = savedFlagService; // Atualiza o estado com o valor salvo
     });
   }
 
+  Future<void> _loadSavedPermNovoPedido() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedNovoPedido = sharedPreferences.getBool('criarPedido') ?? false;
+    setState(() {
+      permCriarPedido = savedNovoPedido;
+    });
+  }
+
   Future<void> _loadSavedFlagGerarPedido() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedFlagGerarPedido = sharedPreferences.getBool('flagGerarPedido') ?? false;
-    setState(() {
-      flagGerarPedido = savedFlagGerarPedido;
-    });
+    bool savedFlagGerarPedido =
+        sharedPreferences.getBool('flagGerarPedido') ?? false;
+    if (permCriarPedido == false) {
+      await sharedPreferences.setBool('flagGerarPedido', false);
+      setState(() {
+        flagGerarPedido = false;
+      });
+    } else {
+      setState(() {
+        flagGerarPedido = savedFlagGerarPedido;
+      });
+    }
   }
 
   Future<void> _loadSavedCheckCPF() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedCheckCPF = sharedPreferences.getBool('checkCPF') ?? true; // Carrega o valor salvo (padrão: true)
+    bool savedCheckCPF = sharedPreferences.getBool('checkCPF') ??
+        true; // Carrega o valor salvo (padrão: true)
     setState(() {
       isCheckedCPF = savedCheckCPF; // Atualiza o estado com o valor salvo
     });
@@ -382,9 +403,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadSavedCheckProduct() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ?? false; // Carrega o valor salvo (padrão: false)
+    bool savedCheckProduct = sharedPreferences.getBool('checkProduct') ??
+        false; // Carrega o valor salvo (padrão: false)
     setState(() {
-      isCheckedProduct = savedCheckProduct; // Atualiza o estado com o valor salvo
+      isCheckedProduct =
+          savedCheckProduct; // Atualiza o estado com o valor salvo
     });
   }
 

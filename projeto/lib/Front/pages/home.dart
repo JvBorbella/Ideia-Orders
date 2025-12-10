@@ -1,19 +1,26 @@
+import 'dart:convert';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/back/alter_table_endpoint.dart';
-import 'package:projeto/back/company_list.dart';
-import 'package:projeto/back/get_cliente.dart';
-import 'package:projeto/back/list_table_prices.dart';
-import 'package:projeto/back/new_order.dart';
-import 'package:projeto/back/order_details.dart';
-import 'package:projeto/back/orders_endpoint.dart';
-import 'package:projeto/back/products_endpoint.dart';
-import 'package:projeto/back/table_price.dart';
+import 'package:projeto/back/checK_internet.dart';
+import 'package:projeto/back/company/alter_table_endpoint.dart';
+import 'package:projeto/back/company/company_list.dart';
+import 'package:projeto/back/customer/get_cliente.dart';
+import 'package:projeto/back/company/list_table_prices.dart';
+import 'package:projeto/back/orders/new_order.dart';
+import 'package:projeto/back/orders/order_details.dart';
+import 'package:projeto/back/orders/orders_endpoint.dart';
+import 'package:projeto/back/products/products_endpoint.dart';
+import 'package:projeto/back/company/table_price.dart';
+import 'package:projeto/back/save_products.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
+import 'package:projeto/front/components/global/elements/alert_dialog.dart';
+import 'package:projeto/front/components/global/elements/modal.dart';
 import 'package:projeto/front/components/home/elements/drawer_button.dart';
 import 'package:projeto/front/components/home/elements/order_container.dart';
+import 'package:projeto/front/components/login_config/elements/config_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/style.dart';
@@ -23,6 +30,9 @@ import 'package:projeto/front/pages/new_order_page.dart';
 import 'package:projeto/front/pages/order_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:http/http.dart' as http;
+
+final GlobalKey<HomeState> homeKey = GlobalKey<HomeState>();
 
 class Home extends StatefulWidget {
   final String token;
@@ -30,39 +40,47 @@ class Home extends StatefulWidget {
   final String urlBasic;
 
   const Home({
-    super.key,
+    Key? key,
     this.token = '',
     this.url = '',
     this.urlBasic = '',
-  });
+  }) : super(key: key);
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Home> createState() => HomeState();
 }
 
-class _HomeState extends State<Home> {
+class HomeState extends State<Home> {
   List<OrdersEndpoint> orders = [];
   List<ProductsEndpoint> products = [];
   List<OrdersDetailsEndpoint> ordersDetails = [];
   List<ListTablePrices> tables_price = [];
   List<CompanyList> company = [];
-  String urlController = '';
-  bool isLoading = true;
+
+  bool isLoading = true, permNovaPrevenda = false, permEditarPrevenda = false;
+  //permNovoPedido = false;
+
   NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-  String selectedOptionChild = '';
-  String urlBasic = '';
-  String usuario_id = '';
-  String id = '';
-  String token = '';
-  String prevendaId = '';
-  String flagFilter = '';
 
-  String empresaid = '';
-  String tabelapreco_id_company = '';
-  String tabelapreco_id = '';
-
-  String flagpermitiralterartabela = '';
+  String urlController = '',
+      selectedOptionChild = '',
+      urlBasic = '',
+      usuario_id = '',
+      id = '',
+      token = '',
+      prevendaId = '',
+      flagFilter = '',
+      empresaid = '',
+      tabelapreco_id_company = '',
+      tabelapreco_id = '',
+      flagpermitiralterartabela = '',
+      perfilId = '',
+      empresa_id = '',
+      empresa_nome = '',
+      empresa_codigo = '',
+      tableprice = '',
+      tableprice_id = '';
 
   late String pessoanome = '';
   late String cpfcnpj = '';
@@ -75,29 +93,23 @@ class _HomeState extends State<Home> {
   late String enderecocep = '';
   late String uf = '';
   late String codigoproduto = '';
-
   late String pessoaid = '';
   late String nome = '';
   late String codigo = '';
   late String cpfcliente = '';
   late String filterValue = '';
 
-  final _cepcontroller = TextEditingController();
-  final _complementocontroller = TextEditingController();
-  final _bairrocontroller = TextEditingController();
-  final _cidadecontroller = TextEditingController();
-  final _numerocontroller = TextEditingController();
-  final _ufcontroller = TextEditingController();
-  final _logradourocontroller = TextEditingController();
-  final _emailcontroller = TextEditingController();
-
-  final _cpfcontroller = TextEditingController();
-  final _nomecontroller = TextEditingController();
-  final _telefonecontatocontroller = TextEditingController();
-
-  String empresa_id = '';
-  String empresa_nome = '';
-  String empresa_codigo = '';
+  final _cepcontroller = TextEditingController(),
+      _complementocontroller = TextEditingController(),
+      _bairrocontroller = TextEditingController(),
+      _cidadecontroller = TextEditingController(),
+      _numerocontroller = TextEditingController(),
+      _ufcontroller = TextEditingController(),
+      _logradourocontroller = TextEditingController(),
+      _emailcontroller = TextEditingController(),
+      _cpfcontroller = TextEditingController(),
+      _nomecontroller = TextEditingController(),
+      _telefonecontatocontroller = TextEditingController();
 
   String formatTel(String telefonecontato) {
     if (telefonecontato.length > 10) {
@@ -118,9 +130,6 @@ class _HomeState extends State<Home> {
     loadData();
   }
 
-  String tableprice = '';
-  String tableprice_id = '';
-
   void _openModal(BuildContext context) {
     bool isLoadingButton = false;
     bool isLoadingSearch = false;
@@ -128,375 +137,346 @@ class _HomeState extends State<Home> {
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: (context, setModalState) {
-            return AlertDialog(
-              contentPadding: EdgeInsets.all(0),
-              backgroundColor: Style.defaultColor,
-              content: SingleChildScrollView(
-                child: Container(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(Style.height_8(context)),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Style.primaryColor,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(Style.height_20(context)),
-                            topRight: Radius.circular(Style.height_20(context)),
-                          ),
+            return Modal('Abertura de pedido', [
+              if (empresaid.isEmpty)
+                Row(
+                  children: [
+                    Container(
+                      height: Style.height_30(context),
+                      child: PopupMenuButton<String>(
+                        itemBuilder: (BuildContext context) =>
+                            buildMenuItemsCompany(company),
+                        onSelected: (value) async {
+                          if (value != '') {
+                            setModalState(() {
+                              empresa_id = value;
+                              // Busca o nome da empresa correspondente ao ID selecionado
+                              final selectedCompany = company.firstWhere(
+                                (company) => company.empresa_id == value,
+                              );
+                              empresa_nome = selectedCompany?.empresa_nome ??
+                                  ''; // Atualiza o nome
+                              empresa_codigo =
+                                  selectedCompany?.empresa_codigo ??
+                                      ''; // Atualiza o nome
+                            });
+                            setState(() {
+                              empresa_id = value;
+                            });
+                            await fetchDataTablePriceCompany(empresa_id);
+                            await fetchDataTablePrice(empresa_id);
+                            await fetchDataListTablesPrice(empresa_id);
+                            await fetchDataTablePriceName();
+                            setModalState(() {
+                              tableprice;
+                            });
+                            setState(() {
+                              tabelapreco_id = tabelapreco_id_company;
+                            });
+                          } else {
+                            setState(() {
+                              empresaid = '';
+                              empresa_nome = '';
+                              empresa_codigo = '';
+                            });
+                          }
+                        },
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.arrow_drop_down_rounded,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: Style.height_20(context),
+                              ),
+                              SizedBox(
+                                width: Style.height_2(context),
+                              ),
+                              Container(
+                                width: Style.width_180(context),
+                                child: Text(
+                                  empresa_nome.isEmpty
+                                      ? 'Selecione a empresa'
+                                      : '${empresa_codigo} - ${empresa_nome}',
+                                  style: TextStyle(
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: Style.height_12(context),
+                                  ),
+                                  //textAlign: TextAlign.center,
+                                  overflow: TextOverflow
+                                      .clip, // corta o texto no limite da largura
+                                  softWrap:
+                                      true, // permite a quebra de linha conforme necessário
+                                ),
+                              )
+                            ]),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      // width: 150,
+                      child: Text(
+                        empresa_codigo + ' ' + empresa_nome,
+                        style: TextStyle(
+                          color: Style.quarantineColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: Style.height_12(context),
                         ),
-                        child: Text(
-                          'Abertura do pedido',
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow
+                            .clip, // corta o texto no limite da largura
+                        softWrap:
+                            true, // permite a quebra de linha conforme necessário
+                      ),
+                    )
+                  ],
+                ),
+              // SizedBox(
+              //   height: Style.height_5(context),
+              // ),
+              if (flagpermitiralterartabela == '1')
+                Row(
+                  children: [
+                    SizedBox(
+                      height: Style.height_30(context),
+                      child: PopupMenuButton<String>(
+                        itemBuilder: (BuildContext context) =>
+                            buildMenuItemsTPrice(tables_price),
+                        onSelected: (value) async {
+                          setModalState(() {
+                            tableprice = value;
+                          });
+                          await DataServiceTablePriceId.fetchDataTablePriceId(
+                              context, urlBasic, tableprice);
+                          setState(() {
+                            tableprice = value;
+                            fetchDataTablePriceId();
+                          });
+                        },
+                        child: Row(
+                            // mainAxisAlignment:
+                            //     MainAxisAlignment.center,
+                            // crossAxisAlignment:
+                            //     CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.arrow_drop_down_rounded,
+                                color: Style.primaryColor,
+                                size: Style.height_20(context),
+                              ),
+                              SizedBox(
+                                width: Style.height_2(context),
+                              ),
+                              Container(
+                                width: Style.width_150(context),
+                                child: Text(
+                                  tableprice.isEmpty
+                                      ? 'Tabela de Preço'
+                                      : tableprice,
+                                  style: TextStyle(
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: Style.height_12(context),
+                                  ),
+                                  //textAlign: TextAlign.center,
+                                  overflow: TextOverflow
+                                      .clip, // corta o texto no limite da largura
+                                  softWrap:
+                                      true, // permite a quebra de linha conforme necessário
+                                ),
+                              ),
+                            ]),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      // width: 150,
+                      child: Text(
+                        tableprice,
+                        style: TextStyle(
+                          color: Style.quarantineColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: Style.height_12(context),
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow
+                            .clip, // corta o texto no limite da largura
+                        softWrap:
+                            true, // permite a quebra de linha conforme necessário
+                      ),
+                    )
+                  ],
+                ),
+              Input(
+                text: 'CPF',
+                type: TextInputType.text,
+                textAlign: TextAlign.start,
+                controller: _cpfcontroller,
+                inputFormatters: [
+                  CnpjCpfFormatter(
+                    eDocumentType: EDocumentType.BOTH,
+                  )
+
+                  /// Máscara de CPF
+                ],
+                textInputAction: TextInputAction.unspecified,
+                isLoadingButton: isLoadingSearch,
+                IconButton: IconButton(
+                  onPressed: () async {
+                    setModalState(
+                      () {
+                        isLoadingSearch = true;
+                      },
+                    );
+                    await GetCliente.getcliente(
+                      context,
+                      urlBasic,
+                      _nomecontroller,
+                      _cpfcontroller,
+                      _telefonecontatocontroller,
+                      _cepcontroller,
+                      _logradourocontroller,
+                      _ufcontroller,
+                      _bairrocontroller,
+                      _numerocontroller,
+                      _complementocontroller,
+                      _cidadecontroller,
+                      _emailcontroller,
+                    );
+                    setModalState(
+                      () {
+                        isLoadingSearch = false;
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.person_search),
+                ),
+              ),
+              SizedBox(
+                height: Style.height_10(context),
+              ),
+              Input(
+                text: 'Telefone',
+                type: TextInputType.text,
+                controller: _telefonecontatocontroller,
+                textAlign: TextAlign.start,
+                textInputAction: TextInputAction.unspecified,
+                inputFormatters: [
+                  MaskedInputFormatter('(00) 00000-0000'), // Máscara de CPF
+                ],
+              ),
+              SizedBox(
+                height: Style.height_10(context),
+              ),
+              Input(
+                text: 'Nome do cliente',
+                type: TextInputType.text,
+                controller: _nomecontroller,
+                textInputAction: TextInputAction.unspecified,
+                textAlign: TextAlign.start,
+              ),
+              SizedBox(
+                height: Style.height_20(context),
+              ),
+              SizedBox(
+                height: Style.height_10(context),
+              ),
+              RegisterButton(
+                text: 'Abrir Pedido',
+                color: Style.primaryColor,
+                width: Style.width_150(context),
+                isLoadingButton: isLoadingButton,
+                onPressed: () async {
+                  setModalState(() {
+                    isLoadingButton = true;
+                  });
+                  var bodyMap = {
+                    'cpf': _cpfcontroller.text,
+                    'telefone': _telefonecontatocontroller.text,
+                    'nome': _nomecontroller.text,
+                    'empresa_id': empresa_id,
+                    'tabelapreco_id': tabelapreco_id,
+                  };
+
+                  final hasInternet = await hasInternetConnection();
+
+                  if (!hasInternet) {
+                    final SharedListService produtosStorage =
+                        SharedListService('orders_list');
+                    await produtosStorage.addItem(bodyMap);
+                    List<Map<String, dynamic>> lista =
+                        await produtosStorage.getList();
+                    print(lista);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        padding: EdgeInsets.all(
+                            Style.SaveUrlMessagePadding(context)),
+                        content: Text(
+                          'Pedido armazenado localmente devido à falta de conexão com a internet.',
                           style: TextStyle(
-                            fontSize: Style.height_15(context),
-                            fontWeight: FontWeight.bold,
+                            fontSize: Style.SaveUrlMessageSize(context),
                             color: Style.tertiaryColor,
                           ),
                         ),
+                        backgroundColor: Style.warningColor,
                       ),
-                      SizedBox(
-                        height: Style.height_10(context),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(Style.height_12(context)),
-                        child: Column(
-                          children: [
-                            if (empresaid.isEmpty)
-                              Row(
-                                children: [
-                                  Container(
-                                    height: Style.height_30(context),
-                                    child: PopupMenuButton<String>(
-                                      itemBuilder: (BuildContext context) =>
-                                          buildMenuItemsCompany(company),
-                                      onSelected: (value) async {
-                                        if (value != '') {
-                                          setModalState(() {
-                                            empresa_id = value;
-                                            // Busca o nome da empresa correspondente ao ID selecionado
-                                            final selectedCompany =
-                                                company.firstWhere(
-                                              (company) =>
-                                                  company.empresa_id == value,
-                                            );
-                                            empresa_nome =
-                                                selectedCompany?.empresa_nome ??
-                                                    ''; // Atualiza o nome
-                                            empresa_codigo = selectedCompany
-                                                    ?.empresa_codigo ??
-                                                ''; // Atualiza o nome
-                                          });
-                                          setState(() {
-                                            empresa_id = value;
-                                          });
-                                          await fetchDataTablePriceCompany(
-                                              empresa_id);
-                                          await fetchDataTablePrice(empresa_id);
-                                          await fetchDataListTablesPrice(
-                                              empresa_id);
-                                          await fetchDataTablePriceName();
-                                          setModalState(() {
-                                            tableprice;
-                                          });
-                                          setState(() {
-                                            tabelapreco_id =
-                                                tabelapreco_id_company;
-                                          });
-                                        } else {
-                                          setState(() {
-                                            empresaid = '';
-                                            empresa_nome = '';
-                                            empresa_codigo = '';
-                                          });
-                                        }
-                                      },
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.business_center_rounded,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              size: Style.height_20(context),
-                                            ),
-                                            SizedBox(
-                                              width: Style.height_5(context),
-                                            ),
-                                            // Text(
-                                            //   empresa_nome.isEmpty
-                                            //       ? 'Filtro de empresa'
-                                            //       : '',
-                                            //   style: TextStyle(
-                                            //       fontSize:
-                                            //           Style.height_12(context)),
-                                            // ),
-                                            Container(
-                                              width: Style.width_180(context),
-                                              child: Text(
-                                                empresa_nome.isEmpty
-                                                    ? 'Selecione a empresa'
-                                                    : '${empresa_codigo} - ${empresa_nome}',
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize:
-                                                      Style.height_12(context),
-                                                ),
-                                                textAlign: TextAlign.center,
-                                                overflow: TextOverflow
-                                                    .clip, // corta o texto no limite da largura
-                                                softWrap:
-                                                    true, // permite a quebra de linha conforme necessário
-                                              ),
-                                            )
-                                          ]),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            else
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    // width: 150,
-                                    child: Text(
-                                      empresa_codigo + ' ' + empresa_nome,
-                                      style: TextStyle(
-                                        color: Style.quarantineColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: Style.height_12(context),
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow
-                                          .clip, // corta o texto no limite da largura
-                                      softWrap:
-                                          true, // permite a quebra de linha conforme necessário
-                                    ),
-                                  )
-                                ],
-                              ),
-                            Input(
-                              text: 'CPF',
-                              type: TextInputType.text,
-                              textAlign: TextAlign.start,
-                              controller: _cpfcontroller,
-                              inputFormatters: [
-                                CnpjCpfFormatter(
-                                  eDocumentType: EDocumentType.BOTH,
-                                )
+                    );
+                  } else {
+                    final data = await DataServiceCliente2.fetchDataCliente2(
+                        urlBasic, _cpfcontroller.text, token);
+                    var pessoa_id = data['pessoa_id'].toString();
+                    if (flagpermitiralterartabela == '1') {
+                      await DataServiceNewOrder.sendDataOrder(
+                          context,
+                          urlBasic,
+                          token,
+                          _cpfcontroller.text,
+                          _telefonecontatocontroller.text,
+                          _nomecontroller.text,
+                          pessoa_id,
+                          tabelapreco_id,
+                          empresa_id);
+                    } else {
+                      await DataServiceNewOrder.sendDataOrder(
+                          context,
+                          urlBasic,
+                          token,
+                          _cpfcontroller.text,
+                          _telefonecontatocontroller.text,
+                          _nomecontroller.text,
+                          pessoa_id,
+                          tabelapreco_id_company,
+                          empresa_id);
+                    }
+                    fetchDataOrders(ascending: true, flagFilter: flagFilter);
+                    setState(() {
+                      selectedOptionChild = _getFilterText(flagFilter);
+                    });
+                  }
 
-                                /// Máscara de CPF
-                              ],
-                              textInputAction: TextInputAction.unspecified,
-                              isLoadingButton: isLoadingSearch,
-                              IconButton: IconButton(
-                                onPressed: () async {
-                                  setModalState(
-                                    () {
-                                      isLoadingSearch = true;
-                                    },
-                                  );
-                                  await GetCliente.getcliente(
-                                    context,
-                                    urlBasic,
-                                    _nomecontroller,
-                                    _cpfcontroller,
-                                    _telefonecontatocontroller,
-                                    _cepcontroller,
-                                    _logradourocontroller,
-                                    _ufcontroller,
-                                    _bairrocontroller,
-                                    _numerocontroller,
-                                    _complementocontroller,
-                                    _cidadecontroller,
-                                    _emailcontroller,
-                                  );
-                                  setModalState(
-                                    () {
-                                      isLoadingSearch = false;
-                                    },
-                                  );
-                                },
-                                icon: const Icon(Icons.person_search),
-                              ),
-                            ),
-                            SizedBox(
-                              height: Style.height_10(context),
-                            ),
-                            Input(
-                              text: 'Telefone',
-                              type: TextInputType.text,
-                              controller: _telefonecontatocontroller,
-                              textAlign: TextAlign.start,
-                              textInputAction: TextInputAction.unspecified,
-                              inputFormatters: [
-                                MaskedInputFormatter(
-                                    '(00) 00000-0000'), // Máscara de CPF
-                              ],
-                            ),
-                            SizedBox(
-                              height: Style.height_10(context),
-                            ),
-                            Input(
-                              text: 'Nome do cliente',
-                              type: TextInputType.text,
-                              controller: _nomecontroller,
-                              textInputAction: TextInputAction.unspecified,
-                              textAlign: TextAlign.start,
-                            ),
-                            SizedBox(
-                              height: Style.height_20(context),
-                            ),
-                            if (flagpermitiralterartabela == '1')
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    height: Style.height_30(context),
-                                    child: PopupMenuButton<String>(
-                                      itemBuilder: (BuildContext context) =>
-                                          buildMenuItemsTPrice(tables_price),
-                                      onSelected: (value) async {
-                                        setModalState(() {
-                                          tableprice = value;
-                                        });
-                                        await DataServiceTablePriceId
-                                            .fetchDataTablePriceId(
-                                                context, urlBasic, tableprice);
-                                        setState(() {
-                                          tableprice = value;
-                                          fetchDataTablePriceId();
-                                        });
-                                      },
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.price_change_rounded,
-                                              color: Style.primaryColor,
-                                              size: Style.height_20(context),
-                                            ),
-                                            SizedBox(
-                                              width: Style.height_2(context),
-                                            ),
-                                            Container(
-                                              width: Style.width_150(context),
-                                              child: Text(
-                                                tableprice.isEmpty
-                                                    ? 'Tabela de Preço'
-                                                    : tableprice,
-                                                style: TextStyle(
-                                                  color: Style.secondaryColor,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize:
-                                                      Style.height_12(context),
-                                                ),
-                                                textAlign: TextAlign.center,
-                                                overflow: TextOverflow
-                                                    .clip, // corta o texto no limite da largura
-                                                softWrap:
-                                                    true, // permite a quebra de linha conforme necessário
-                                              ),
-                                            ),
-                                          ]),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            else
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    // width: 150,
-                                    child: Text(
-                                      tableprice,
-                                      style: TextStyle(
-                                        color: Style.quarantineColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: Style.height_12(context),
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow
-                                          .clip, // corta o texto no limite da largura
-                                      softWrap:
-                                          true, // permite a quebra de linha conforme necessário
-                                    ),
-                                  )
-                                ],
-                              ),
-                            SizedBox(
-                              height: Style.height_10(context),
-                            ),
-                            RegisterButton(
-                              text: 'Abrir Pedido',
-                              color: Style.primaryColor,
-                              width: Style.width_150(context),
-                              isLoadingButton: isLoadingButton,
-                              onPressed: () async {
-                                setModalState(() {
-                                  isLoadingButton = true;
-                                });
-                                final data =
-                                    await DataServiceCliente2.fetchDataCliente2(
-                                        urlBasic, _cpfcontroller.text, token);
-                                var pessoa_id = data['pessoa_id'].toString();
-                                if (flagpermitiralterartabela == '1') {
-                                  await DataServiceNewOrder.sendDataOrder(
-                                      context,
-                                      urlBasic,
-                                      token,
-                                      _cpfcontroller.text,
-                                      _telefonecontatocontroller.text,
-                                      _nomecontroller.text,
-                                      pessoa_id,
-                                      tabelapreco_id,
-                                      empresa_id);
-                                } else {
-                                  await DataServiceNewOrder.sendDataOrder(
-                                      context,
-                                      urlBasic,
-                                      token,
-                                      _cpfcontroller.text,
-                                      _telefonecontatocontroller.text,
-                                      _nomecontroller.text,
-                                      pessoa_id,
-                                      tabelapreco_id_company,
-                                      empresa_id);
-                                }
-                                fetchDataOrders(
-                                    ascending: true, flagFilter: flagFilter);
-                                setState(() {
-                                  selectedOptionChild =
-                                      _getFilterText(flagFilter);
-                                });
-                                setModalState(() {
-                                  isLoadingButton = false;
-                                });
-                                _closeModal();
-                                _cpfcontroller.clear();
-                                _nomecontroller.clear();
-                                _telefonecontatocontroller.clear();
-                              },
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            );
+                  setModalState(() {
+                    isLoadingButton = false;
+                  });
+                  _closeModal();
+                  _cpfcontroller.clear();
+                  _nomecontroller.clear();
+                  _telefonecontatocontroller.clear();
+                },
+              )
+            ]);
           });
         }).then((_) {
       _cpfcontroller.clear();
@@ -537,7 +517,13 @@ class _HomeState extends State<Home> {
                 child: FloatingActionButton(
                   backgroundColor: Style.primaryColor,
                   onPressed: () {
+                    // if (permNovaPrevenda || permEditarPrevenda) {
                     _openModal(context);
+                    // } else {
+                    //   showDialog(
+                    //       context: context,
+                    //       builder: (_) => AlertDialogDefault());
+                    // }
                   },
                   shape: const CircleBorder(),
                   child: Icon(
@@ -627,7 +613,7 @@ class _HomeState extends State<Home> {
                                           color: Style.primaryColor)),
                                   value: 'finalizados',
                                   child: Text(
-                                    'Faturados',
+                                    'Finalizados',
                                   ),
                                 ),
                                 PopupMenuDivider(
@@ -732,30 +718,32 @@ class _HomeState extends State<Home> {
                                 orders[index].prevendaId,
                               );
 
-                              if (orders[index].flagpermitefaturar?.toString() ==
+                              if (orders[index]
+                                      .flagpermitefaturar
+                                      ?.toString() ==
                                   '1') {
-                                Navigator.of(context)
-                                    .pushReplacement(MaterialPageRoute(
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
                                         builder: (context) => OrderPage(
-                                              prevendaId:
-                                                  orders[index].prevendaId,
-                                              pessoaid: pessoaid,
-                                              numero: orders[index]
-                                                  .numero
-                                                  .toString(),
-                                              pessoanome: pessoanome,
-                                              cpfcnpj: cpfcnpj,
-                                              telefone: telefone,
-                                              datahora: orders[index].datahora,
-                                              valortotal:
-                                                  orders[index].valortotal,
-                                              codigoproduto: codigoproduto,
-                                              endereco: endereco,
-                                              uf: uf,
-                                              operador: orders[index].operador,
-                                              vendedorId: orders[index].vendedorId,
-                                              valordesconto: orders[index].valordesconto
-                                            )));
+                                            prevendaId:
+                                                orders[index].prevendaId,
+                                            pessoaid: pessoaid,
+                                            numero:
+                                                orders[index].numero.toString(),
+                                            pessoanome: pessoanome,
+                                            cpfcnpj: cpfcnpj,
+                                            telefone: telefone,
+                                            datahora: orders[index].datahora,
+                                            valortotal:
+                                                orders[index].valortotal,
+                                            codigoproduto: codigoproduto,
+                                            endereco: endereco,
+                                            uf: uf,
+                                            operador: orders[index].operador,
+                                            vendedorId:
+                                                orders[index].vendedorId,
+                                            valordesconto:
+                                                orders[index].valordesconto)));
                               } else {
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
@@ -770,9 +758,11 @@ class _HomeState extends State<Home> {
                                         valortotal: orders[index].valortotal,
                                         codigoproduto: codigoproduto,
                                         operador: orders[index].operador,
-                                        empresa_id: orders[index].empresaId.toString(),
-                                        valordesconto: orders[index].valordesconto.toString()
-                                        ),
+                                        empresa_id:
+                                            orders[index].empresaId.toString(),
+                                        valordesconto: orders[index]
+                                            .valordesconto
+                                            .toString()),
                                   ),
                                 );
                               }
@@ -782,7 +772,8 @@ class _HomeState extends State<Home> {
                               valortotal: orders[index].valortotal,
                               nomepessoa: orders[index].nomepessoa,
                               data: orders[index].datahora,
-                              flagpermitefaturar: orders[index].flagpermitefaturar.toString(),
+                              flagpermitefaturar:
+                                  orders[index].flagpermitefaturar.toString(),
                               valordesconto: orders[index].valordesconto,
                             ),
                           );
@@ -838,18 +829,25 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> loadData() async {
+    await Future.wait([clearCache()]);
     await Future.wait([
       _loadSavedUserId(),
       _loadSavedEmpresaID(),
       _loadSavedFilter(),
     ]);
-    await fetchDataTablePriceCompany(empresaid);
-    await fetchDataTablePriceName();
-    await fetchDataTablePrice(empresaid);
-    await fetchDataListTablesPrice(empresaid);
-    await fetchDataCompany();
-    await Future.wait(
-        [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
+    final hasInternet = await hasInternetConnection();
+
+    if (!hasInternet) {
+    } else {
+      await getPermissions();
+      await fetchDataTablePriceCompany(empresaid);
+      await fetchDataTablePriceName();
+      await fetchDataTablePrice(empresaid);
+      await fetchDataListTablesPrice(empresaid);
+      await fetchDataCompany();
+      await Future.wait(
+          [fetchDataOrders(flagFilter: flagFilter), fetchDataCliente2()]);
+    }
   }
 
   Future<void> _refreshData() async {
@@ -907,7 +905,8 @@ class _HomeState extends State<Home> {
       // Aplicando o filtro baseado no campo flagpermitefaturar
       if (flagFilter != null && flagFilter.isNotEmpty) {
         fetchData = fetchData
-            .where((order) => order.flagpermitefaturar?.toString() == flagFilter)
+            .where(
+                (order) => order.flagpermitefaturar?.toString() == flagFilter)
             .toList();
       }
       setState(() {
@@ -1138,8 +1137,9 @@ class _HomeState extends State<Home> {
       PopupMenuItem(
           enabled: false,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text('Tab. Preço'),
               Container(
                 margin: EdgeInsets.only(bottom: Style.height_5(context)),
                 decoration: BoxDecoration(
@@ -1177,8 +1177,9 @@ class _HomeState extends State<Home> {
       PopupMenuItem(
           enabled: false,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text('Empresa'),
               Container(
                 margin: EdgeInsets.only(bottom: Style.height_5(context)),
                 decoration: BoxDecoration(
@@ -1231,6 +1232,145 @@ class _HomeState extends State<Home> {
           empresa_codigo = company.first.empresa_codigo.toString();
         });
       }
+    }
+  }
+
+  Future<void> clearCache() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setBool('editarPrevenda', false);
+    await sharedPreferences.setBool('aplicarDesconto', false);
+    await sharedPreferences.setBool('cadastrarCliente', false);
+    await sharedPreferences.setBool('editarCliente', false);
+    await sharedPreferences.setBool('criarPedido', false);
+  }
+
+  Future<void> getPermissions() async {
+    try {
+      var rawQuery =
+          '''usuario%20u%20WHERE%20u.usuario_id%20=%20'$usuario_id'/''';
+      var urlGet = Uri.parse('$urlBasic/ideia/core/getdata/$rawQuery');
+      print(urlGet);
+      var response = await http.get(urlGet, headers: {
+        // 'auth-token': token,
+        'Accept': 'text/html'
+      });
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        var dynamicKey = jsonResponse['data'].keys.first;
+        var dataMap = jsonResponse['data'] as Map<String, dynamic>;
+        if (dataMap.isNotEmpty) {
+          var dynamicKey = dataMap.keys.first; // Obter a chave dinâmica
+          print('Chave dinâmica encontrada: $dynamicKey');
+
+          var userList = dataMap[dynamicKey] as List;
+          if (userList.isNotEmpty) {
+            var user = userList.first;
+            var perfil_id = user['perfil_id']?.toString();
+            setState(() {
+              perfilId = perfil_id ?? usuario_id;
+            });
+            print(perfilId);
+          } else {
+            print('Nenhum item encontrado na lista.');
+          }
+          try {
+            var rawQuery =
+                '''permissao%20p%20WHERE%20p.usuario_id%20=%20'$perfilId'/''';
+            var urlGet = Uri.parse('$urlBasic/ideia/core/getdata/$rawQuery');
+            print(urlGet);
+            var response = await http.get(urlGet, headers: {
+              // 'auth-token': token,
+              'Accept': 'text/html'
+            });
+            print(response.statusCode);
+            if (response.statusCode == 200) {
+              var jsonResponse = jsonDecode(response.body);
+              var dynamicKey = jsonResponse['data'].keys.first;
+              var dataMap = jsonResponse['data'] as Map<String, dynamic>;
+              if (dataMap.isNotEmpty) {
+                var dynamicKey = dataMap.keys.first; // Obter a chave dinâmica
+                var dataList = dataMap[dynamicKey] as List;
+                if (dataList != null && dataList is List) {
+                  var listPermissoes = dataList.toList();
+                  // bool criarPrevenda = listPermissoes.any((item) {
+                  //   return item['formname']?.toString() == '4008' &&
+                  //       item['compname']?.toString() == 'actNovo' &&
+                  //       item['flag'] == 1;
+                  // });
+                  bool editarPrevenda = listPermissoes.any((item) {
+                    return item['formname']?.toString() == '4008' &&
+                        item['compname']?.toString() == 'actEditar' &&
+                        item['flag'] == 1;
+                  });
+                  bool criarPedido = listPermissoes.any((item) {
+                    return item['formname']?.toString() == '4002' &&
+                        item['compname']?.toString() == 'actNovo' &&
+                        item['flag'] == 1;
+                  });
+                  bool aplicarDesconto = listPermissoes.any((item) {
+                    return item['formname']?.toString() == 'frmPrincipalImanager2' &&
+                        item['compname']?.toString() ==
+                            'actIdeiaPDVDescontoTotal' &&
+                        item['flag'] == 1;
+                  });
+                  bool cadastrarCliente = listPermissoes.any((item) {
+                    return item['formname']?.toString() == '1001' &&
+                        item['compname']?.toString() == 'actNovo' &&
+                        item['flag'] == 1;
+                  });
+                  bool editarCliente = listPermissoes.any((item) {
+                    return item['formname']?.toString() == '1001' &&
+                        item['compname']?.toString() == 'actEditar' &&
+                        item['flag'] == 1;
+                  });
+                  SharedPreferences sharedPreferences =
+                      await SharedPreferences.getInstance();
+                  // if (criarPrevenda) {
+                  //   setState(() {
+                  //     permNovaPrevenda = criarPrevenda;
+                  //   });
+                  //   await sharedPreferences.setBool(
+                  //       'criarPrevenda', criarPrevenda);
+                  // }
+                  if (editarPrevenda) {
+                    setState(() {
+                      permEditarPrevenda = editarPrevenda;
+                    });
+                    await sharedPreferences.setBool(
+                        'editarPrevenda', editarPrevenda);
+                  }
+                  if (criarPedido) {
+                    await sharedPreferences.setBool('criarPedido', criarPedido);
+                    // setState(() {
+                    //   permNovoPedido = criarPedido;
+                    // });
+                    //print(permNovoPedido);
+                  }
+                  if (aplicarDesconto) {
+                    await sharedPreferences.setBool(
+                        'aplicarDesconto', aplicarDesconto);
+                  }
+                  if (cadastrarCliente) {
+                    await sharedPreferences.setBool(
+                        'cadastrarCliente', cadastrarCliente);
+                  }
+                  if (editarCliente) {
+                    await sharedPreferences.setBool(
+                        'editarCliente', editarCliente);
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            print('Erro no endpoint permissoes: $e');
+          }
+        }
+      } else {
+        print('Erro na requisição ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Erro durante a requisição getPermissions $e');
     }
   }
 }

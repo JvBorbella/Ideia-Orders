@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/back/orders_endpoint.dart';
-import 'package:projeto/back/rm_product.dart';
+import 'package:projeto/back/checK_internet.dart';
+import 'package:projeto/back/orders/orders_endpoint.dart';
+import 'package:projeto/back/products/rm_product.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
@@ -86,6 +87,7 @@ class _ProductSessionState extends State<ProductSession> {
   void initState() {
     super.initState();
     loadData();
+    print(widget.cpfcnpj);
     totalValue = widget.valortotal; // Inicializa com o valor total original
   }
 
@@ -93,6 +95,8 @@ class _ProductSessionState extends State<ProductSession> {
     // Função para fechar o modal
     Navigator.of(context).pop();
   }
+
+  // final hasInternet = await hasInternetConnection();
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +107,8 @@ class _ProductSessionState extends State<ProductSession> {
         SizedBox(
           height: Style.height_10(context),
         ),
+        // if (!hasInternet) ListView.builder(itemBuilder: itemBuilder)
+        // else
         ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -453,7 +459,8 @@ class _ProductSessionState extends State<ProductSession> {
             color: Style.primaryColor,
             width: Style.height_150(context),
             icon: Icons.add_circle,
-            onPressed: () {
+            onPressed: () async {
+              print(widget.cpfcnpj);
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => ProductList(
                       prevendaid: widget.prevendaid.toString(),
@@ -483,9 +490,14 @@ class _ProductSessionState extends State<ProductSession> {
 
   Future<void> loadData() async {
     await Future.wait([_loadSavedUrlBasic(), _loadSavedToken()]);
-    await Future.wait([
-      fetchDataOrders(),
-    ]);
+    final hasInternet = await hasInternetConnection();
+
+    if (!hasInternet) {
+    } else {
+      await Future.wait([
+        fetchDataOrders(),
+      ]);
+    }
   }
 
   Future<void> _loadSavedUrlBasic() async {

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/back/add_product.dart';
+import 'package:projeto/back/products/add_product.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
@@ -321,57 +321,57 @@ class _ProductAddState extends State<ProductAdd> {
                         SizedBox(
                           height: Style.height_10(context),
                         ),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Complemento',
-                                  style: TextStyle(
-                                      fontSize: Style.height_15(context),
-                                      color: Style.primaryColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(
-                                  width: Style.width_180(context),
-                                  child: TextFormField(
-                                    controller: _complementocontroller,
-                                    textAlign: TextAlign.start,
-                                    textAlignVertical: TextAlignVertical
-                                        .top, // Alinha o cursor ao topo
-                                    maxLines:
-                                        null, // Permite quebra de linha automática
-                                    decoration: const InputDecoration(
-                                      contentPadding: EdgeInsets.only(
-                                          top: 20.0,
-                                          left: 10.0,
-                                          right:
-                                              10.0), // Ajuste conforme necessário
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Style.secondaryColor),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Style.secondaryColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )
-                          ],
-                        ),
+                        // Column(
+                        //   children: [
+                        //     Row(
+                        //       mainAxisAlignment: MainAxisAlignment.center,
+                        //       crossAxisAlignment: CrossAxisAlignment.center,
+                        //       children: [
+                        //         Text(
+                        //           'Complemento',
+                        //           style: TextStyle(
+                        //               fontSize: Style.height_15(context),
+                        //               color: Style.primaryColor,
+                        //               fontWeight: FontWeight.bold),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //     Row(
+                        //       mainAxisAlignment: MainAxisAlignment.center,
+                        //       crossAxisAlignment: CrossAxisAlignment.center,
+                        //       mainAxisSize: MainAxisSize.min,
+                        //       children: [
+                        //         SizedBox(
+                        //           width: Style.width_180(context),
+                        //           child: TextFormField(
+                        //             controller: _complementocontroller,
+                        //             textAlign: TextAlign.start,
+                        //             textAlignVertical: TextAlignVertical
+                        //                 .top, // Alinha o cursor ao topo
+                        //             maxLines:
+                        //                 null, // Permite quebra de linha automática
+                        //             decoration: const InputDecoration(
+                        //               contentPadding: EdgeInsets.only(
+                        //                   top: 20.0,
+                        //                   left: 10.0,
+                        //                   right:
+                        //                       10.0), // Ajuste conforme necessário
+                        //               enabledBorder: OutlineInputBorder(
+                        //                 borderSide: BorderSide(
+                        //                     color: Style.secondaryColor),
+                        //               ),
+                        //               focusedBorder: OutlineInputBorder(
+                        //                 borderSide: BorderSide(
+                        //                   color: Style.secondaryColor,
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //           ),
+                        //         )
+                        //       ],
+                        //     )
+                        //   ],
+                        // ),
                         SizedBox(
                           height: Style.height_20(context),
                         ),

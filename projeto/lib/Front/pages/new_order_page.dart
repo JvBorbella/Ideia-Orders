@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:projeto/back/get_cep.dart';
-import 'package:projeto/back/get_cliente.dart';
-import 'package:projeto/back/order_details.dart';
+import 'package:projeto/back/checK_internet.dart';
+import 'package:projeto/back/customer/get_cep.dart';
+import 'package:projeto/back/customer/get_cliente.dart';
+import 'package:projeto/back/orders/order_details.dart';
+import 'package:projeto/front/components/global/elements/alert_dialog.dart';
+import 'package:projeto/front/components/global/elements/modal.dart';
+import 'package:projeto/front/components/login_config/elements/config_button.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/elements/navbar_button.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
@@ -31,28 +35,27 @@ class NewOrderPage extends StatefulWidget {
       empresa_id,
       valordesconto;
 
-  const NewOrderPage({
-    super.key,
-    this.prevendaId,
-    this.pessoaid,
-    this.numero,
-    this.pessoanome,
-    this.cpfcnpj,
-    this.telefone,
-    this.endereco,
-    this.bairro,
-    this.cidade,
-    this.cep,
-    this.complemento,
-    this.uf,
-    this.datahora,
-    this.valortotal,
-    this.codigoproduto,
-    this.operador,
-    this.noProduct = '0',
-    this.empresa_id,
-    this.valordesconto
-  });
+  const NewOrderPage(
+      {super.key,
+      this.prevendaId,
+      this.pessoaid,
+      this.numero,
+      this.pessoanome,
+      this.cpfcnpj,
+      this.telefone,
+      this.endereco,
+      this.bairro,
+      this.cidade,
+      this.cep,
+      this.complemento,
+      this.uf,
+      this.datahora,
+      this.valortotal,
+      this.codigoproduto,
+      this.operador,
+      this.noProduct = '0',
+      this.empresa_id,
+      this.valordesconto});
 
   @override
   State<NewOrderPage> createState() => _NewOrderPageState();
@@ -63,6 +66,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
 
   final GlobalKey<CustomerSessionState> customerKey =
       GlobalKey<CustomerSessionState>();
+
+  List<dynamic> options = [];
 
   late String pessoaid = '',
       nome = '',
@@ -82,14 +87,20 @@ class _NewOrderPageState extends State<NewOrderPage> {
       codigoproduto = '',
       imagemurl = '',
       prevendaprodutoid = '',
-      produtoid = '';
+      produtoid = '',
+      cpfInformado = '',
+      telInformado = '',
+      nomeInformado = '';
 
   late double valorunitario = 0.0,
       valortotalitem = 0.0,
       valortotal = 0.0,
       quantidade = 0.0;
 
-  bool FlagGerarPedido = false, isLoading = true, loadSaveOrder = false;
+  bool FlagGerarPedido = false,
+      isLoading = true,
+      loadSaveOrder = false,
+      permEditarPrevenda = false;
 
   final _complementocontroller2 = TextEditingController(),
       _bairrocontroller = TextEditingController(),
@@ -104,6 +115,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
     super.initState();
     loadData();
     _refreshData();
+    print(widget.cpfcnpj);
   }
 
   @override
@@ -118,90 +130,122 @@ class _NewOrderPageState extends State<NewOrderPage> {
     return SafeArea(
         child: WillPopScope(
             child: Scaffold(
-              body: Column(
-                children: [
-                  Navbar(text: 'Novo pedido', children: [
-                    const NavbarButton(
-                        destination: Home(), Icons: Icons.arrow_back_ios_new),
-                    Container(
-                      padding: EdgeInsets.all(Style.height_2(context)),
-                      child: IconButton(
-                        onPressed: loadSaveOrder == true ? null : () async {
-                            setState(() {
-                              loadSaveOrder = true;
-                            });
-                            await customerKey.currentState?.saveOrder();
-                            setState(() {
-                              loadSaveOrder = false;
-                            });
-                          }, 
-                        icon: Icon(
-                          Icons.save_rounded,
-                          color: Style.tertiaryColor,
-                          size: Style.height_25(context),
-                        )
-                      )
-                    ),
-                  ]),
-                  Expanded(
-                    child: ListView(
-                children: [
-                  ProductSession(
-                      prevendaid: widget.prevendaId.toString(),
-                      pessoaid: pessoaid.toString(),
-                      numpedido: widget.numero.toString(),
-                      pessoanome: widget.pessoanome.toString(),
-                      cpfcnpj: widget.cpfcnpj.toString(),
-                      telefone: widget.telefone.toString(),
-                      cep: widget.cep.toString(),
-                      bairro: widget.bairro.toString(),
-                      cidade: widget.cidade.toString(),
-                      endereco: widget.endereco.toString(),
-                      complemento: widget.complemento.toString(),
-                      produtoid: produtoid.toString(),
-                      prevendaprodutoid: prevendaprodutoid.toString(),
-                      nomeproduto: nomeproduto.toString(),
-                      codigoproduto: codigoproduto.toString(),
-                      valorunitario: valorunitario.toDouble(),
-                      valortotalitem: valortotalitem.toDouble(),
-                      valortotal: valortotal.toDouble(),
-                      quantidade: quantidade.toDouble(),
-                      imagemurl: imagemurl.toString(),
-                      onProductRemoved: _onProductRemoved,
-                      empresa_id: widget.empresa_id,
-                      valordesconto: widget.valordesconto,
+                body: Column(
+              children: [
+                Navbar(text: 'Novo pedido', children: [
+                  const NavbarButton(
+                      destination: Home(), Icons: Icons.arrow_back_ios_new),
+                  Container(
+                    padding: EdgeInsets.only(right: Style.height_5(context)),
+                    child: PopupMenuButton<String>(
+                      itemBuilder: (BuildContext context) =>
+                          buildMenuItems(options),
+                      onSelected: (value) async {
+                        switch (value) {
+                          case 'finalizar':
+                            await customerKey.currentState?.finishOrder();
+                          case 'gravar':
+                            if (permEditarPrevenda == false) {
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialogDefault());
+                            } else {
+                              await customerKey.currentState?.saveOrder();
+                            }
+                            ;
+                          case 'desconto':
+                            await customerKey.currentState?.openModalDesc();
+                            break;
+                        }
+                      },
+                      child: Icon(
+                        Icons.more_vert_rounded,
+                        color: Style.tertiaryColor,
+                        size: Style.height_20(context),
                       ),
-                  SizedBox(
-                    height: Style.height_15(context),
-                  ),
-                  CustomerSession(
-                    key: customerKey,
-                    pessoanome: widget.pessoanome,
-                    pessoaid: pessoaid,
-                    cpfcnpj: widget.cpfcnpj,
-                    telefone: widget.telefone,
-                    cep: enderecocep,
-                    bairro: enderecobairro,
-                    numero: endereconumero,
-                    endereco: endereco,
-                    complemento: enderecocomplemento,
-                    cidade: _localidadecontroller.text,
-                    uf: uf,
-                    email: email,
-                    prevendaid: widget.prevendaId,
-                    numpedido: widget.numero.toString(),
-                    noProduct: widget.noProduct,
-                    valordesconto: widget.valordesconto
-                  ),
-                  SizedBox(
-                    height: Style.height_30(context),
-                  ),
-                ],
-              ),
+                    ),
                   )
-                ],
-              )
-            ),
+                ]),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      ProductSession(
+                        prevendaid: widget.prevendaId.toString(),
+                        pessoaid: widget.pessoaid.toString(),
+                        numpedido: widget.numero.toString(),
+                        pessoanome: nomeInformado.isNotEmpty
+                            ? nomeInformado
+                            : widget.pessoanome.toString(),
+                        cpfcnpj: cpfInformado.isNotEmpty
+                            ? cpfInformado
+                            : widget.cpfcnpj.toString(),
+                        telefone: telInformado.isNotEmpty
+                            ? telInformado
+                            : widget.telefone.toString(),
+                        cep: widget.cep.toString(),
+                        bairro: widget.bairro.toString(),
+                        cidade: widget.cidade.toString(),
+                        endereco: widget.endereco.toString(),
+                        complemento: widget.complemento.toString(),
+                        produtoid: produtoid.toString(),
+                        prevendaprodutoid: prevendaprodutoid.toString(),
+                        nomeproduto: nomeproduto.toString(),
+                        codigoproduto: codigoproduto.toString(),
+                        valorunitario: valorunitario.toDouble(),
+                        valortotalitem: valortotalitem.toDouble(),
+                        valortotal: valortotal.toDouble(),
+                        quantidade: quantidade.toDouble(),
+                        imagemurl: imagemurl.toString(),
+                        onProductRemoved: _onProductRemoved,
+                        empresa_id: widget.empresa_id,
+                        valordesconto: widget.valordesconto,
+                      ),
+                      SizedBox(
+                        height: Style.height_15(context),
+                      ),
+                      CustomerSession(
+                        key: customerKey,
+                        pessoanome: widget.pessoanome,
+                        pessoaid: widget.pessoaid,
+                        cpfcnpj: widget.cpfcnpj,
+                        telefone: widget.telefone,
+                        cep: enderecocep,
+                        bairro: enderecobairro,
+                        numero: endereconumero,
+                        endereco: endereco,
+                        complemento: enderecocomplemento,
+                        cidade: _localidadecontroller.text,
+                        uf: uf,
+                        email: email,
+                        prevendaid: widget.prevendaId,
+                        numpedido: widget.numero.toString(),
+                        noProduct: widget.noProduct,
+                        valordesconto: widget.valordesconto,
+                        empresa_id: widget.empresa_id,
+                        onCpfAtualizado: (cpf) {
+                          setState(() {
+                            cpfInformado = cpf;
+                          });
+                        },
+                        onTelAtualizado: (telefone) {
+                          setState(() {
+                            telInformado = telefone;
+                          });
+                        },
+                        onNomeAtualizado: (nome) {
+                          setState(() {
+                            nomeInformado = nome;
+                          });
+                        },
+                      ),
+                      SizedBox(
+                        height: Style.height_30(context),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            )),
             onWillPop: () async {
               Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const Home()));
@@ -232,10 +276,26 @@ class _NewOrderPageState extends State<NewOrderPage> {
   //     cidade = savedCidade;
   //   });
   // }
+  Future<void> _loadSavedPermEditarPrevenda() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedEditarPrevenda =
+        sharedPreferences.getBool('editarPrevenda') ?? false;
+    setState(() {
+      permEditarPrevenda = savedEditarPrevenda;
+    });
+  }
 
   Future<void> loadData() async {
-    await Future.wait([_loadSavedUrlBasic(), _loadSavedToken()]);
-    await Future.wait(
+    await Future.wait([
+      _loadSavedUrlBasic(),
+      _loadSavedToken(),
+      _loadSavedPermEditarPrevenda()
+    ]);
+    final hasInternet = await hasInternetConnection();
+
+    if (!hasInternet) {} 
+    else {
+      await Future.wait(
         [fetchDataCliente2(), fetchDataOrdersDetails2(widget.prevendaId)]);
     await GetCep.getcep(
         enderecocep,
@@ -246,6 +306,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
         _localidadecontroller,
         _ibgecontroller,
         ibge);
+    }
+    
   }
 
   Future<void> _refreshData() async {
@@ -317,5 +379,57 @@ class _NewOrderPageState extends State<NewOrderPage> {
       valortotal = double.parse(data['valortotal'] ?? '0.0');
       quantidade = double.parse(data['quantidade'] ?? '0.0');
     });
+  }
+
+  List<PopupMenuItem<String>> buildMenuItems(List<dynamic> options) {
+    List<PopupMenuItem<String>> staticItems = [
+      PopupMenuItem(
+          enabled: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              //Text('Empresa'),
+              Container(
+                margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Style.height_5(context)),
+                    color: Style.errorColor),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon:
+                      Image.asset('assets/images/icon_remove/icon_remove.png'),
+                  style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor)),
+                ),
+              ),
+            ],
+          )),
+    ];
+    const PopupMenuDivider();
+
+    List<PopupMenuItem<String>> optionItems = [
+      PopupMenuItem(
+        value: 'gravar',
+        child: Text('Gravar'),
+      ),
+      PopupMenuItem(
+        value: 'finalizar',
+        child: Text('Finalizar'),
+      ),
+      PopupMenuItem(
+        value: 'desconto',
+        child: Text(
+          'Aplicar Desconto',
+          //style: TextStyle(fontSize: Style.height_10(context)),
+        ),
+      ),
+    ];
+
+    const PopupMenuDivider();
+
+    return staticItems + optionItems;
   }
 }

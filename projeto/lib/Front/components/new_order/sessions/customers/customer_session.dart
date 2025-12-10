@@ -1,25 +1,29 @@
 // import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'dart:convert';
-
 import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/back/finish_order.dart';
-import 'package:projeto/back/get_cep.dart';
-import 'package:projeto/back/get_cliente.dart';
-import 'package:projeto/back/new_customer.dart';
-import 'package:projeto/back/orders_endpoint.dart';
+import 'package:projeto/back/checK_internet.dart';
+import 'package:projeto/back/company/company_list.dart';
+import 'package:projeto/back/orders/finish_order.dart';
+import 'package:projeto/back/customer/get_cep.dart';
+import 'package:projeto/back/customer/get_cliente.dart';
+import 'package:projeto/back/customer/new_customer.dart';
+import 'package:projeto/back/orders/orders_endpoint.dart';
+import 'package:projeto/back/saveList.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
-import 'package:projeto/front/components/login_config/elements/button.dart';
+import 'package:projeto/front/components/global/elements/alert_dialog.dart';
+import 'package:projeto/front/components/global/elements/modal.dart';
 import 'package:projeto/front/components/login_config/elements/config_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
-import 'package:projeto/front/components/product_page/elements/product_add.dart';
+import 'package:projeto/front/components/order_page/elements/input_blocked.dart';
 import 'package:projeto/front/components/style.dart';
+import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -45,28 +49,36 @@ class CustomerSession extends StatefulWidget {
   final numpedido;
   final noProduct;
   final valordesconto;
+  final empresa_id;
+  final Function(String) onCpfAtualizado;
+  final Function(String) onTelAtualizado;
+  final Function(String) onNomeAtualizado;
 
-  const CustomerSession(
-      {Key? key,
-      this.prevendaid,
-      this.pessoaid,
-      this.pessoanome,
-      this.cpfcnpj,
-      this.telefone,
-      this.cep,
-      this.bairro,
-      this.localidade,
-      this.ibge,
-      this.endereco,
-      this.complemento,
-      this.numero,
-      this.cidade,
-      this.uf,
-      this.numpedido,
-      this.noProduct,
-      this.email,
-      this.valordesconto})
-      : super(key: key);
+  const CustomerSession({
+    Key? key,
+    this.prevendaid,
+    this.pessoaid,
+    this.pessoanome,
+    this.cpfcnpj,
+    this.telefone,
+    this.cep,
+    this.bairro,
+    this.localidade,
+    this.ibge,
+    this.endereco,
+    this.complemento,
+    this.numero,
+    this.cidade,
+    this.uf,
+    this.numpedido,
+    this.noProduct,
+    this.email,
+    this.valordesconto,
+    this.empresa_id,
+    required this.onCpfAtualizado,
+    required this.onTelAtualizado,
+    required this.onNomeAtualizado,
+  }) : super(key: key);
 
   @override
   State<CustomerSession> createState() => CustomerSessionState();
@@ -79,30 +91,41 @@ class CustomerSessionState extends State<CustomerSession> {
         urlBasic,
         token,
         _nomecontroller.text,
-        _cpfcontroller.text,
+        cpfcontroller.text,
         _telefonecontatocontroller.text,
         widget.prevendaid,
         widget.pessoaid,
         vendedorId,
-        double.parse(substituirVirgulaPorPonto(valordescontoController.text)) ?? 0.0);
+        double.parse(substituirVirgulaPorPonto(valordescontoController.text)) ??
+            0.0);
   }
 
   late BuildContext modalContext;
 
-  String urlBasic = '';
-  String token = '';
-  String ibge = '';
-  String cpf = '';
-  String vendedorId = '';
-  bool isCheckedCPF = true;
-
-  bool isLoading = true;
-  bool isLoadingButton = false;
-  bool isLoadingIconButton = false;
-  bool isLoadingSearchCPF = false, isLoadingSearchSeller = false;
-  bool isLoadingSearchCEP = false;
-
-  bool FlagGerarPedido = false;
+  String urlBasic = '',
+      token = '',
+      ibge = '',
+      cpf = '',
+      tel = '',
+      nome = '',
+      vendedorId = '',
+      empresa_codigo = '',
+      empresa_nome = '',
+      empresa_id = '';
+  //bool permNovoPedido = homeKey.currentState?.permNovoPedido ?? false;
+  bool isCheckedCPF = true,
+      isLoading = true,
+      isLoadingButton = false,
+      isLoadingIconButton = false,
+      isLoadingSearchCPF = false,
+      isLoadingSearchSeller = false,
+      isLoadingSearchCEP = false,
+      FlagGerarPedido = false,
+      permEditarPrevenda = false,
+      permCadastrarCliente = false,
+      permEditarCliente = false,
+      permAplicarDesconto = false,
+      permNovoPedido = false;
 
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
@@ -113,12 +136,13 @@ class CustomerSessionState extends State<CustomerSession> {
   final _ibgecontroller = TextEditingController();
   final _ufcontroller = TextEditingController();
   final _logradourocontroller = TextEditingController();
-  final _cpfcontroller = TextEditingController();
+  final cpfcontroller = TextEditingController();
   final _nomecontroller = TextEditingController();
   final _telefonecontatocontroller = TextEditingController();
   final _emailcontroller = TextEditingController();
   final vendedorController = TextEditingController();
   final valordescontoController = TextEditingController();
+  final empresaController = TextEditingController();
 
   // final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
@@ -129,15 +153,19 @@ class CustomerSessionState extends State<CustomerSession> {
   final pessoa_id = String;
 
   List<OrdersDetailsEndpoint> orders = [];
+  List<CompanyList> company = [];
 
   String substituirVirgulaPorPonto(String texto) {
     return texto.replaceAll(',', '.');
   }
 
+  String buttonText = 'Cadastrar Cliente';
+
   @override
   void initState() {
     super.initState();
     loadData();
+    print(widget.empresa_id);
     _localidadecontroller.text = widget.cidade ?? '';
     _cepcontroller.text = _cepMaskFormatter.maskText(widget.cep);
     _bairrocontroller.text = widget.bairro.toString();
@@ -164,13 +192,13 @@ class CustomerSessionState extends State<CustomerSession> {
         RegExp(r'\D'), ''); // Remove caracteres não numéricos
 
     if (cleanedCpfCnpj.isNotEmpty) {
-      _cpfcontroller.text = cleanedCpfCnpj.length > 11
+      cpfcontroller.text = cleanedCpfCnpj.length > 11
           ? MaskTextInputFormatter(mask: '##.###.###/####-##')
               .maskText(cleanedCpfCnpj)
           : MaskTextInputFormatter(mask: '###.###.###-##')
               .maskText(cleanedCpfCnpj);
     } else {
-      _cpfcontroller.text = ''; // Define vazio se não houver CPF ou CNPJ
+      cpfcontroller.text = ''; // Define vazio se não houver CPF ou CNPJ
     }
     _telefonecontatocontroller.text = widget.telefone == 'null'
         ? ''
@@ -181,65 +209,114 @@ class CustomerSessionState extends State<CustomerSession> {
     print('Número: ' + widget.numpedido);
   }
 
+  // List<Map<String, dynamic>> dataOrder = [
+  //   { },
+  // ];
+
+  // Future<List<Map<String, dynamic>>> recuperarLista() async {
+  //   final prefs = await SharedPreferences.getInstance();
+
+  //   String? listaJson = prefs.getString('minha_lista');
+
+  //   if (listaJson == null) return [];
+
+  //   List<dynamic> listaDecodificada = jsonDecode(listaJson);
+
+  //   return listaDecodificada
+  //       .map((item) => Map<String, dynamic>.from(item))
+  //       .toList();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Column(
         children: [
-          const TextTitle(text: 'Desconto'),
-          SizedBox(
-            height: Style.height_5(context),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: Style.height_15(context)),
-            child: Input(
-              text: 'Desconto total',
-              controller: valordescontoController,
-              type: TextInputType.number,
-              textAlign: TextAlign.center,
-              inputFormatters: [
-                TextInputFormatter.withFunction((oldValue, newValue) {
-                  try {
-                    if (newValue.text.isEmpty) return newValue;
-                    final number = double.parse(
-                            newValue.text.replaceAll(RegExp(r'[^0-9]'), '')) /
-                        100;
-                    final formatted = currencyFormat.format(number);
-                    return TextEditingValue(
-                      text: formatted,
-                      selection:
-                          TextSelection.collapsed(offset: formatted.length),
-                    );
-                  } catch (e) {
-                    return oldValue;
-                  }
-                }),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: Style.height_10(context),
-          ),
-          ButtonConfig(
-            text: 'Aplicar Desconto',
-            height: Style.height_12(context),
-            onPressed: () async {
-              await NewCustomer.AdjustOrder(
-                  context,
-                  urlBasic,
-                  token,
-                  _nomecontroller.text,
-                  _cpfcontroller.text,
-                  _telefonecontatocontroller.text,
-                  widget.prevendaid,
-                  pessoa_id.toString(),
-                  vendedorId,
-                  double.parse(substituirVirgulaPorPonto(
-                          valordescontoController.text)) ??
-                      0.0);
-            },
-          ),
-          const TextTitle(text: 'Dados do cliente'),
+          // const TextTitle(text: 'Desconto'),
+          // SizedBox(
+          //   height: Style.height_5(context),
+          // ),
+          // Container(
+          //   padding: EdgeInsets.symmetric(horizontal: Style.height_15(context)),
+          //   child: Input(
+          //     text: 'Desconto total',
+          //     controller: valordescontoController,
+          //     type: TextInputType.number,
+          //     textAlign: TextAlign.center,
+          //     inputFormatters: [
+          //       TextInputFormatter.withFunction((oldValue, newValue) {
+          //         try {
+          //           if (newValue.text.isEmpty) return newValue;
+          //           final number = double.parse(
+          //                   newValue.text.replaceAll(RegExp(r'[^0-9]'), '')) /
+          //               100;
+          //           final formatted = currencyFormat.format(number);
+          //           return TextEditingValue(
+          //             text: formatted,
+          //             selection:
+          //                 TextSelection.collapsed(offset: formatted.length),
+          //           );
+          //         } catch (e) {
+          //           return oldValue;
+          //         }
+          //       }),
+          //     ],
+          //   ),
+          // ),
+          // SizedBox(
+          //   height: Style.height_10(context),
+          // ),
+          // RegisterIconButton(
+          //   text: 'Aplicar Desconto',
+          //   color: Style.primaryColor,
+          //   width: Style.height_150(context),
+          //   icon: Icons.money_off_csred_rounded,
+          //   onPressed: () async {
+          //     if (permAplicarDesconto == false) {
+          //       showDialog(
+          //           context: context, builder: (_) => AlertDialogDefault());
+          //     } else {
+          //       await NewCustomer.AdjustOrder(
+          //           context,
+          //           urlBasic,
+          //           token,
+          //           _nomecontroller.text,
+          //           cpfcontroller.text,
+          //           _telefonecontatocontroller.text,
+          //           widget.prevendaid,
+          //           pessoa_id.toString(),
+          //           vendedorId,
+          //           double.parse(substituirVirgulaPorPonto(
+          //                   valordescontoController.text)) ??
+          //               0.0);
+          //     }
+          //   },
+          // ),
+          // ButtonConfig(
+          //   text: 'Aplicar Desconto',
+          //   height: Style.height_12(context),
+          //   onPressed: () async {
+          //     if (permAplicarDesconto == false) {
+          //       showDialog(
+          //           context: context, builder: (_) => AlertDialogDefault());
+          //     } else {
+          //       await NewCustomer.AdjustOrder(
+          //           context,
+          //           urlBasic,
+          //           token,
+          //           _nomecontroller.text,
+          //           cpfcontroller.text,
+          //           _telefonecontatocontroller.text,
+          //           widget.prevendaid,
+          //           pessoa_id.toString(),
+          //           vendedorId,
+          //           double.parse(substituirVirgulaPorPonto(
+          //                   valordescontoController.text)) ??
+          //               0.0);
+          //     }
+          //   },
+          // ),
+          const TextTitle(text: 'Dados do pedido'),
           SizedBox(
             height: Style.height_5(context),
           ),
@@ -247,10 +324,26 @@ class CustomerSessionState extends State<CustomerSession> {
             padding: EdgeInsets.all(Style.height_15(context)),
             child: Column(
               children: [
+                // if (widget.empresa_id != '')
+                //   InputBlocked(
+                //     value: '',
+                //   )
+                // else
+                //   Input(
+                //       text: 'Busque a empresa',
+                //       type: TextInputType.text,
+                //       textAlign: TextAlign.left,
+                //       controller: empresaController,
+                //       IconButton: IconButton(
+                //           onPressed: () {
+                //             searchCompany();
+                //           },
+                //           icon: Icon(Icons.screen_search_desktop_rounded))
+                //       ),
                 Input(
-                  text: 'CPF',
+                  text: 'CPF / CNPJ do Cliente',
                   type: TextInputType.text,
-                  controller: _cpfcontroller,
+                  controller: cpfcontroller,
                   isLoadingButton: isLoadingSearchCPF,
                   inputFormatters: [
                     CnpjCpfFormatter(
@@ -264,11 +357,14 @@ class CustomerSessionState extends State<CustomerSession> {
                         setState(() {
                           isLoadingSearchCPF = true;
                         });
+                        // await salvarLista(dataOrder);
+                        // List<Map<String, dynamic>> listaSalva = await recuperarLista();
+                        // print(listaSalva);
                         await GetCliente.getcliente(
                           context,
                           urlBasic,
                           _nomecontroller,
-                          _cpfcontroller,
+                          cpfcontroller,
                           _telefonecontatocontroller,
                           _cepcontroller,
                           _logradourocontroller,
@@ -279,9 +375,20 @@ class CustomerSessionState extends State<CustomerSession> {
                           _cidadecontroller,
                           _emailcontroller,
                         );
+                        if (_nomecontroller.text != '') {
+                          setState(() {
+                            buttonText = 'Salvar Edições';
+                          });
+                        }
                         setState(() {
+                          cpf = cpfcontroller.text;
+                          tel = _telefonecontatocontroller.text;
+                          nome = _nomecontroller.text;
                           isLoadingSearchCPF = false;
                         });
+                        widget.onCpfAtualizado(cpf);
+                        widget.onTelAtualizado(tel);
+                        widget.onNomeAtualizado(nome);
                       },
                       icon: const Icon(Icons.person_search)),
                 ),
@@ -543,9 +650,9 @@ class CustomerSessionState extends State<CustomerSession> {
                     Column(
                       children: [
                         SizedBox(
-                          width: Style.width_150(context),
+                          //width: Style.width_150(context),
                           child: RegisterButton(
-                            text: 'Cadastrar cliente',
+                            text: buttonText,
                             color: Style.primaryColor,
                             width: Style.width_150(context),
                             isLoadingButton: isLoadingButton,
@@ -561,7 +668,7 @@ class CustomerSessionState extends State<CustomerSession> {
                                   widget.pessoaid,
                                   vendedorId,
                                   _nomecontroller.text,
-                                  _cpfcontroller.text,
+                                  cpfcontroller.text,
                                   _telefonecontatocontroller.text,
                                   _cepcontroller.text,
                                   _bairrocontroller.text,
@@ -572,8 +679,12 @@ class CustomerSessionState extends State<CustomerSession> {
                                   ibge,
                                   _emailcontroller.text,
                                   _ufcontroller.text,
-                                  double.parse(substituirVirgulaPorPonto(valordescontoController.text)) ??
-                                      0.0);
+                                  double.parse(substituirVirgulaPorPonto(
+                                          valordescontoController.text)) ??
+                                      0.0,
+                                  permCadastrarCliente,
+                                  permEditarCliente,
+                                  permEditarPrevenda);
                               print('pessoa_id: ' + widget.pessoaid);
                               setState(() {
                                 isLoadingButton = false;
@@ -583,180 +694,187 @@ class CustomerSessionState extends State<CustomerSession> {
                         ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: Style.width_150(context),
-                          child: Column(
-                            children: [
-                              RegisterIconButton(
-                                onPressed: () async {
-                                  setState(() {
-                                    isLoadingIconButton = true;
-                                  });
-                                  if (isCheckedCPF == true) {
-                                    if (_cpfcontroller.text.isEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          behavior: SnackBarBehavior.floating,
-                                          padding: EdgeInsets.all(
-                                              Style.SaveUrlMessagePadding(
-                                                  context)),
-                                          content: Text(
-                                            'Por favor, preencha o CPF do cliente',
-                                            style: TextStyle(
-                                              fontSize:
-                                                  Style.SaveUrlMessageSize(
-                                                      context),
-                                              color: Style.tertiaryColor,
-                                            ),
-                                          ),
-                                          backgroundColor: Style.errorColor,
-                                        ),
-                                      );
-                                      setState(() {
-                                        isLoadingIconButton = false;
-                                      });
-                                    } else if (_telefonecontatocontroller
-                                        .text.isEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          behavior: SnackBarBehavior.floating,
-                                          padding: EdgeInsets.all(
-                                              Style.SaveUrlMessagePadding(
-                                                  context)),
-                                          content: Text(
-                                            'Por favor, preencha o telefone do cliente',
-                                            style: TextStyle(
-                                              fontSize:
-                                                  Style.SaveUrlMessageSize(
-                                                      context),
-                                              color: Style.tertiaryColor,
-                                            ),
-                                          ),
-                                          backgroundColor: Style.errorColor,
-                                        ),
-                                      );
-                                      setState(() {
-                                        isLoadingIconButton = false;
-                                      });
-                                    } else if (_nomecontroller.text.isEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          behavior: SnackBarBehavior.floating,
-                                          padding: EdgeInsets.all(
-                                              Style.SaveUrlMessagePadding(
-                                                  context)),
-                                          content: Text(
-                                            'Por favor, preencha o nome do cliente',
-                                            style: TextStyle(
-                                              fontSize:
-                                                  Style.SaveUrlMessageSize(
-                                                      context),
-                                              color: Style.tertiaryColor,
-                                            ),
-                                          ),
-                                          backgroundColor: Style.errorColor,
-                                        ),
-                                      );
-                                      setState(() {
-                                        isLoadingIconButton = false;
-                                      });
-                                    } else if (orders.isEmpty ||
-                                        widget.noProduct == '1') {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          behavior: SnackBarBehavior.floating,
-                                          padding: EdgeInsets.all(
-                                              Style.SaveUrlMessagePadding(
-                                                  context)),
-                                          content: Text(
-                                            'Não é possível finalizar o pedido sem produtos.',
-                                            style: TextStyle(
-                                              fontSize:
-                                                  Style.SaveUrlMessageSize(
-                                                      context),
-                                              color: Style.tertiaryColor,
-                                            ),
-                                          ),
-                                          backgroundColor: Style.errorColor,
-                                        ),
-                                      );
-                                      setState(() {
-                                        isLoadingIconButton = false;
-                                      });
-                                    } else {
-                                      _openModal(context);
-                                      setState(() {
-                                        isLoadingIconButton = false;
-                                      });
-                                    }
-                                  } else if (orders.isEmpty ||
-                                      widget.noProduct == '1') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        behavior: SnackBarBehavior.floating,
-                                        padding: EdgeInsets.all(
-                                            Style.SaveUrlMessagePadding(
-                                                context)),
-                                        content: Text(
-                                          'Não é possível finalizar o pedido sem produtos.',
-                                          style: TextStyle(
-                                            fontSize: Style.SaveUrlMessageSize(
-                                                context),
-                                            color: Style.tertiaryColor,
-                                          ),
-                                        ),
-                                        backgroundColor: Style.errorColor,
-                                      ),
-                                    );
-                                    setState(() {
-                                      isLoadingIconButton = false;
-                                    });
-                                  } else {
-                                    setState(() {
-                                      isLoadingIconButton = true;
-                                    });
-                                    final data = await DataServiceCliente2
-                                        .fetchDataCliente2(urlBasic,
-                                            _cpfcontroller.text, token);
-                                    var pessoa_id =
-                                        data['pessoa_id'].toString();
-                                    await NewCustomer.AdjustOrder(
-                                        context,
-                                        urlBasic,
-                                        token,
-                                        _nomecontroller.text,
-                                        _cpfcontroller.text,
-                                        _telefonecontatocontroller.text,
-                                        widget.prevendaid,
-                                        pessoa_id,
-                                        vendedorId,
-                                        double.parse(substituirVirgulaPorPonto(
-                                                valordescontoController
-                                                    .text)) ??
-                                            0.0);
-                                    _openModal(context);
-                                    setState(() {
-                                      isLoadingIconButton = false;
-                                    });
-                                  }
-                                },
-                                text: 'Finalizar pedido',
-                                color: Style.sucefullColor,
-                                width: Style.width_150(context),
-                                icon: Icons.check_rounded,
-                                isLoadingButton: isLoadingIconButton,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )
+                    // Column(
+                    //   children: [
+                    //     SizedBox(
+                    //       width: Style.width_150(context),
+                    //       child: Column(
+                    //         children: [
+                    //           RegisterIconButton(
+                    //             onPressed: () async {
+                    //               setState(() {
+                    //                 isLoadingIconButton = true;
+                    //               });
+                    //               if (isCheckedCPF == true) {
+                    //                 if (cpfcontroller.text.isEmpty) {
+                    //                   ScaffoldMessenger.of(context)
+                    //                       .showSnackBar(
+                    //                     SnackBar(
+                    //                       behavior: SnackBarBehavior.floating,
+                    //                       padding: EdgeInsets.all(
+                    //                           Style.SaveUrlMessagePadding(
+                    //                               context)),
+                    //                       content: Text(
+                    //                         'Por favor, preencha o CPF do cliente',
+                    //                         style: TextStyle(
+                    //                           fontSize:
+                    //                               Style.SaveUrlMessageSize(
+                    //                                   context),
+                    //                           color: Style.tertiaryColor,
+                    //                         ),
+                    //                       ),
+                    //                       backgroundColor: Style.errorColor,
+                    //                     ),
+                    //                   );
+                    //                   setState(() {
+                    //                     isLoadingIconButton = false;
+                    //                   });
+                    //                 } else if (_telefonecontatocontroller
+                    //                     .text.isEmpty) {
+                    //                   ScaffoldMessenger.of(context)
+                    //                       .showSnackBar(
+                    //                     SnackBar(
+                    //                       behavior: SnackBarBehavior.floating,
+                    //                       padding: EdgeInsets.all(
+                    //                           Style.SaveUrlMessagePadding(
+                    //                               context)),
+                    //                       content: Text(
+                    //                         'Por favor, preencha o telefone do cliente',
+                    //                         style: TextStyle(
+                    //                           fontSize:
+                    //                               Style.SaveUrlMessageSize(
+                    //                                   context),
+                    //                           color: Style.tertiaryColor,
+                    //                         ),
+                    //                       ),
+                    //                       backgroundColor: Style.errorColor,
+                    //                     ),
+                    //                   );
+                    //                   setState(() {
+                    //                     isLoadingIconButton = false;
+                    //                   });
+                    //                 } else if (_nomecontroller.text.isEmpty) {
+                    //                   ScaffoldMessenger.of(context)
+                    //                       .showSnackBar(
+                    //                     SnackBar(
+                    //                       behavior: SnackBarBehavior.floating,
+                    //                       padding: EdgeInsets.all(
+                    //                           Style.SaveUrlMessagePadding(
+                    //                               context)),
+                    //                       content: Text(
+                    //                         'Por favor, preencha o nome do cliente',
+                    //                         style: TextStyle(
+                    //                           fontSize:
+                    //                               Style.SaveUrlMessageSize(
+                    //                                   context),
+                    //                           color: Style.tertiaryColor,
+                    //                         ),
+                    //                       ),
+                    //                       backgroundColor: Style.errorColor,
+                    //                     ),
+                    //                   );
+                    //                   setState(() {
+                    //                     isLoadingIconButton = false;
+                    //                   });
+                    //                 } else if (orders.isEmpty ||
+                    //                     widget.noProduct == '1') {
+                    //                   ScaffoldMessenger.of(context)
+                    //                       .showSnackBar(
+                    //                     SnackBar(
+                    //                       behavior: SnackBarBehavior.floating,
+                    //                       padding: EdgeInsets.all(
+                    //                           Style.SaveUrlMessagePadding(
+                    //                               context)),
+                    //                       content: Text(
+                    //                         'Não é possível finalizar o pedido sem produtos.',
+                    //                         style: TextStyle(
+                    //                           fontSize:
+                    //                               Style.SaveUrlMessageSize(
+                    //                                   context),
+                    //                           color: Style.tertiaryColor,
+                    //                         ),
+                    //                       ),
+                    //                       backgroundColor: Style.errorColor,
+                    //                     ),
+                    //                   );
+                    //                   setState(() {
+                    //                     isLoadingIconButton = false;
+                    //                   });
+                    //                 } else {
+                    //                   _openModal(context);
+                    //                   setState(() {
+                    //                     isLoadingIconButton = false;
+                    //                   });
+                    //                 }
+                    //               } else if (orders.isEmpty ||
+                    //                   widget.noProduct == '1') {
+                    //                 ScaffoldMessenger.of(context).showSnackBar(
+                    //                   SnackBar(
+                    //                     behavior: SnackBarBehavior.floating,
+                    //                     padding: EdgeInsets.all(
+                    //                         Style.SaveUrlMessagePadding(
+                    //                             context)),
+                    //                     content: Text(
+                    //                       'Não é possível finalizar o pedido sem produtos.',
+                    //                       style: TextStyle(
+                    //                         fontSize: Style.SaveUrlMessageSize(
+                    //                             context),
+                    //                         color: Style.tertiaryColor,
+                    //                       ),
+                    //                     ),
+                    //                     backgroundColor: Style.errorColor,
+                    //                   ),
+                    //                 );
+                    //                 setState(() {
+                    //                   isLoadingIconButton = false;
+                    //                 });
+                    //               } else {
+                    //                 setState(() {
+                    //                   isLoadingIconButton = true;
+                    //                 });
+                    //                 final data = await DataServiceCliente2
+                    //                     .fetchDataCliente2(urlBasic,
+                    //                         cpfcontroller.text, token);
+                    //                 var pessoa_id =
+                    //                     data['pessoa_id'].toString();
+                    //                 if (permEditarPrevenda) {
+                    //                   await NewCustomer.AdjustOrder(
+                    //                       context,
+                    //                       urlBasic,
+                    //                       token,
+                    //                       _nomecontroller.text,
+                    //                       cpfcontroller.text,
+                    //                       _telefonecontatocontroller.text,
+                    //                       widget.prevendaid,
+                    //                       pessoa_id,
+                    //                       vendedorId,
+                    //                       double.parse(
+                    //                               substituirVirgulaPorPonto(
+                    //                                   valordescontoController
+                    //                                       .text)) ??
+                    //                           0.0);
+                    //                   _openModal(context);
+                    //                   setState(() {
+                    //                     isLoadingIconButton = false;
+                    //                   });
+                    //                 } else
+                    //                   _openModal(context);
+                    //                 setState(() {
+                    //                   isLoadingIconButton = false;
+                    //                 });
+                    //               }
+                    //             },
+                    //             text: 'Finalizar pedido',
+                    //             color: Style.sucefullColor,
+                    //             width: Style.width_150(context),
+                    //             icon: Icons.check_rounded,
+                    //             isLoadingButton: isLoadingIconButton,
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     )
+                    //   ],
+                    // )
                   ],
                 )
               ],
@@ -1017,21 +1135,73 @@ class CustomerSessionState extends State<CustomerSession> {
     });
   }
 
+  Future<void> _loadSavedPermEditarPrevenda() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedEditarPrevenda =
+        sharedPreferences.getBool('editarPrevenda') ?? false;
+    setState(() {
+      permEditarPrevenda = savedEditarPrevenda;
+    });
+  }
+
+  Future<void> _loadSavedPermCadastrarCliente() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedCadastrarCliente =
+        sharedPreferences.getBool('cadastrarCliente') ?? false;
+    setState(() {
+      permCadastrarCliente = savedCadastrarCliente;
+    });
+  }
+
+  Future<void> _loadSavedPermEditarCliente() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedEditarCliente =
+        sharedPreferences.getBool('editarCliente') ?? false;
+    setState(() {
+      permEditarCliente = savedEditarCliente;
+    });
+  }
+
+  Future<void> _loadSavedPermAplicarDesconto() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedAplicarDesconto =
+        sharedPreferences.getBool('aplicarDesconto') ?? false;
+    setState(() {
+      permAplicarDesconto = savedAplicarDesconto;
+    });
+  }
+
+  Future<void> _loadSavedPermNovoPedido() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool savedNovoPedido = sharedPreferences.getBool('criarPedido') ?? false;
+    setState(() {
+      permNovoPedido = savedNovoPedido;
+    });
+  }
+
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
       _loadSavedToken(),
       _loadSavedIbge(),
       _loadSavedCheckCPF(),
-      _loadSavedFlagGerarPedido()
+      _loadSavedFlagGerarPedido(),
+      _loadSavedPermEditarPrevenda(),
+      _loadSavedPermCadastrarCliente(),
+      _loadSavedPermEditarCliente(),
+      _loadSavedPermAplicarDesconto(),
+      _loadSavedPermNovoPedido(),
     ]);
 
-    await Future.wait([
-      fetchDataOrders(),
-    ]);
-    await Future.wait([
-      fetchDataSeller(),
-    ]);
+    final hasInternet = await hasInternetConnection();
+
+    if (!hasInternet) {
+    } else {
+      await Future.wait([fetchDataOrders(), searchCompany()]);
+      await Future.wait([
+        fetchDataSeller(),
+      ]);
+    }
   }
 
   Future<void> fetchDataOrders() async {
@@ -1104,5 +1274,226 @@ class CustomerSessionState extends State<CustomerSession> {
     } catch (e) {
       print('Erro ao pesquisar vendedor: $e');
     }
+  }
+
+  Future<void> searchCompany() async {
+    try {
+      var urlGetCompany = Uri.parse(
+          '''$urlBasic/ideia/core/getdata/empresa%20e%20WHERE%20(e.empresa_id%20=%20'${widget.empresa_id}'%20OR%20e.empresa_codigo%20=%20'${empresaController.text}'%20OR%20e.empresa_nome%20LIKE%20'${empresaController.text}')/''');
+      var response =
+          await http.get(urlGetCompany, headers: {'Accept': 'text/html'});
+
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        var dataList = jsonData['data'].keys.first;
+        var dataMap = jsonData['data'] as Map<String, dynamic>;
+
+        if (dataMap.isNotEmpty) {
+          var companyList = dataMap[dataList] as List;
+          var company = companyList.first;
+          setState(() {
+            empresaController.text =
+                '${company['empresa_codigo']} - ${company['empresa_nome']}';
+            empresa_id = company['empresa_id'];
+          });
+          print(empresaController.text);
+        } else {
+          print('Lista vazia: ${response.body}');
+        }
+      } else {
+        print('${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Erro na requisição searchCompany: $e');
+    }
+  }
+
+  Future<void> finishOrder() async {
+    if (isCheckedCPF == true) {
+      if (cpfcontroller.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Por favor, preencha o CPF do cliente',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
+              ),
+            ),
+            backgroundColor: Style.errorColor,
+          ),
+        );
+        setState(() {
+          isLoadingIconButton = false;
+        });
+      } else if (_telefonecontatocontroller.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Por favor, preencha o telefone do cliente',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
+              ),
+            ),
+            backgroundColor: Style.errorColor,
+          ),
+        );
+        setState(() {
+          isLoadingIconButton = false;
+        });
+      } else if (_nomecontroller.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Por favor, preencha o nome do cliente',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
+              ),
+            ),
+            backgroundColor: Style.errorColor,
+          ),
+        );
+        setState(() {
+          isLoadingIconButton = false;
+        });
+      } else if (orders.isEmpty || widget.noProduct == '1') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+            content: Text(
+              'Não é possível finalizar o pedido sem produtos.',
+              style: TextStyle(
+                fontSize: Style.SaveUrlMessageSize(context),
+                color: Style.tertiaryColor,
+              ),
+            ),
+            backgroundColor: Style.errorColor,
+          ),
+        );
+        setState(() {
+          isLoadingIconButton = false;
+        });
+      } else {
+        _openModal(context);
+        setState(() {
+          isLoadingIconButton = false;
+        });
+      }
+    } else if (orders.isEmpty || widget.noProduct == '1') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+          content: Text(
+            'Não é possível finalizar o pedido sem produtos.',
+            style: TextStyle(
+              fontSize: Style.SaveUrlMessageSize(context),
+              color: Style.tertiaryColor,
+            ),
+          ),
+          backgroundColor: Style.errorColor,
+        ),
+      );
+      setState(() {
+        isLoadingIconButton = false;
+      });
+    } else {
+      setState(() {
+        isLoadingIconButton = true;
+      });
+      final data = await DataServiceCliente2.fetchDataCliente2(
+          urlBasic, cpfcontroller.text, token);
+      var pessoa_id = data['pessoa_id'].toString();
+      if (permEditarPrevenda) {
+        await NewCustomer.AdjustOrder(
+            context,
+            urlBasic,
+            token,
+            _nomecontroller.text,
+            cpfcontroller.text,
+            _telefonecontatocontroller.text,
+            widget.prevendaid,
+            pessoa_id,
+            vendedorId,
+            double.parse(
+                    substituirVirgulaPorPonto(valordescontoController.text)) ??
+                0.0);
+        _openModal(context);
+        setState(() {
+          isLoadingIconButton = false;
+        });
+      } else
+        _openModal(context);
+    }
+  }
+
+  Future<void> openModalDesc() async {
+    showDialog(
+      context: context,
+      builder: (context) => Modal('Aplicar Desconto', [
+        Input(
+          text: 'Desconto total',
+          controller: valordescontoController,
+          type: TextInputType.number,
+          textAlign: TextAlign.center,
+          inputFormatters: [
+            TextInputFormatter.withFunction((oldValue, newValue) {
+              try {
+                if (newValue.text.isEmpty) return newValue;
+                final number = double.parse(
+                        newValue.text.replaceAll(RegExp(r'[^0-9]'), '')) /
+                    100;
+                final formatted = currencyFormat.format(number);
+                return TextEditingValue(
+                  text: formatted,
+                  selection: TextSelection.collapsed(offset: formatted.length),
+                );
+              } catch (e) {
+                return oldValue;
+              }
+            }),
+          ],
+        ),
+        SizedBox(
+          height: Style.height_10(context),
+        ),
+        RegisterIconButton(
+          text: 'Aplicar Desconto',
+          color: Style.primaryColor,
+          width: Style.height_150(context),
+          icon: Icons.money_off_csred_rounded,
+          onPressed: () async {
+            if (permAplicarDesconto == false) {
+              showDialog(
+                  context: context, builder: (_) => AlertDialogDefault());
+            } else {
+              await NewCustomer.AdjustOrder(
+                  context,
+                  urlBasic,
+                  token,
+                  _nomecontroller.text,
+                  cpfcontroller.text,
+                  _telefonecontatocontroller.text,
+                  widget.prevendaid,
+                  pessoa_id.toString(),
+                  vendedorId,
+                  double.parse(substituirVirgulaPorPonto(
+                          valordescontoController.text)) ??
+                      0.0);
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ]),
+    );
   }
 }
