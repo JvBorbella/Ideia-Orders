@@ -13,18 +13,14 @@ class LoginFunction {
     BuildContext context,
     //Recebendo os dados armazenados que serão necessário para efetuar a função.
     String url,
-    TextEditingController userController,
-    TextEditingController passwordController,
+    String userController,
+    String passwordController,
   ) async {
     //Tentando fazer a requisição ao servidor.
     try {
       //Definindo variáveis que serão utilizadas na requisição
 
-      var username = userController.text;
-      //username: recebe o valor digitado no input de usuário na tela de login.
-      var password = passwordController.text;
-      // //password: recebe o valor digitado no input de senha na tela de login.
-      var md5Password = md5.convert(utf8.encode(password)).toString();
+      var md5Password = md5.convert(utf8.encode(passwordController)).toString();
       //md5Password: criptografa a senha digitada em md5 Hash pois o servidor só aceita requisição com a senha já criptografada.
       var authorization = Uri.parse('$url/ideia/secure/login');
       //authorization: define a url que fará a requisição post ao servidor.
@@ -34,11 +30,11 @@ class LoginFunction {
         authorization, //passando a url da requisição
         headers: {
           //passando os parâmetros na header da requisição.
-          'auth-user': username,
+          'auth-user': userController,
           'auth-pass': md5Password,
         },
       );
-      print(password);
+      print(passwordController);
       print(md5Password);
 
       //Caso o servidor aceite a conexão, o token será resgatado no json e armazenado no sharedpreferences.

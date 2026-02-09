@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:projeto/back/checK_internet.dart';
+import 'package:projeto/back/offline/orders/order_model.dart';
 import 'package:projeto/front/pages/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -123,8 +126,12 @@ Future<void> clearCache() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print('Page size estimate: ${Platform.operatingSystemVersion}');
-  HttpOverrides.global = MyHttpOverrides();
+  // HttpOverrides.global = MyHttpOverrides();
+  
+  // await Hive.initFlutter();
+  // Hive.registerAdapter(OrderModelAdapter());
+
+  // await Hive.openBox<OrderModel>('orders');
   runApp(const MyApp());
 }
 

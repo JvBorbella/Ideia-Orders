@@ -360,29 +360,29 @@ class NewCustomer {
       'uf': uf,
     };
 
-    List<Map<String, dynamic>> dataOrder = [
-      bodyJson,
-    ];
+    // List<Map<String, dynamic>> dataOrder = [
+    //   bodyJson,
+    // ];
 
-    await salvarListaCliente(dataOrder);
+    // await salvarListaCliente(dataOrder);
 
-    Future<List<Map<String, dynamic>>> recuperarLista() async {
-      final prefs = await SharedPreferences.getInstance();
+    // Future<List<Map<String, dynamic>>> recuperarLista() async {
+    //   final prefs = await SharedPreferences.getInstance();
 
-      String? listaJson = prefs.getString('minha_lista');
+    //   String? listaJson = prefs.getString('minha_lista');
 
-      if (listaJson == null) return [];
+    //   if (listaJson == null) return [];
 
-      List<dynamic> listaDecodificada = jsonDecode(listaJson);
+    //   List<dynamic> listaDecodificada = jsonDecode(listaJson);
 
-      return listaDecodificada
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-    }
-    List<Map<String, dynamic>> listaSalva = await recuperarLista();
-    print(listaSalva);
+    //   return listaDecodificada
+    //       .map((item) => Map<String, dynamic>.from(item))
+    //       .toList();
+    // }
+    // List<Map<String, dynamic>> listaSalva = await recuperarLista();
+    // print(listaSalva);
 
-    print(cpfDefault);
+    // print(cpfDefault);
 
     try {
       var response = await http.post(

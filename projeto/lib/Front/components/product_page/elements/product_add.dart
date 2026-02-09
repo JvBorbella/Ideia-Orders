@@ -108,7 +108,7 @@ class _ProductAddState extends State<ProductAdd> {
                             widget.nomeproduto.toString(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: Style.height_15(context),
+                              fontSize: Style.height_12(context),
                               color: Style.primaryColor,
                               fontWeight: FontWeight.w900,
                             ),
@@ -131,7 +131,7 @@ class _ProductAddState extends State<ProductAdd> {
                                 Text(
                                   widget.codigoproduto,
                                   style: TextStyle(
-                                      fontSize: Style.height_15(context),
+                                      fontSize: Style.height_12(context),
                                       color: Style.primaryColor,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -150,7 +150,7 @@ class _ProductAddState extends State<ProductAdd> {
                                       .format(widget.precotabela)
                                       .toString(),
                                   style: TextStyle(
-                                      fontSize: Style.height_15(context),
+                                      fontSize: Style.height_12(context),
                                       color: Style.primaryColor,
                                       fontWeight: FontWeight.bold),
                                 )
@@ -167,7 +167,7 @@ class _ProductAddState extends State<ProductAdd> {
                                 Text(
                                   widget.unidade ?? '',
                                   style: TextStyle(
-                                      fontSize: Style.height_15(context),
+                                      fontSize: Style.height_12(context),
                                       color: Style.primaryColor,
                                       fontWeight: FontWeight.bold),
                                 )
@@ -187,7 +187,7 @@ class _ProductAddState extends State<ProductAdd> {
                                 Text(
                                   'Qtde a adicionar',
                                   style: TextStyle(
-                                      fontSize: Style.height_15(context),
+                                      fontSize: Style.height_12(context),
                                       color: Style.primaryColor,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -225,7 +225,7 @@ class _ProductAddState extends State<ProductAdd> {
                                   Text(
                                     'Expedição',
                                     style: TextStyle(
-                                        fontSize: Style.height_15(context),
+                                        fontSize: Style.height_12(context),
                                         color: Style.primaryColor,
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -321,57 +321,6 @@ class _ProductAddState extends State<ProductAdd> {
                         SizedBox(
                           height: Style.height_10(context),
                         ),
-                        // Column(
-                        //   children: [
-                        //     Row(
-                        //       mainAxisAlignment: MainAxisAlignment.center,
-                        //       crossAxisAlignment: CrossAxisAlignment.center,
-                        //       children: [
-                        //         Text(
-                        //           'Complemento',
-                        //           style: TextStyle(
-                        //               fontSize: Style.height_15(context),
-                        //               color: Style.primaryColor,
-                        //               fontWeight: FontWeight.bold),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //     Row(
-                        //       mainAxisAlignment: MainAxisAlignment.center,
-                        //       crossAxisAlignment: CrossAxisAlignment.center,
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         SizedBox(
-                        //           width: Style.width_180(context),
-                        //           child: TextFormField(
-                        //             controller: _complementocontroller,
-                        //             textAlign: TextAlign.start,
-                        //             textAlignVertical: TextAlignVertical
-                        //                 .top, // Alinha o cursor ao topo
-                        //             maxLines:
-                        //                 null, // Permite quebra de linha automática
-                        //             decoration: const InputDecoration(
-                        //               contentPadding: EdgeInsets.only(
-                        //                   top: 20.0,
-                        //                   left: 10.0,
-                        //                   right:
-                        //                       10.0), // Ajuste conforme necessário
-                        //               enabledBorder: OutlineInputBorder(
-                        //                 borderSide: BorderSide(
-                        //                     color: Style.secondaryColor),
-                        //               ),
-                        //               focusedBorder: OutlineInputBorder(
-                        //                 borderSide: BorderSide(
-                        //                   color: Style.secondaryColor,
-                        //                 ),
-                        //               ),
-                        //             ),
-                        //           ),
-                        //         )
-                        //       ],
-                        //     )
-                        //   ],
-                        // ),
                         SizedBox(
                           height: Style.height_20(context),
                         ),
@@ -793,8 +742,6 @@ class _ProductAddState extends State<ProductAdd> {
         var expedicaoId = data[0]['expedicao_id'];
         var expedicaoNome = data[0]['nome'];
         var expedicaoCodigo = data[0]['codigo'];
-
-        print(dataList);
 
         setState(() {
           expedition = dataList;

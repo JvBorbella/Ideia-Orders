@@ -1,8 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:projeto/back/checK_internet.dart';
 import 'package:projeto/back/orders/orders_endpoint.dart';
 import 'package:projeto/back/products/rm_product.dart';
+import 'package:projeto/back/saveList.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/Style.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
@@ -10,6 +15,8 @@ import 'package:projeto/front/components/new_order/elements/register_icon_button
 import 'package:projeto/front/components/new_order/sessions/customers/customer_session.dart';
 import 'package:projeto/front/pages/product_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
 
 class ProductSession extends StatefulWidget {
   final prevendaid;
@@ -35,6 +42,7 @@ class ProductSession extends StatefulWidget {
   final imagemurl;
   final empresa_id;
   final valordesconto;
+  final local_id;
 
   final VoidCallback? onProductRemoved;
 
@@ -62,7 +70,8 @@ class ProductSession extends StatefulWidget {
       this.imagemurl,
       this.onProductRemoved,
       this.empresa_id,
-      this.valordesconto});
+      this.valordesconto,
+      this.local_id});
 
   @override
   State<ProductSession> createState() => _ProductSessionState();
@@ -76,12 +85,22 @@ class _ProductSessionState extends State<ProductSession> {
   List<OrdersDetailsEndpoint> orders = [];
   bool isLoading = true;
 
-  String urlBasic = '';
-  String token = '';
+  String urlBasic = '',
+      token = '',
+      expedicaoId = '',
+      expedicaoNome = '',
+      expedicaoCodigo = '';
 
   double totalValue = 0.0;
 
-  TextEditingController valordescontoController = TextEditingController();
+  List expedition = [];
+
+  TextEditingController valordescontoController = TextEditingController(),
+      eanController = TextEditingController(),
+      codigoController = TextEditingController(),
+      nomeController = TextEditingController(),
+      quantidadeController = TextEditingController(),
+      nomeExpedicaoController = TextEditingController();
 
   @override
   void initState() {
@@ -103,12 +122,13 @@ class _ProductSessionState extends State<ProductSession> {
     return Material(
         child: Column(
       children: [
+        SizedBox(
+          height: Style.height_10(context),
+        ),
         TextTitle(text: 'Produto(s)'),
         SizedBox(
           height: Style.height_10(context),
         ),
-        // if (!hasInternet) ListView.builder(itemBuilder: itemBuilder)
-        // else
         ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -198,7 +218,23 @@ class _ProductSessionState extends State<ProductSession> {
                                                   ),
                                                 ),
                                               ],
-                                            )
+                                            ),
+                                            if (orders[index]
+                                                .nomeexpedicao
+                                                .isNotEmpty)
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    orders[index].nomeexpedicao,
+                                                    style: TextStyle(
+                                                      fontSize: Style.height_10(
+                                                          context),
+                                                      color:
+                                                          Style.quarantineColor,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
                                           ],
                                         )
                                       ],
@@ -206,6 +242,12 @@ class _ProductSessionState extends State<ProductSession> {
                                   ),
                                 ],
                               ),
+                              if (orders[index].flagSync == 0)
+                                Icon(
+                                  Icons.cloud_off,
+                                  color: Colors.orange,
+                                  size: Style.height_15(context),
+                                ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -303,34 +345,45 @@ class _ProductSessionState extends State<ProductSession> {
                                                                 TextButton(
                                                                   onPressed:
                                                                       () async {
-                                                                    await DataServiceRmProduct.sendDataOrder(
-                                                                        context,
-                                                                        urlBasic,
-                                                                        token,
-                                                                        widget
-                                                                            .prevendaid,
-                                                                        orders[index]
-                                                                            .prevendaprodutoid);
-                                                                    _closeModal();
+                                                                    final checkInternet =
+                                                                        await hasInternetConnection();
+                                                                    if (!checkInternet) {
+                                                                      await removerItemProduto(
+                                                                          orders[index]
+                                                                              .prevendaprodutoid,
+                                                                          widget
+                                                                              .local_id);
+                                                                      _closeModal();
+                                                                      fetchDataOrders();
+                                                                    } else {
+                                                                      await DataServiceRmProduct.sendDataOrder(
+                                                                          context,
+                                                                          urlBasic,
+                                                                          token,
+                                                                          widget
+                                                                              .prevendaid,
+                                                                          orders[index]
+                                                                              .prevendaprodutoid);
+                                                                      _closeModal();
 
-                                                                    setState(
-                                                                        () {
-                                                                      orders.removeAt(
-                                                                          index);
-                                                                      totalValue =
-                                                                          _calculateTotal();
-                                                                    });
-
-                                                                    if (orders
-                                                                        .isEmpty) {
                                                                       setState(
-                                                                          () {});
-                                                                      if (widget
-                                                                              .onProductRemoved !=
-                                                                          null) {
-                                                                        widget
-                                                                            .onProductRemoved!();
-                                                                      } // Força uma atualização da UI quando a lista estiver vazia
+                                                                          () {
+                                                                        orders.removeAt(
+                                                                            index);
+                                                                        totalValue =
+                                                                            _calculateTotal();
+                                                                      });
+
+                                                                      if (orders
+                                                                          .isEmpty) {
+                                                                        setState(
+                                                                            () {});
+                                                                        if (widget.onProductRemoved !=
+                                                                            null) {
+                                                                          widget
+                                                                              .onProductRemoved!();
+                                                                        } // Força uma atualização da UI quando a lista estiver vazia
+                                                                      }
                                                                     }
                                                                   },
                                                                   child:
@@ -338,7 +391,6 @@ class _ProductSessionState extends State<ProductSession> {
                                                                     width: Style
                                                                         .ButtonExitWidth(
                                                                             context),
-                                                                    // height: Style.ButtonExitHeight(context),
                                                                     padding: EdgeInsets.all(
                                                                         Style.ButtonExitPadding(
                                                                             context)),
@@ -460,21 +512,175 @@ class _ProductSessionState extends State<ProductSession> {
             width: Style.height_150(context),
             icon: Icons.add_circle,
             onPressed: () async {
-              print(widget.cpfcnpj);
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => ProductList(
-                      prevendaid: widget.prevendaid.toString(),
-                      pessoaid: widget.pessoaid.toString(),
-                      numpedido: widget.numpedido.toString(),
-                      pessoanome: widget.pessoanome.toString(),
-                      cpfcnpj: widget.cpfcnpj.toString(),
-                      telefone: widget.telefone.toString(),
-                      cep: widget.cep.toString(),
-                      bairro: widget.bairro.toString(),
-                      endereco: widget.endereco.toString(),
-                      complemento: widget.complemento.toString(),
-                      empresa_id: widget.empresa_id.toString(),
-                      valordesconto: widget.valordesconto)));
+              final checkInternet = await hasInternetConnection();
+              if (!checkInternet) {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return StatefulBuilder(
+                        builder: (context, setModalState) => AlertDialog(
+                              backgroundColor: Style.defaultColor,
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Input(
+                                      text: 'Informe o EAN do produto',
+                                      controller: eanController,
+                                      type: TextInputType.text,
+                                      textAlign: TextAlign.left),
+                                  SizedBox(
+                                    height: Style.height_10(context),
+                                  ),
+                                  Input(
+                                      text: 'Informe o Código do produto',
+                                      controller: codigoController,
+                                      type: TextInputType.text,
+                                      textAlign: TextAlign.left),
+                                  SizedBox(
+                                    height: Style.height_10(context),
+                                  ),
+                                  Input(
+                                      text: 'Informe o Nome do produto',
+                                      controller: nomeController,
+                                      type: TextInputType.text,
+                                      textAlign: TextAlign.left),
+                                  SizedBox(
+                                    height: Style.height_10(context),
+                                  ),
+                                  Input(
+                                      text: 'Informe a Quantidade',
+                                      controller: quantidadeController,
+                                      type: TextInputType.number,
+                                      textAlign: TextAlign.left),
+                                  SizedBox(
+                                    height: Style.height_10(context),
+                                  ),
+                                  Container(
+                                    height: Style.height_30(context),
+                                    child: PopupMenuButton<String>(
+                                      itemBuilder: (BuildContext context) =>
+                                          buildMenuItemsexpedition(expedition),
+                                      onSelected: (value) async {
+                                        if (value != '') {
+                                          setModalState(() {
+                                            expedicaoId = value;
+                                            // Busca o nome da empresa correspondente ao ID selecionado
+                                            final selectedexpedition =
+                                                expedition.firstWhere(
+                                              (expedition) =>
+                                                  expedition['expedicao_id'] ==
+                                                  value,
+                                            );
+                                            expedicaoNome =
+                                                selectedexpedition['nome'] ??
+                                                    ''; // Atualiza o nome
+                                            expedicaoCodigo =
+                                                selectedexpedition['codigo'] ??
+                                                    ''; // Atualiza o nome
+                                          });
+                                          setState(() {
+                                            expedicaoId = value;
+                                          });
+                                          print(expedicaoId);
+                                        } else {
+                                          setState(() {
+                                            expedicaoId = '';
+                                            expedicaoNome = '';
+                                            expedicaoCodigo = '';
+                                          });
+                                        }
+                                      },
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.arrow_drop_down_rounded,
+                                              color: Style.secondaryColor,
+                                              size: Style.height_20(context),
+                                            ),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border(
+                                                  bottom: BorderSide(
+                                                    color: Style
+                                                        .secondaryColor, // Color of the bottom border
+                                                    width: Style.height_2(
+                                                        context), // Thickness of the bottom border
+                                                    style: BorderStyle
+                                                        .solid, // Style of the border (solid, dashed, etc.)
+                                                  ),
+                                                ),
+                                              ),
+                                              width: Style.width_150(context),
+                                              child: Text(
+                                                expedicaoNome.isEmpty
+                                                    ? 'Selecione a expedição'
+                                                    : '${expedicaoCodigo} - ${expedicaoNome}',
+                                                style: TextStyle(
+                                                  color: Style.secondaryColor,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize:
+                                                      Style.height_12(context),
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                overflow: TextOverflow
+                                                    .ellipsis, // corta o texto no limite da largura
+                                                softWrap:
+                                                    true, // permite a quebra de linha conforme necessário
+                                              ),
+                                            )
+                                          ]),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      final uuid = const Uuid().v4();
+                                      final bodyMap = {
+                                        'local_id': widget.local_id,
+                                        'flag_sync': 0,
+                                        'produto_id': '',
+                                        'prevendaproduto_id': uuid,
+                                        'codigoproduto': codigoController.text,
+                                        'nomeproduto': nomeController.text,
+                                        'nome': expedicaoNome,
+                                        'expedicao_id': expedicaoId,
+                                        'valorunitario': 0.0,
+                                        'quantidade': double.parse(
+                                            quantidadeController.text),
+                                        'valortotal': 0.0,
+                                        'ean': eanController.text,
+                                      };
+                                      await adicionarItemProduto(bodyMap);
+                                      _closeModal();
+                                      fetchDataOrders();
+                                    },
+                                    child: Text('Adicionar'))
+                              ],
+                            ));
+                  },
+                );
+              } else {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => ProductList(
+                        prevendaid: widget.prevendaid.toString(),
+                        pessoaid: widget.pessoaid.toString(),
+                        numpedido: widget.numpedido.toString(),
+                        pessoanome: widget.pessoanome.toString(),
+                        cpfcnpj: widget.cpfcnpj.toString(),
+                        telefone: widget.telefone.toString(),
+                        cep: widget.cep.toString(),
+                        bairro: widget.bairro.toString(),
+                        endereco: widget.endereco.toString(),
+                        complemento: widget.complemento.toString(),
+                        empresa_id: widget.empresa_id.toString(),
+                        valordesconto: widget.valordesconto)));
+              }
             }),
       ],
     ));
@@ -490,14 +696,10 @@ class _ProductSessionState extends State<ProductSession> {
 
   Future<void> loadData() async {
     await Future.wait([_loadSavedUrlBasic(), _loadSavedToken()]);
-    final hasInternet = await hasInternetConnection();
-
-    if (!hasInternet) {
-    } else {
-      await Future.wait([
-        fetchDataOrders(),
-      ]);
-    }
+    await Future.wait([
+      fetchDataOrders(),
+    ]);
+    await fetchDataListExpedicao();
   }
 
   Future<void> _loadSavedUrlBasic() async {
@@ -517,16 +719,207 @@ class _ProductSessionState extends State<ProductSession> {
   }
 
   Future<void> fetchDataOrders() async {
-    List<OrdersDetailsEndpoint>? fetchData =
-        await DataServiceOrdersDetails.fetchDataOrdersDetails(
-            urlBasic, widget.prevendaid, token);
-    if (fetchData != null) {
-      setState(() {
-        orders = fetchData;
-      });
+    setState(() => isLoading = true);
+
+    final hasInternet = await hasInternetConnection();
+    final allOffline = await recuperarListaProdutosPedido(); // 🔴 todos
+
+    try {
+      if (!hasInternet) {
+        final filtered = allOffline
+            .where((e) => e.local_id.toString() == widget.local_id.toString())
+            .toList();
+
+        setState(() => orders = filtered);
+        //await adicionarItemProduto(filtered);
+        return;
+      }
+
+      final fetchData = await DataServiceOrdersDetails.fetchDataOrdersDetails(
+          urlBasic, widget.prevendaid, token);
+
+      if (fetchData != null) {
+        final onlineMap = fetchData.map((e) {
+          final json = e.toJson();
+          json['local_id'] = widget.local_id;
+          json['flag_sync'] = 1;
+          return json;
+        }).toList();
+
+        // 🔵 separa apenas o pedido atual
+        final currentOrderOffline = allOffline
+            .where((e) => e.local_id.toString() == widget.local_id.toString())
+            .map((e) => e.toJson())
+            .toList();
+
+        final mergedCurrent = mergeListsByKey(
+          onlineMap,
+          currentOrderOffline,
+          'prevendaproduto_id',
+        );
+
+        // 🔵 remove o pedido atual da lista completa
+        final otherOrders = allOffline
+            .where((e) => e.local_id.toString() != widget.local_id.toString())
+            .map((e) => e.toJson())
+            .toList();
+
+        // 🔵 junta tudo novamente
+        final finalList = [...otherOrders, ...mergedCurrent];
+
+        //await salvarListaProdutosPedido(finalList);
+
+        setState(() {
+          orders = mergedCurrent
+              .map((e) => OrdersDetailsEndpoint.fromJson(e))
+              .toList();
+        });
+      } else {
+        final filtered = allOffline
+            .where((e) => e.local_id.toString() == widget.local_id.toString())
+            .toList();
+
+        setState(() => orders = filtered);
+      }
+    } finally {
+      setState(() => isLoading = false);
     }
-    setState(() {
-      isLoading = false;
-    });
+  }
+
+  // Future<void> fetchDataOrders() async {
+  //   final hasInternet = await hasInternetConnection();
+  //   final listOrdersOff = await recuperarListaProdutosPedido();
+  //   if (!hasInternet) {
+  //     print(listOrdersOff);
+  //     setState(() {
+  //       orders = listOrdersOff
+  //           .where((e) => e.local_id.toString() == widget.local_id.toString())
+  //           .toList();
+  //       isLoading = false;
+  //     });
+  //   } else {
+  //     List<OrdersDetailsEndpoint>? fetchData =
+  //         await DataServiceOrdersDetails.fetchDataOrdersDetails(
+  //             urlBasic, widget.prevendaid, token);
+  //     if (fetchData != null) {
+  //       final onlineMap = fetchData.map((e) {
+  //         final json = e.toJson();
+  //         json['local_id'] = widget.local_id;
+  //         json['flag_sync'] = 1;
+  //         return json;
+  //       }).toList();
+
+  //       final offlineMap = listOrdersOff
+  //           .where((e) => e.local_id.toString() == widget.local_id.toString())
+  //           .map((e) => e.toJson())
+  //           .toList();
+
+  //       final mergedList = mergeListsByKey(
+  //         onlineMap,
+  //         offlineMap,
+  //         'local_id',
+  //       );
+
+  //       await salvarListaProdutosPedido(mergedList);
+
+  //       print(mergedList);
+
+  //       setState(() {
+  //         orders =
+  //             mergedList.map((e) => OrdersDetailsEndpoint.fromJson(e)).toList();
+  //       });
+  //     } else {
+  //       final listOrdersOff = await recuperarListaProdutosPedido();
+
+  //       setState(() {
+  //         orders = listOrdersOff;
+  //       });
+  //     }
+  //   }
+  //   setState(() {
+  //     isLoading = false;
+  //   });
+  // }
+
+  Future<void> fetchDataListExpedicao() async {
+    final hasInternet = await hasInternetConnection();
+    if (!hasInternet) {
+      final listTablePricesOff = await recuperarListaExpedicao();
+      setState(() {
+        expedition = listTablePricesOff;
+      });
+    } else {
+      try {
+        var urlGet = Uri.parse(
+            '$urlBasic/ideia/core/getdata/expedicao%20e%20WHERE%20COALESCE(e.flagexcluido,%200)%20<>%201/');
+        var response = await http.get(urlGet, headers: {'Accept': 'text/html'});
+        if (response.statusCode == 200) {
+          var jsonData = json.decode(response.body);
+          var dynamicKey = jsonData['data'].keys.first;
+          // Verifica se o valor associado à chave é uma lista
+          var dataList = jsonData['data'][dynamicKey];
+          var data = dataList;
+          var expedicaoId = data[0]['expedicao_id'];
+          var expedicaoNome = data[0]['nome'];
+          var expedicaoCodigo = data[0]['codigo'];
+
+          var bodyMap = {
+            'expedicao_id': expedicaoId,
+            'expedicao_nome': expedicaoNome,
+            'expedicao_codigo': expedicaoCodigo,
+          };
+
+          await salvarListaExpedicao(data);
+
+          setState(() {
+            expedition = dataList;
+          });
+        }
+      } catch (e) {
+        print('Erro durante a requisição: $e');
+      }
+    }
+  }
+
+  List<PopupMenuItem<String>> buildMenuItemsexpedition(List expedition) {
+    List<PopupMenuItem<String>> staticItems = [
+      PopupMenuItem(
+          enabled: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Style.height_5(context)),
+                    color: Style.errorColor),
+                child: IconButton(
+                  onPressed: () {
+                    _closeModal();
+                  },
+                  icon:
+                      Image.asset('assets/images/icon_remove/icon_remove.png'),
+                  style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor)),
+                ),
+              ),
+            ],
+          )),
+    ];
+    const PopupMenuDivider();
+
+    List<PopupMenuItem<String>> dynamicItems = expedition.map((expeditions) {
+      return PopupMenuItem<String>(
+        value: expeditions['expedicao_id'].toString(),
+        child: Text(
+            ('${expeditions['codigo']} - ${expeditions['nome']}').toString()),
+        key: Key(expeditions['nome'].toString()),
+      );
+    }).toList();
+
+    const PopupMenuDivider();
+
+    return staticItems + dynamicItems;
   }
 }

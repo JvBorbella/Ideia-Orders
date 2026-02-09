@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto/back/checK_internet.dart';
 import 'package:projeto/back/system/login_function.dart';
 import 'package:projeto/back/system/save_user_function.dart';
 import 'package:projeto/front/components/login_config/elements/button.dart';
@@ -10,6 +11,7 @@ import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
 import 'package:projeto/front/components/login_config/structure/form_card.dart';
 import 'package:projeto/front/pages/config.dart';
+import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -25,7 +27,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String urlController = '';
+  String urlController = '', token = '';
   final SaveUserService saveUserService = SaveUserService();
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    //verifyToken();
     _userController.text = '';
     _passwordController.text = '';
 
@@ -46,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadSavedUser();
+    _loadSavedToken();
     _loadSavedUrl();
   }
 
@@ -57,12 +61,55 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  Future<void> _loadSavedToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedToken = sharedPreferences.getString('token') ?? '';
+    setState(() {
+      token = savedToken;
+    });
+  }
+
   Future<void> _loadSavedUser() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String savedUser = sharedPreferences.getString('saveUser') ?? '';
     setState(() {
       _userController.text = savedUser;
     });
+  }
+
+  Future<void> verifyToken() async {
+    final checkInternet = await hasInternetConnection();
+    if (!checkInternet) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(seconds: 7),
+          behavior: SnackBarBehavior.floating,
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: Style.width_200(context),
+                child: Text(
+                  overflow: TextOverflow.clip,
+                  'Sem conexão com a Internet, porém, token ara login ainda válido',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const Home(),
+                      ),
+                    );
+                  },
+                  child: Text('Entrar'))
+            ],
+          ),
+          backgroundColor: Style.errorColor,
+        ),
+      );
+    }
   }
 
   @override
@@ -111,31 +158,13 @@ class _LoginPageState extends State<LoginPage> {
                           controller: _passwordController,
                           textAlign: TextAlign.start,
                           onSubmitted: (value) async {
-                              await LoginFunction.login(
-                                context,
-                                urlController,
-                                _userController,
-                                _passwordController,
-                              );
-                            },
-                        ),
-                        SizedBox(
-                          height: Style.InputToButtonSpace(context),
-                        ),
-                        ButtonConfig(
-                          isLoadingButton: flagLoadEntrar,
-                          text: 'Entrar',
-                          onPressed: () async {
-                            setState(() {
-                              flagLoadEntrar = true;
-                            });
                             if (_userController.text.isNotEmpty &&
                                 _passwordController.text.isNotEmpty) {
                               await LoginFunction.login(
                                 context,
                                 urlController,
-                                _userController,
-                                _passwordController,
+                                _userController.text,
+                                _passwordController.text,
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -152,6 +181,77 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               );
                             }
+                            setState(() {
+                              flagLoadEntrar = false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          height: Style.InputToButtonSpace(context),
+                        ),
+                        ButtonConfig(
+                          isLoadingButton: flagLoadEntrar,
+                          text: 'Entrar',
+                          onPressed: () async {
+                            setState(() {
+                              flagLoadEntrar = true;
+                            });
+                            final checkInternet = await hasInternetConnection();
+                            if (!checkInternet) {
+                              if (_userController.text.isNotEmpty &&
+                                  _passwordController.text.isNotEmpty) {
+                                SharedPreferences sharedPreferences =
+                                    await SharedPreferences.getInstance();
+                                await sharedPreferences.setString(
+                                    'login_usuario', _userController.text);
+                                await sharedPreferences.setString(
+                                    'senha_usuario', _passwordController.text);
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const Home(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text(
+                                      'Por favor, preencha todos os campos',
+                                      style: TextStyle(
+                                        fontSize: Style.height_12(context),
+                                        color: Style.tertiaryColor,
+                                      ),
+                                    ),
+                                    backgroundColor: Style.errorColor,
+                                  ),
+                                );
+                              }
+                            } else {
+                              if (_userController.text.isNotEmpty &&
+                                  _passwordController.text.isNotEmpty) {
+                                await LoginFunction.login(
+                                  context,
+                                  urlController,
+                                  _userController.text,
+                                  _passwordController.text,
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text(
+                                      'Por favor, preencha todos os campos',
+                                      style: TextStyle(
+                                        fontSize: Style.height_12(context),
+                                        color: Style.tertiaryColor,
+                                      ),
+                                    ),
+                                    backgroundColor: Style.errorColor,
+                                  ),
+                                );
+                              }
+                            }
+
                             setState(() {
                               flagLoadEntrar = false;
                             });

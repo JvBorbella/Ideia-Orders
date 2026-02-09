@@ -36,8 +36,7 @@ class DataServiceFinishOrder {
 
     try {
       var urlPost = Uri.parse('$urlBasic/ideia/prevenda/finalizar/$prevendaid');
-      var urlGerarPedido =
-          Uri.parse('$urlBasic/ideia/prevenda/gerarpedido/$prevendaid');
+      var urlGerarPedido = Uri.parse('$urlBasic/ideia/prevenda/gerarpedido/$prevendaid');
 
       if (flagGerarPedido == true) {
         var responsePedido =

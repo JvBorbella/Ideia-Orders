@@ -56,11 +56,11 @@ class DataServiceProducts {
       BuildContext context, String urlBasic, String token, String text, String tabelapreco_id) async {
     List<ProductsEndpoint>? products;
 
-    final treatedText = _prepareText(text);
+    final treatedText = Uri.encodeComponent(_prepareText(text));
 
     try {
       var urlPost = Uri.parse(
-        '''$urlBasic/ideia/core/getdata/produto%20p%20LEFT%20JOIN%20produtotabelapreco%20pt%20ON%20p.produto_id%20=%20pt.produto_id%20AND%20pt.tabelapreco_id%20=%20'$tabelapreco_id'%20LEFT%20JOIN%20unidademedida%20u%20ON%20u.unidademedida_id%20=%20p.unidademedida_id%20LEFT%20JOIN%20produtounidademedida%20pu%20ON%20pu.produto_id%20=%20p.produto_id%20WHERE%20p.flagexcluido%20%3C%3E%201%20AND%20(p.codigo%20LIKE%20'$treatedText'%20OR%20p.eantributavel%20LIKE%20'$treatedText'%20OR%20p.nome%20LIKE%20'$treatedText'%20OR%20pu.codigo%20LIKE%20'$treatedText'%20OR%20pu.eancomercial%20LIKE%20'$treatedText')%20AND%20pt.precofinal%20IS%20NOT%20NULL%20LIMIT%2050/'''
+        '''$urlBasic/ideia/core/getdata/produto%20p%20LEFT%20JOIN%20produtotabelapreco%20pt%20ON%20p.produto_id%20=%20pt.produto_id%20AND%20pt.tabelapreco_id%20=%20'$tabelapreco_id'%20LEFT%20JOIN%20unidademedida%20u%20ON%20u.unidademedida_id%20=%20p.unidademedida_id%20LEFT%20JOIN%20produtounidademedida%20pu%20ON%20pu.produto_id%20=%20p.produto_id%20WHERE%20COALESCE(p.flagexcluido,%201)%20AND%20(p.codigo%20LIKE%20'$treatedText'%20OR%20p.eantributavel%20LIKE%20'$treatedText'%20OR%20p.nome%20LIKE%20'$treatedText'%20OR%20pu.codigo%20LIKE%20'$treatedText'%20OR%20pu.eancomercial%20LIKE%20'$treatedText')%20AND%20pt.precofinal%20IS%20NOT%20NULL%20LIMIT%2050/'''
        // '$urlBasic/ideia/prevenda/listaprodutos?busca=$text'
       );
 

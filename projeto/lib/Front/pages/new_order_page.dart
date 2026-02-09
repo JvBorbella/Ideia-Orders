@@ -33,6 +33,7 @@ class NewOrderPage extends StatefulWidget {
       noProduct,
       operador,
       empresa_id,
+      local_id,
       valordesconto;
 
   const NewOrderPage(
@@ -55,6 +56,7 @@ class NewOrderPage extends StatefulWidget {
       this.operador,
       this.noProduct = '0',
       this.empresa_id,
+      this.local_id,
       this.valordesconto});
 
   @override
@@ -199,6 +201,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
                         onProductRemoved: _onProductRemoved,
                         empresa_id: widget.empresa_id,
                         valordesconto: widget.valordesconto,
+                        local_id: widget.local_id,
                       ),
                       SizedBox(
                         height: Style.height_15(context),
@@ -222,6 +225,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
                         noProduct: widget.noProduct,
                         valordesconto: widget.valordesconto,
                         empresa_id: widget.empresa_id,
+                        local_id: widget.local_id,
                         onCpfAtualizado: (cpf) {
                           setState(() {
                             cpfInformado = cpf;
@@ -296,7 +300,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
     if (!hasInternet) {} 
     else {
       await Future.wait(
-        [fetchDataCliente2(), fetchDataOrdersDetails2(widget.prevendaId)]);
+        [fetchDataCliente2(), //fetchDataOrdersDetails2(widget.prevendaId)
+        ]);
     await GetCep.getcep(
         enderecocep,
         _logradourocontroller,

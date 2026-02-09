@@ -9,23 +9,26 @@ class OrderContainer extends StatefulWidget {
   final String numero;
   final flagpermitefaturar;
   final valordesconto;
+  final flag_sync;
 
-  const OrderContainer({
-    super.key, 
-  required this.valortotal,
-  required this.data,
-  required this.nomepessoa,
-  required this.numero,
-  this.flagpermitefaturar,
-  this.valordesconto
-  });
+  const OrderContainer(
+      {super.key,
+      required this.valortotal,
+      required this.data,
+      required this.nomepessoa,
+      required this.numero,
+      this.flagpermitefaturar,
+      this.valordesconto,
+      this.flag_sync});
 
   @override
   State<OrderContainer> createState() => _OrderContainerState();
 }
+
 class _OrderContainerState extends State<OrderContainer> {
   double get valorfinal => widget.valortotal - (widget.valordesconto ?? 0.0);
-   NumberFormat currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+  NumberFormat currencyFormat =
+      NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -50,9 +53,9 @@ class _OrderContainerState extends State<OrderContainer> {
                   Text(
                     'Número',
                     style: TextStyle(
-                        color: Style.quarantineColor,
-                        fontSize: Style.height_8(context),
-                        ),
+                      color: Style.quarantineColor,
+                      fontSize: Style.height_8(context),
+                    ),
                   ),
                   Text(
                     widget.numero,
@@ -69,27 +72,26 @@ class _OrderContainerState extends State<OrderContainer> {
               Column(
                 children: [
                   SizedBox(
-                    width: Style.width_215(context),
+                    width: Style.width_100(context),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                    'Cliente',
-                    style: TextStyle(
-                        color: Style.quarantineColor,
-                        fontSize: Style.height_8(context),
+                          'Cliente',
+                          style: TextStyle(
+                            color: Style.quarantineColor,
+                            fontSize: Style.height_8(context),
+                          ),
                         ),
-                  ),
-                  Text(
-                    widget.nomepessoa,
-                    style: TextStyle(
-                      color: Style.primaryColor,
-                      fontSize: Style.height_10(context),
-                      fontWeight: FontWeight.bold
-                    ),
-                    softWrap: true,
-                    overflow: TextOverflow.clip,
-                  ),
+                        Text(
+                          widget.nomepessoa,
+                          style: TextStyle(
+                              color: Style.primaryColor,
+                              fontSize: Style.height_10(context),
+                              fontWeight: FontWeight.bold),
+                          softWrap: true,
+                          overflow: TextOverflow.clip,
+                        ),
                       ],
                     ),
                   )
@@ -97,64 +99,73 @@ class _OrderContainerState extends State<OrderContainer> {
               ),
             ],
           ),
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              if (widget.flagpermitefaturar == '1')
-              Icon(
-                Icons.check_circle_outline,
-                color: Style.sucefullColor,
-                size: Style.height_15(context),
-              )
-            ],
-          ),
-          Column(
-            children: [
-              Row(
+              Column(
                 children: [
-                  Column(
-                    children: [
-                      Text(
-                        'Valor',
-                        style: TextStyle(
-                            color: Style.quarantineColor,
-                            fontSize: Style.height_8(context),
-                            ),
-                      ),
-                      Text(
-                        currencyFormat.format(valorfinal),
-                        style: TextStyle(
-                          color: Style.primaryColor,
-                          fontSize: Style.height_10(context),
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  )
+                  if (widget.flag_sync == 0)
+                    Icon(
+                      Icons.cloud_off,
+                      color: Colors.orange,
+                      size: Style.height_15(context),
+                    ),
+                  if (widget.flagpermitefaturar == '1')
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: Style.sucefullColor,
+                      size: Style.height_15(context),
+                    )
                 ],
               ),
-              Row(
+              Column(
                 children: [
-                  Column(
+                  Row(
                     children: [
-                      Text(
-                        'Data',
-                        style: TextStyle(
-                            color: Style.quarantineColor,
-                            fontSize: Style.height_8(context),
+                      Column(
+                        children: [
+                          Text(
+                            'Valor',
+                            style: TextStyle(
+                              color: Style.quarantineColor,
+                              fontSize: Style.height_8(context),
                             ),
-                      ),
-                      Text(
-                        DateFormat('dd/MM/yyyy').format(widget.data),
-                        style: TextStyle(
-                            color: Style.primaryColor,
-                            fontSize: Style.height_8(context),
-                            fontWeight: FontWeight.bold
-                            ),
+                          ),
+                          Text(
+                            currencyFormat.format(valorfinal),
+                            style: TextStyle(
+                                color: Style.primaryColor,
+                                fontSize: Style.height_10(context),
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       )
                     ],
-                  )
+                  ),
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            'Data',
+                            style: TextStyle(
+                              color: Style.quarantineColor,
+                              fontSize: Style.height_8(context),
+                            ),
+                          ),
+                          Text(
+                            DateFormat('dd/MM/yyyy').format(widget.data),
+                            style: TextStyle(
+                                color: Style.primaryColor,
+                                fontSize: Style.height_8(context),
+                                fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ],
-              ),
+              )
             ],
           )
         ],

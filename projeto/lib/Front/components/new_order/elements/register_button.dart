@@ -50,6 +50,7 @@ class _RegisterButtonState extends State<RegisterButton> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
+                    overflow: TextOverflow.ellipsis,
                     widget.text,
                     style: TextStyle(
                         fontSize: Style.height_8(context),

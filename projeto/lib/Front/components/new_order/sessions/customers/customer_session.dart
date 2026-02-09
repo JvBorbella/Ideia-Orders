@@ -1,5 +1,6 @@
 // import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'dart:convert';
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cnpj_cpf_formatter_nullsafety/cnpj_cpf_formatter_nullsafety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,6 +51,7 @@ class CustomerSession extends StatefulWidget {
   final noProduct;
   final valordesconto;
   final empresa_id;
+  final local_id;
   final Function(String) onCpfAtualizado;
   final Function(String) onTelAtualizado;
   final Function(String) onNomeAtualizado;
@@ -75,6 +77,7 @@ class CustomerSession extends StatefulWidget {
     this.email,
     this.valordesconto,
     this.empresa_id,
+    this.local_id,
     required this.onCpfAtualizado,
     required this.onTelAtualizado,
     required this.onNomeAtualizado,
@@ -154,6 +157,7 @@ class CustomerSessionState extends State<CustomerSession> {
 
   List<OrdersDetailsEndpoint> orders = [];
   List<CompanyList> company = [];
+  List<Map<String, dynamic>> clienteFiltrado = [];
 
   String substituirVirgulaPorPonto(String texto) {
     return texto.replaceAll(',', '.');
@@ -209,113 +213,11 @@ class CustomerSessionState extends State<CustomerSession> {
     print('Número: ' + widget.numpedido);
   }
 
-  // List<Map<String, dynamic>> dataOrder = [
-  //   { },
-  // ];
-
-  // Future<List<Map<String, dynamic>>> recuperarLista() async {
-  //   final prefs = await SharedPreferences.getInstance();
-
-  //   String? listaJson = prefs.getString('minha_lista');
-
-  //   if (listaJson == null) return [];
-
-  //   List<dynamic> listaDecodificada = jsonDecode(listaJson);
-
-  //   return listaDecodificada
-  //       .map((item) => Map<String, dynamic>.from(item))
-  //       .toList();
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Column(
         children: [
-          // const TextTitle(text: 'Desconto'),
-          // SizedBox(
-          //   height: Style.height_5(context),
-          // ),
-          // Container(
-          //   padding: EdgeInsets.symmetric(horizontal: Style.height_15(context)),
-          //   child: Input(
-          //     text: 'Desconto total',
-          //     controller: valordescontoController,
-          //     type: TextInputType.number,
-          //     textAlign: TextAlign.center,
-          //     inputFormatters: [
-          //       TextInputFormatter.withFunction((oldValue, newValue) {
-          //         try {
-          //           if (newValue.text.isEmpty) return newValue;
-          //           final number = double.parse(
-          //                   newValue.text.replaceAll(RegExp(r'[^0-9]'), '')) /
-          //               100;
-          //           final formatted = currencyFormat.format(number);
-          //           return TextEditingValue(
-          //             text: formatted,
-          //             selection:
-          //                 TextSelection.collapsed(offset: formatted.length),
-          //           );
-          //         } catch (e) {
-          //           return oldValue;
-          //         }
-          //       }),
-          //     ],
-          //   ),
-          // ),
-          // SizedBox(
-          //   height: Style.height_10(context),
-          // ),
-          // RegisterIconButton(
-          //   text: 'Aplicar Desconto',
-          //   color: Style.primaryColor,
-          //   width: Style.height_150(context),
-          //   icon: Icons.money_off_csred_rounded,
-          //   onPressed: () async {
-          //     if (permAplicarDesconto == false) {
-          //       showDialog(
-          //           context: context, builder: (_) => AlertDialogDefault());
-          //     } else {
-          //       await NewCustomer.AdjustOrder(
-          //           context,
-          //           urlBasic,
-          //           token,
-          //           _nomecontroller.text,
-          //           cpfcontroller.text,
-          //           _telefonecontatocontroller.text,
-          //           widget.prevendaid,
-          //           pessoa_id.toString(),
-          //           vendedorId,
-          //           double.parse(substituirVirgulaPorPonto(
-          //                   valordescontoController.text)) ??
-          //               0.0);
-          //     }
-          //   },
-          // ),
-          // ButtonConfig(
-          //   text: 'Aplicar Desconto',
-          //   height: Style.height_12(context),
-          //   onPressed: () async {
-          //     if (permAplicarDesconto == false) {
-          //       showDialog(
-          //           context: context, builder: (_) => AlertDialogDefault());
-          //     } else {
-          //       await NewCustomer.AdjustOrder(
-          //           context,
-          //           urlBasic,
-          //           token,
-          //           _nomecontroller.text,
-          //           cpfcontroller.text,
-          //           _telefonecontatocontroller.text,
-          //           widget.prevendaid,
-          //           pessoa_id.toString(),
-          //           vendedorId,
-          //           double.parse(substituirVirgulaPorPonto(
-          //                   valordescontoController.text)) ??
-          //               0.0);
-          //     }
-          //   },
-          // ),
           const TextTitle(text: 'Dados do pedido'),
           SizedBox(
             height: Style.height_5(context),
@@ -324,22 +226,6 @@ class CustomerSessionState extends State<CustomerSession> {
             padding: EdgeInsets.all(Style.height_15(context)),
             child: Column(
               children: [
-                // if (widget.empresa_id != '')
-                //   InputBlocked(
-                //     value: '',
-                //   )
-                // else
-                //   Input(
-                //       text: 'Busque a empresa',
-                //       type: TextInputType.text,
-                //       textAlign: TextAlign.left,
-                //       controller: empresaController,
-                //       IconButton: IconButton(
-                //           onPressed: () {
-                //             searchCompany();
-                //           },
-                //           icon: Icon(Icons.screen_search_desktop_rounded))
-                //       ),
                 Input(
                   text: 'CPF / CNPJ do Cliente',
                   type: TextInputType.text,
@@ -650,42 +536,61 @@ class CustomerSessionState extends State<CustomerSession> {
                     Column(
                       children: [
                         SizedBox(
-                          //width: Style.width_150(context),
                           child: RegisterButton(
                             text: buttonText,
                             color: Style.primaryColor,
                             width: Style.width_150(context),
                             isLoadingButton: isLoadingButton,
                             onPressed: () async {
+                              final checkInternet =
+                                  await hasInternetConnection();
                               setState(() {
                                 isLoadingButton = true;
                               });
-                              await NewCustomer.getCostumer(
-                                  context,
-                                  urlBasic,
-                                  token,
-                                  widget.prevendaid,
-                                  widget.pessoaid,
-                                  vendedorId,
-                                  _nomecontroller.text,
-                                  cpfcontroller.text,
-                                  _telefonecontatocontroller.text,
-                                  _cepcontroller.text,
-                                  _bairrocontroller.text,
-                                  _logradourocontroller.text,
-                                  _localidadecontroller.text,
-                                  _complementocontroller.text,
-                                  _numerocontroller.text,
-                                  ibge,
-                                  _emailcontroller.text,
-                                  _ufcontroller.text,
-                                  double.parse(substituirVirgulaPorPonto(
-                                          valordescontoController.text)) ??
-                                      0.0,
-                                  permCadastrarCliente,
-                                  permEditarCliente,
-                                  permEditarPrevenda);
-                              print('pessoa_id: ' + widget.pessoaid);
+                              if (!checkInternet) {
+                                final bodyMap = {
+                                  'local_id': widget.local_id,
+                                  'cpfcnpj': cpfcontroller.text,
+                                  'telefone': _telefonecontatocontroller.text,
+                                  'nome': _nomecontroller.text,
+                                  'email': _emailcontroller.text,
+                                  'vendedor_codigo': vendedorController.text,
+                                  'cep': _cepcontroller.text,
+                                  'endereco': _logradourocontroller.text,
+                                  'uf': _ufcontroller.text,
+                                  'bairro': _bairrocontroller.text,
+                                  'cidade': _cidadecontroller.text,
+                                  'numero': _numerocontroller.text,
+                                  'complemento': _complementocontroller.text,
+                                };
+                                await adicionarDadosCliente(bodyMap);
+                              } else {
+                                await NewCustomer.getCostumer(
+                                    context,
+                                    urlBasic,
+                                    token,
+                                    widget.prevendaid,
+                                    widget.pessoaid,
+                                    vendedorId,
+                                    _nomecontroller.text,
+                                    cpfcontroller.text,
+                                    _telefonecontatocontroller.text,
+                                    _cepcontroller.text,
+                                    _bairrocontroller.text,
+                                    _logradourocontroller.text,
+                                    _localidadecontroller.text,
+                                    _complementocontroller.text,
+                                    _numerocontroller.text,
+                                    ibge,
+                                    _emailcontroller.text,
+                                    _ufcontroller.text,
+                                    double.parse(substituirVirgulaPorPonto(
+                                            valordescontoController.text)) ??
+                                        0.0,
+                                    permCadastrarCliente,
+                                    permEditarCliente,
+                                    permEditarPrevenda);
+                              }
                               setState(() {
                                 isLoadingButton = false;
                               });
@@ -694,187 +599,6 @@ class CustomerSessionState extends State<CustomerSession> {
                         ),
                       ],
                     ),
-                    // Column(
-                    //   children: [
-                    //     SizedBox(
-                    //       width: Style.width_150(context),
-                    //       child: Column(
-                    //         children: [
-                    //           RegisterIconButton(
-                    //             onPressed: () async {
-                    //               setState(() {
-                    //                 isLoadingIconButton = true;
-                    //               });
-                    //               if (isCheckedCPF == true) {
-                    //                 if (cpfcontroller.text.isEmpty) {
-                    //                   ScaffoldMessenger.of(context)
-                    //                       .showSnackBar(
-                    //                     SnackBar(
-                    //                       behavior: SnackBarBehavior.floating,
-                    //                       padding: EdgeInsets.all(
-                    //                           Style.SaveUrlMessagePadding(
-                    //                               context)),
-                    //                       content: Text(
-                    //                         'Por favor, preencha o CPF do cliente',
-                    //                         style: TextStyle(
-                    //                           fontSize:
-                    //                               Style.SaveUrlMessageSize(
-                    //                                   context),
-                    //                           color: Style.tertiaryColor,
-                    //                         ),
-                    //                       ),
-                    //                       backgroundColor: Style.errorColor,
-                    //                     ),
-                    //                   );
-                    //                   setState(() {
-                    //                     isLoadingIconButton = false;
-                    //                   });
-                    //                 } else if (_telefonecontatocontroller
-                    //                     .text.isEmpty) {
-                    //                   ScaffoldMessenger.of(context)
-                    //                       .showSnackBar(
-                    //                     SnackBar(
-                    //                       behavior: SnackBarBehavior.floating,
-                    //                       padding: EdgeInsets.all(
-                    //                           Style.SaveUrlMessagePadding(
-                    //                               context)),
-                    //                       content: Text(
-                    //                         'Por favor, preencha o telefone do cliente',
-                    //                         style: TextStyle(
-                    //                           fontSize:
-                    //                               Style.SaveUrlMessageSize(
-                    //                                   context),
-                    //                           color: Style.tertiaryColor,
-                    //                         ),
-                    //                       ),
-                    //                       backgroundColor: Style.errorColor,
-                    //                     ),
-                    //                   );
-                    //                   setState(() {
-                    //                     isLoadingIconButton = false;
-                    //                   });
-                    //                 } else if (_nomecontroller.text.isEmpty) {
-                    //                   ScaffoldMessenger.of(context)
-                    //                       .showSnackBar(
-                    //                     SnackBar(
-                    //                       behavior: SnackBarBehavior.floating,
-                    //                       padding: EdgeInsets.all(
-                    //                           Style.SaveUrlMessagePadding(
-                    //                               context)),
-                    //                       content: Text(
-                    //                         'Por favor, preencha o nome do cliente',
-                    //                         style: TextStyle(
-                    //                           fontSize:
-                    //                               Style.SaveUrlMessageSize(
-                    //                                   context),
-                    //                           color: Style.tertiaryColor,
-                    //                         ),
-                    //                       ),
-                    //                       backgroundColor: Style.errorColor,
-                    //                     ),
-                    //                   );
-                    //                   setState(() {
-                    //                     isLoadingIconButton = false;
-                    //                   });
-                    //                 } else if (orders.isEmpty ||
-                    //                     widget.noProduct == '1') {
-                    //                   ScaffoldMessenger.of(context)
-                    //                       .showSnackBar(
-                    //                     SnackBar(
-                    //                       behavior: SnackBarBehavior.floating,
-                    //                       padding: EdgeInsets.all(
-                    //                           Style.SaveUrlMessagePadding(
-                    //                               context)),
-                    //                       content: Text(
-                    //                         'Não é possível finalizar o pedido sem produtos.',
-                    //                         style: TextStyle(
-                    //                           fontSize:
-                    //                               Style.SaveUrlMessageSize(
-                    //                                   context),
-                    //                           color: Style.tertiaryColor,
-                    //                         ),
-                    //                       ),
-                    //                       backgroundColor: Style.errorColor,
-                    //                     ),
-                    //                   );
-                    //                   setState(() {
-                    //                     isLoadingIconButton = false;
-                    //                   });
-                    //                 } else {
-                    //                   _openModal(context);
-                    //                   setState(() {
-                    //                     isLoadingIconButton = false;
-                    //                   });
-                    //                 }
-                    //               } else if (orders.isEmpty ||
-                    //                   widget.noProduct == '1') {
-                    //                 ScaffoldMessenger.of(context).showSnackBar(
-                    //                   SnackBar(
-                    //                     behavior: SnackBarBehavior.floating,
-                    //                     padding: EdgeInsets.all(
-                    //                         Style.SaveUrlMessagePadding(
-                    //                             context)),
-                    //                     content: Text(
-                    //                       'Não é possível finalizar o pedido sem produtos.',
-                    //                       style: TextStyle(
-                    //                         fontSize: Style.SaveUrlMessageSize(
-                    //                             context),
-                    //                         color: Style.tertiaryColor,
-                    //                       ),
-                    //                     ),
-                    //                     backgroundColor: Style.errorColor,
-                    //                   ),
-                    //                 );
-                    //                 setState(() {
-                    //                   isLoadingIconButton = false;
-                    //                 });
-                    //               } else {
-                    //                 setState(() {
-                    //                   isLoadingIconButton = true;
-                    //                 });
-                    //                 final data = await DataServiceCliente2
-                    //                     .fetchDataCliente2(urlBasic,
-                    //                         cpfcontroller.text, token);
-                    //                 var pessoa_id =
-                    //                     data['pessoa_id'].toString();
-                    //                 if (permEditarPrevenda) {
-                    //                   await NewCustomer.AdjustOrder(
-                    //                       context,
-                    //                       urlBasic,
-                    //                       token,
-                    //                       _nomecontroller.text,
-                    //                       cpfcontroller.text,
-                    //                       _telefonecontatocontroller.text,
-                    //                       widget.prevendaid,
-                    //                       pessoa_id,
-                    //                       vendedorId,
-                    //                       double.parse(
-                    //                               substituirVirgulaPorPonto(
-                    //                                   valordescontoController
-                    //                                       .text)) ??
-                    //                           0.0);
-                    //                   _openModal(context);
-                    //                   setState(() {
-                    //                     isLoadingIconButton = false;
-                    //                   });
-                    //                 } else
-                    //                   _openModal(context);
-                    //                 setState(() {
-                    //                   isLoadingIconButton = false;
-                    //                 });
-                    //               }
-                    //             },
-                    //             text: 'Finalizar pedido',
-                    //             color: Style.sucefullColor,
-                    //             width: Style.width_150(context),
-                    //             icon: Icons.check_rounded,
-                    //             isLoadingButton: isLoadingIconButton,
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     )
-                    //   ],
-                    // )
                   ],
                 )
               ],
@@ -1194,14 +918,61 @@ class CustomerSessionState extends State<CustomerSession> {
     ]);
 
     final hasInternet = await hasInternetConnection();
+    final dataCustomer = await recuperarDadosCliente();
+    clienteFiltrado = dataCustomer
+            .where(
+                (dataCustomer) => dataCustomer['local_id'] == widget.local_id)
+            .toList();
+        if (clienteFiltrado.isNotEmpty) {
+          setState(() {
+            cpfcontroller.text = clienteFiltrado.first['cpfcnpj'] ?? '';
+            _telefonecontatocontroller.text = clienteFiltrado.first['telefone'] ?? '';
+            _nomecontroller.text = clienteFiltrado.first['nome'] ?? '';
+            _emailcontroller.text = clienteFiltrado.first['email'] ?? '';
+            vendedorController.text = clienteFiltrado.first['vendedor_codigo'] ?? '';
+            _cepcontroller.text = clienteFiltrado.first['cep'] ?? '';
+            _logradourocontroller.text = clienteFiltrado.first['endereco'] ?? '';
+            _ufcontroller.text = clienteFiltrado.first['uf'] ?? '';
+            _bairrocontroller.text = clienteFiltrado.first['bairro'] ?? '';
+            _cidadecontroller.text = clienteFiltrado.first['cidade'] ?? '';
+            _numerocontroller.text = clienteFiltrado.first['numero'] ?? '';
+            _complementocontroller.text = clienteFiltrado.first['complemento'] ?? '';
+          });
+        }
 
-    if (!hasInternet) {
-    } else {
+    // if (!hasInternet) {
+    //   final dataCustomer = await recuperarDadosCliente();
+    //   if (widget.local_id.isNotEmpty) {
+    //     clienteFiltrado = dataCustomer
+    //         .where(
+    //             (dataCustomer) => dataCustomer['local_id'] == widget.local_id)
+    //         .toList();
+    //     if (clienteFiltrado.isNotEmpty) {
+    //       setState(() {
+    //         cpfcontroller.text = clienteFiltrado.first['cpfcnpj'] ?? '';
+    //         _telefonecontatocontroller.text = clienteFiltrado.first['telefone'] ?? '';
+    //         _nomecontroller.text = clienteFiltrado.first['nome'] ?? '';
+    //         _emailcontroller.text = clienteFiltrado.first['email'] ?? '';
+    //         vendedorController.text = clienteFiltrado.first['vendedor_codigo'] ?? '';
+    //         _cepcontroller.text = clienteFiltrado.first['cep'] ?? '';
+    //         _logradourocontroller.text = clienteFiltrado.first['endereco'] ?? '';
+    //         _ufcontroller.text = clienteFiltrado.first['uf'] ?? '';
+    //         _bairrocontroller.text = clienteFiltrado.first['bairro'] ?? '';
+    //         _cidadecontroller.text = clienteFiltrado.first['cidade'] ?? '';
+    //         _numerocontroller.text = clienteFiltrado.first['numero'] ?? '';
+    //         _complementocontroller.text = clienteFiltrado.first['complemento'] ?? '';
+    //       });
+    //     }
+    //   } else {}
+    //   setState(() {
+    //     // _emailcontroller.text = dataCustomer['email'];
+    //   });
+    // } else {
       await Future.wait([fetchDataOrders(), searchCompany()]);
       await Future.wait([
         fetchDataSeller(),
       ]);
-    }
+    //}
   }
 
   Future<void> fetchDataOrders() async {
@@ -1254,20 +1025,6 @@ class CustomerSessionState extends State<CustomerSession> {
         } catch (e) {
           print('Erro ao acessar pessoa_id: $e');
         }
-        // if (data != null && (data is List ? data.isNotEmpty : true)) {
-        //   setState(() {
-        //     vendedorId = data is List
-        //         ? data[0]['vendedor_pessoa_id'].toString()
-        //         : data['vendedor_pessoa_id'].toString();
-        //     vendedorController.text = '$codigo - $nome';
-        //   }); // Ajuste conforme a estrutura real dos dados
-        //   print('ID do vendedor encontrado: $vendedorId');
-        // } else {
-        //   setState(() {
-        //     vendedorController.text = 'Vendedor não encontrado';
-        //   });
-        //   print('Vendedor não encontrado.');
-        // }
       } else {
         print('Erro na requisição: ${response.statusCode}');
       }

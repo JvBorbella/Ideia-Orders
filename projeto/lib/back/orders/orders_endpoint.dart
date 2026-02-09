@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/style.dart';
+import 'package:uuid/uuid.dart';
 
 class OrdersEndpoint {
   late String usuarioId;
   late String vendedorId;
   late String empresaId;
   late String prevendaId;
-  late int numero;
+  final dynamic numero;
   late double valortotal;
   late double valordesconto;
   late DateTime datahora;
@@ -16,20 +17,31 @@ class OrdersEndpoint {
   late String operador;
   late int flagprocessado;
   late int flagpermitefaturar;
+  // Offline
+  final String? local_id;
+  final int? flagSync; // 0 = local | 1 = sincronizado
+  final String? cpfcnpj;
+  final String? telefone;
 
-  OrdersEndpoint(
-      {required this.usuarioId,
-      required this.vendedorId,
-      required this.empresaId,
-      required this.prevendaId,
-      required this.numero,
-      required this.valortotal,
-      required this.valordesconto,
-      required this.datahora,
-      required this.nomepessoa,
-      required this.operador,
-      required this.flagprocessado,
-      required this.flagpermitefaturar});
+  OrdersEndpoint({
+    required this.usuarioId,
+    required this.vendedorId,
+    required this.empresaId,
+    required this.prevendaId,
+    required this.numero,
+    required this.valortotal,
+    required this.valordesconto,
+    required this.datahora,
+    required this.nomepessoa,
+    required this.operador,
+    required this.flagprocessado,
+    required this.flagpermitefaturar,
+    // Offline
+    this.local_id,
+    this.flagSync,
+    this.cpfcnpj,
+    this.telefone,
+  });
 
   factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
     return OrdersEndpoint(
@@ -38,17 +50,23 @@ class OrdersEndpoint {
       empresaId: json['empresa_id'] ?? '',
       prevendaId: json['prevenda_id'] ?? '',
       numero: json['numero'] ?? 0,
-      valortotal: (json['valortotal'] as num).toDouble(),
-      valordesconto: (json['valordesconto'] as num).toDouble(),
-      datahora: DateTime.parse(json['datahora']),
+      valortotal: (json['valortotal'] as num?)?.toDouble() ?? 0.0,
+      valordesconto: (json['valordesconto'] as num?)?.toDouble() ?? 0.0,
+      datahora: DateTime.parse(json['datahora'] ?? '1899-12-30T00:00:00'),
       nomepessoa: json['nomepessoa'] ?? '',
       operador: json['nome'] ?? '',
       flagprocessado: json['flagprocessado'] ?? 0,
       flagpermitefaturar: json['flagPermiteFaturar'] ?? 0,
+      // Offline
+      local_id: json['local_id'] ?? '',
+      flagSync: json['flag_sync'] ?? 1,
+      cpfcnpj: json['cpfcnpj'] ?? '',
+      telefone: json['telefone'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
+    final uuid = const Uuid().v4();
     return {
       'usuario_id': usuarioId,
       'vendedor_pessoa_id': vendedorId,
@@ -62,6 +80,11 @@ class OrdersEndpoint {
       'operador': operador,
       'flagprocessado': flagprocessado,
       'flagpermitefaturar': flagpermitefaturar.toString(),
+      // Offline
+      'local_id': local_id,
+      'flag_sync': flagSync,
+      'cpfcnpj': cpfcnpj,
+      'telefone': telefone,
     };
   }
 
@@ -166,31 +189,69 @@ class OrdersDetailsEndpoint {
   late double valorunitario;
   late double quantidade;
   late double valortotalitem;
+  // Offline
+  final String? local_id;
+  final int? flagSync; // 0 = local | 1 = sincronizado
+  final String? ean;
+  final String? expedicao_id;
 
-  OrdersDetailsEndpoint({
-    required this.prevendaprodutoid,
-    required this.produtoid,
-    required this.nomeproduto,
-    required this.nomeexpedicao,
-    //required this.imagemurl,
-    required this.codigoproduto,
-    required this.valorunitario,
-    required this.quantidade,
-    required this.valortotalitem,
-  });
+  OrdersDetailsEndpoint(
+      {required this.prevendaprodutoid,
+      required this.produtoid,
+      required this.nomeproduto,
+      required this.nomeexpedicao,
+      //required this.imagemurl,
+      required this.codigoproduto,
+      required this.valorunitario,
+      required this.quantidade,
+      required this.valortotalitem,
+      // Offline
+      this.local_id,
+      this.flagSync,
+      this.ean,
+      this.expedicao_id});
 
   factory OrdersDetailsEndpoint.fromJson(Map<String, dynamic> json) {
+    double _toDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return OrdersDetailsEndpoint(
       produtoid: json['produto_id'] ?? '',
       prevendaprodutoid: json['prevendaproduto_id'] ?? '',
       codigoproduto: json['codigoproduto'] ?? '',
       nomeproduto: json['nomeproduto'] ?? '',
       nomeexpedicao: json['nome'] ?? '',
-      valorunitario: (json['valorunitario'] as num).toDouble(),
-      quantidade: (json['quantidade'] as num).toDouble(),
-      valortotalitem: (json['valortotal'] as num).toDouble(),
-      //imagemurl: json['imagem_url'] ?? '',
+      valorunitario: _toDouble(json['valorunitario']),
+      quantidade: _toDouble(json['quantidade']),
+      valortotalitem: _toDouble(json['valortotal']),
+      // Offilne
+      local_id: json['local_id'] ?? '',
+      flagSync: json['flag_sync'] ?? 1,
+      ean: json['ean'] ?? '',
+      expedicao_id: json['expedicao_id'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'produto_id': produtoid,
+      'prevendaproduto_id': prevendaprodutoid,
+      'codigoproduto': codigoproduto,
+      'nomeproduto': nomeproduto,
+      'nome': nomeexpedicao,
+      'valorunitario': valorunitario,
+      'quantidade': quantidade,
+      'valortotal': valortotalitem,
+      // Offline
+      'local_id': local_id,
+      'flag_sync': flagSync,
+      'ean': ean,
+      'expedicao_id': expedicao_id,
+    };
   }
 }
 
@@ -212,45 +273,14 @@ class DataServiceOrdersDetails {
         print(dynamicKey);
         var dataList = dataMap[dynamicKey] as List;
         //print(jsonDataExped['data'][rawQuery]);
-        ordersDetails = dataList.map((e) => OrdersDetailsEndpoint.fromJson(e)).toList();
-        print(ordersDetails);
+        ordersDetails =
+            dataList.map((e) => OrdersDetailsEndpoint.fromJson(e)).toList();
       } else {
         print('Erro: ${responseExped.statusCode} - ${responseExped.body}');
       }
     } catch (e) {
       print('Erro na requisição OrdersEndpoint: $e');
     }
-
-    // try {
-    //   var urlPost = Uri.parse('$urlBasic/ideia/prevenda/pedido/$prevendaid');
-    //   print('Url da prevenda com id OrderDetails: $urlPost');
-
-    //   var response = await http.get(urlPost, headers: {'auth-token': token});
-
-    //   print('Token: $token');
-
-    //   if (response.statusCode == 200) {
-    //     var jsonData = json.decode(response.body);
-
-    //     if (jsonData.containsKey('data') &&
-    //         jsonData['data'].containsKey('prevendaproduto') &&
-    //         jsonData['data']['prevendaproduto'].isNotEmpty) {
-    //       ordersDetails = (jsonData['data']['prevendaproduto'] as List)
-    //           .map((e) => OrdersDetailsEndpoint.fromJson(e))
-    //           .toList();
-
-    //       // print('Pedidos: '+response.body);
-    //     } else {
-    //       print(
-    //           'Dados não encontrados - ordersDetails - ${response.statusCode} ${response.body}');
-    //     }
-    //   } else {
-    //     print('Erro ao carregar dados: ${response.statusCode}');
-    //   }
-    // } catch (e) {
-    //   print('Erro durante a requisição OrdersDetails: $e');
-    // }
-
     return ordersDetails;
   }
 }

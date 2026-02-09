@@ -23,6 +23,14 @@ class ListTablePrices {
       codigo: (json['codigo'] ?? '').toString(),
     );
   }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'tabelapreco_id': tabelapreco_id,
+      'nome': nome,
+      'codigo': codigo,
+    };
+  }
 }
 
 class DataServiceListTablePrices {

@@ -22,6 +22,14 @@ class CompanyList {
       empresa_id: (json['empresa_id'] ?? '').toString(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'empresa_id': empresa_id,
+      'empresa_nome': empresa_nome,
+      'empresa_codigo': empresa_codigo,
+    };
+  }
 }
 
 class DataServiceCompany {
