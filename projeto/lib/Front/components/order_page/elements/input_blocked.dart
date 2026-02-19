@@ -20,9 +20,9 @@ class _InputBlockedState extends State<InputBlocked> {
   Widget build(BuildContext context) {
     return Material(
       child: SizedBox(
-        height: Style.height_50(context),
-        child: TextFormField(
-          initialValue: widget.value,
+        //height: Style.height_50(context),
+        child: TextField(
+          controller: TextEditingController(text: widget.value),
           readOnly: true,
           inputFormatters: widget.inputFormatters,
           style: TextStyle(

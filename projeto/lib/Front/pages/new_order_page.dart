@@ -4,8 +4,6 @@ import 'package:projeto/back/customer/get_cep.dart';
 import 'package:projeto/back/customer/get_cliente.dart';
 import 'package:projeto/back/orders/order_details.dart';
 import 'package:projeto/front/components/global/elements/alert_dialog.dart';
-import 'package:projeto/front/components/global/elements/modal.dart';
-import 'package:projeto/front/components/login_config/elements/config_button.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:projeto/front/components/global/elements/navbar_button.dart';
 import 'package:projeto/front/components/global/structure/navbar.dart';
@@ -33,6 +31,10 @@ class NewOrderPage extends StatefulWidget {
       noProduct,
       operador,
       empresa_id,
+      empresa_codigo,
+      empresa_nome,
+      tabelapreco_id,
+      tabelapreco,
       local_id,
       valordesconto;
 
@@ -56,6 +58,10 @@ class NewOrderPage extends StatefulWidget {
       this.operador,
       this.noProduct = '0',
       this.empresa_id,
+      this.empresa_codigo,
+      this.empresa_nome,
+      this.tabelapreco_id,
+      this.tabelapreco,
       this.local_id,
       this.valordesconto});
 
@@ -104,6 +110,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
       loadSaveOrder = false,
       permEditarPrevenda = false;
 
+  late int flagprivilegiado;
+
   final _complementocontroller2 = TextEditingController(),
       _bairrocontroller = TextEditingController(),
       _localidadecontroller = TextEditingController(),
@@ -115,9 +123,17 @@ class _NewOrderPageState extends State<NewOrderPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _loadFlagPrivilegiado();
     loadData();
     _refreshData();
-    print(widget.cpfcnpj);
+    print(widget.local_id);
+  }
+
+  Future<void> _loadFlagPrivilegiado() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      flagprivilegiado = prefs.getInt('flagprivilegiado') ?? 0;
+    });
   }
 
   @override
@@ -147,7 +163,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
                           case 'finalizar':
                             await customerKey.currentState?.finishOrder();
                           case 'gravar':
-                            if (permEditarPrevenda == false) {
+                            if (permEditarPrevenda == false &&
+                                flagprivilegiado == 0) {
                               showDialog(
                                   context: context,
                                   builder: (_) => AlertDialogDefault());
@@ -200,6 +217,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
                         imagemurl: imagemurl.toString(),
                         onProductRemoved: _onProductRemoved,
                         empresa_id: widget.empresa_id,
+                        tabelapreco_id: widget.tabelapreco_id,
                         valordesconto: widget.valordesconto,
                         local_id: widget.local_id,
                       ),
@@ -225,6 +243,10 @@ class _NewOrderPageState extends State<NewOrderPage> {
                         noProduct: widget.noProduct,
                         valordesconto: widget.valordesconto,
                         empresa_id: widget.empresa_id,
+                        empresa_codigo: widget.empresa_codigo,
+                        empresa_nome: widget.empresa_nome,
+                        tabelapreco_id: widget.tabelapreco_id,
+                        tabelapreco: widget.tabelapreco,
                         local_id: widget.local_id,
                         onCpfAtualizado: (cpf) {
                           setState(() {
@@ -297,22 +319,21 @@ class _NewOrderPageState extends State<NewOrderPage> {
     ]);
     final hasInternet = await hasInternetConnection();
 
-    if (!hasInternet) {} 
-    else {
-      await Future.wait(
-        [fetchDataCliente2(), //fetchDataOrdersDetails2(widget.prevendaId)
-        ]);
-    await GetCep.getcep(
-        enderecocep,
-        _logradourocontroller,
-        _complementocontroller2,
-        _bairrocontroller,
-        _ufcontroller,
-        _localidadecontroller,
-        _ibgecontroller,
-        ibge);
+    if (!hasInternet) {
+    } else {
+      await Future.wait([
+        fetchDataCliente2(), //fetchDataOrdersDetails2(widget.prevendaId)
+      ]);
+      await GetCep.getcep(
+          enderecocep,
+          _logradourocontroller,
+          _complementocontroller2,
+          _bairrocontroller,
+          _ufcontroller,
+          _localidadecontroller,
+          _ibgecontroller,
+          ibge);
     }
-    
   }
 
   Future<void> _refreshData() async {

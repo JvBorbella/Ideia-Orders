@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
 import 'package:projeto/back/checK_internet.dart';
 import 'package:projeto/back/system/login_function.dart';
 import 'package:projeto/back/system/save_user_function.dart';
 import 'package:projeto/front/components/login_config/elements/button.dart';
 import 'package:projeto/front/components/login_config/elements/config_button.dart';
-
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:projeto/front/components/login_config/elements/input_action.dart';
 import 'package:projeto/front/components/style.dart';
@@ -27,12 +28,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String urlController = '', token = '';
+  String urlController = '', token = '', version = '';
   final SaveUserService saveUserService = SaveUserService();
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool flagLoadEntrar = false;
+  bool flagLoadEntrar = false, flagRememberMe = false;
 
   @override
   void initState() {
@@ -40,15 +41,23 @@ class _LoginPageState extends State<LoginPage> {
     //verifyToken();
     _userController.text = '';
     _passwordController.text = '';
-
+    loadSavedFlagRememberMe();
     _loadSavedUrl();
-    saveUserService.listenAndSaveUser(context, _userController);
+    _getAppVersion();
+  }
+
+  Future<void> _getAppVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      version = packageInfo.version;
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadSavedUser();
+    _loadSavedPassword();
     _loadSavedToken();
     _loadSavedUrl();
   }
@@ -74,6 +83,14 @@ class _LoginPageState extends State<LoginPage> {
     String savedUser = sharedPreferences.getString('saveUser') ?? '';
     setState(() {
       _userController.text = savedUser;
+    });
+  }
+
+  Future<void> _loadSavedPassword() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedPassword = sharedPreferences.getString('savePass') ?? '';
+    setState(() {
+      _passwordController.text = savedPassword;
     });
   }
 
@@ -142,10 +159,10 @@ class _LoginPageState extends State<LoginPage> {
                           controller: _userController,
                           textAlign: TextAlign.start,
                           validator: (user) {
-                            if (user == null || user.isEmpty) {
-                              saveUserService.saveUser(
-                                  context, _userController.text);
-                            }
+                            // if (user == null || user.isEmpty) {
+                            //   saveUserService.saveUser(
+                            //       context, _userController.text);
+                            // }
                           },
                         ),
                         SizedBox(
@@ -187,7 +204,72 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         SizedBox(
-                          height: Style.InputToButtonSpace(context),
+                          height: Style.height_30(context),
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Lembrar meu login',
+                                style: TextStyle(
+                                  fontSize: Style.height_12(context),
+                                  color: Style.primaryColor,
+                                ),
+                              ),
+                              SizedBox(
+                                width: Style.width_10(context),
+                              ),
+                              Switch(
+                                activeColor: Style.secondaryColor,
+                                value: flagRememberMe,
+                                onChanged: (value) async {
+                                  SharedPreferences sharedPreferences =
+                                      await SharedPreferences.getInstance();
+                                  if (!value) {
+                                    sharedPreferences.remove('saveUser');
+                                    sharedPreferences.remove('savePass');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        content: Text(
+                                          'Usuário e senha removidos',
+                                          style: TextStyle(
+                                            fontSize: Style.height_12(context),
+                                            color: Style.tertiaryColor,
+                                          ),
+                                        ),
+                                        backgroundColor: Style.warningColor,
+                                      ),
+                                    );
+                                  } else {
+                                    saveUserService.saveUser(
+                                        context,
+                                        _userController.text,
+                                        _passwordController.text);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        content: Text(
+                                          'Usuário e senha salvos para futuras sessões',
+                                          style: TextStyle(
+                                            fontSize: Style.height_12(context),
+                                            color: Style.tertiaryColor,
+                                          ),
+                                        ),
+                                        backgroundColor: Style.sucefullColor,
+                                      ),
+                                    );
+                                  }
+                                  setState(() {
+                                    flagRememberMe = value;
+                                  });
+                                  await sharedPreferences.setBool(
+                                      'rememberMe', value);
+                                },
+                              ),
+                            ]),
+                        SizedBox(
+                          height: Style.height_20(context),
                         ),
                         ButtonConfig(
                           isLoadingButton: flagLoadEntrar,
@@ -197,6 +279,12 @@ class _LoginPageState extends State<LoginPage> {
                               flagLoadEntrar = true;
                             });
                             final checkInternet = await hasInternetConnection();
+                            if (flagRememberMe) {
+                              saveUserService.saveUser(
+                                  context,
+                                  _userController.text,
+                                  _passwordController.text);
+                            }
                             if (!checkInternet) {
                               if (_userController.text.isNotEmpty &&
                                   _passwordController.text.isNotEmpty) {
@@ -265,6 +353,21 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
+                    SizedBox(
+                      height: Style.height_20(context),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Versão: $version',
+                          style: TextStyle(
+                            fontSize: Style.height_10(context),
+                            color: Style.quarantineColor,
+                          ),
+                        )
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -273,5 +376,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> loadSavedFlagRememberMe() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      flagRememberMe = sharedPreferences.getBool('rememberMe') ?? false;
+    });
   }
 }

@@ -28,6 +28,7 @@ class ProductList extends StatefulWidget {
   final String? endereco;
   final String? complemento;
   final empresa_id;
+  final tabelapreco_id;
   final valordesconto;
 
   final flagService;
@@ -46,6 +47,7 @@ class ProductList extends StatefulWidget {
       this.complemento,
       this.flagService,
       this.empresa_id,
+      this.tabelapreco_id,
       this.valordesconto});
 
   @override
@@ -78,7 +80,7 @@ class _ProductListState extends State<ProductList> {
   void initState() {
     super.initState();
     loadData();
-    print(widget.cpfcnpj);
+    print(widget.tabelapreco_id);
   }
 
   @override
@@ -596,7 +598,10 @@ class _ProductListState extends State<ProductList> {
             context, urlBasic, empresa_id);
     if (fetchedDataTablePrice != null) {
       setState(() {
-        tabelapreco_id = fetchedDataTablePrice['tabelapreco_id'] ?? '';
+        tabelapreco_id = fetchedDataTablePrice['tabelapreco_id'] == '' ||
+                fetchedDataTablePrice['tabelapreco_id'] == null
+            ? widget.tabelapreco_id
+            : fetchedDataTablePrice['tabelapreco_id'];
       });
     }
   }

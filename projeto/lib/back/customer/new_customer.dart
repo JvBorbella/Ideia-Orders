@@ -29,6 +29,8 @@ class NewCustomer {
       String ibge,
       String emailController,
       String uf,
+      String empresaId,
+      String tabelaprecoId,
       double valordesconto,
       bool permCadastrarCliente,
       bool permEditarCliente,
@@ -53,6 +55,9 @@ class NewCustomer {
     print(cpfDefault);
     print('email' + emailController);
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int flagprivilegiado = prefs.getInt('flagprivilegiado') ?? 0;
+
     try {
       var response = await http.get(
         urlPost,
@@ -62,8 +67,9 @@ class NewCustomer {
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
         if (jsonData.containsKey('success') &&
-            jsonData['success'] == 1 &&
-            permEditarCliente) {
+                jsonData['success'] == 1 &&
+                permEditarCliente ||
+            flagprivilegiado == 1) {
           showModalBottomSheet(
               context: context,
               builder: (BuildContext context) {
@@ -86,25 +92,25 @@ class NewCustomer {
                             //Conteúdo interno do modal
                             children: [
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   SizedBox(
-                                    width: Style.width_250(context),
+                                    width: Style.width_300(context),
                                     child: Text(
                                       'Este cliente já possui cadastro. Caso clique em "Continuar", o cadastro será atualizado.',
                                       style: TextStyle(
-                                        fontSize: Style.height_15(context),
+                                        fontSize: Style.height_12(context),
                                         color: Style.primaryColor,
                                       ),
                                       overflow: TextOverflow.clip,
+                                      textAlign: TextAlign.center,
                                       softWrap: true,
                                     ),
                                   )
                                 ],
                               ),
-                              SizedBox(
-                                height: Style.height_30(context),
-                              ),
-                              Row(
+                              SizedBox(height: Style.height_10(context)),
+                              Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: [
@@ -120,7 +126,9 @@ class NewCustomer {
                                           prevendaid,
                                           pessoaid,
                                           vendedorId,
-                                          valordesconto ?? 0.0);
+                                          valordesconto ?? 0.0,
+                                          empresaId,
+                                          tabelaprecoId);
                                       await NewCustomer.newCostumer(
                                           context,
                                           urlBasic,
@@ -159,10 +167,10 @@ class NewCustomer {
                                       );
                                     },
                                     child: Container(
-                                      // width: Style.width_200(context),
-                                      // height: Style.ButtonExitHeight(context),
-                                      padding: EdgeInsets.all(
-                                          Style.ButtonExitPadding(context)),
+                                      alignment: Alignment.center,
+                                      width: double.infinity,
+                                      height: Style.height_30(context),
+                                      //padding: EdgeInsets.all(Style.ButtonExitPadding(context)),
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
                                               Style.ButtonExitBorderRadius(
@@ -179,15 +187,16 @@ class NewCustomer {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: Style.height_10(context)),
                                   TextButton(
                                     onPressed: () async {
                                       Navigator.of(context).pop();
                                     },
                                     child: Container(
-                                      // width: Style.ButtonCancelWidth(context),
-                                      // height: Style.ButtonCancelHeight(context),
-                                      padding: EdgeInsets.all(
-                                          Style.ButtonCancelPadding(context)),
+                                      alignment: Alignment.center,
+                                      width: double.infinity,
+                                      height: Style.height_30(context),
+                                      //padding: EdgeInsets.all(Style.ButtonCancelPadding(context)),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(
                                             Style.ButtonExitBorderRadius(
@@ -220,7 +229,7 @@ class NewCustomer {
                           return true;
                         }));
               });
-        } else if (permCadastrarCliente) {
+        } else if (permCadastrarCliente || flagprivilegiado == 1) {
           await NewCustomer.newCostumer(
               context,
               urlBasic,
@@ -254,7 +263,7 @@ class NewCustomer {
         } else {
           showDialog(context: context, builder: (_) => AlertDialogDefault());
         }
-        if (permEditarPrevenda) {
+        if (permEditarPrevenda || flagprivilegiado == 1) {
           await NewCustomer.AdjustOrder(
               context,
               urlBasic,
@@ -265,7 +274,9 @@ class NewCustomer {
               prevendaid,
               pessoaid,
               vendedorId,
-              valordesconto ?? 0.0);
+              valordesconto ?? 0.0,
+              empresaId,
+              tabelaprecoId);
         } else {}
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -453,7 +464,9 @@ class NewCustomer {
       String prevendaid,
       String pessoaid,
       String vendedorId,
-      double valordesconto) async {
+      double valordesconto,
+      String empresa_id,
+      String tabelapreco_id) async {
     var urlPost = Uri.parse('$urlBasic/ideia/prevenda/ajustapedido');
 
     var headers = {
@@ -474,7 +487,9 @@ class NewCustomer {
       'prevenda_id': prevendaid,
       'pessoa_id': pessoaid,
       'vendedor_id': vendedorId,
-      'valordesconto': valordesconto
+      'valordesconto': valordesconto,
+      'empresa_id': empresa_id,
+      'tabelapreco_id': tabelapreco_id
     });
     var bodyJson = {
       'cpf': cpfDefault,
@@ -483,7 +498,9 @@ class NewCustomer {
       'prevenda_id': prevendaid,
       'pessoa_id': pessoaid,
       'vendedor_id': vendedorId,
-      'valordesconto': valordesconto
+      'valordesconto': valordesconto,
+      'empresa_id': empresa_id,
+      'tabelapreco_id': tabelapreco_id
     };
 
     List<Map<String, dynamic>> dataOrder = [
@@ -505,6 +522,7 @@ class NewCustomer {
           .map((item) => Map<String, dynamic>.from(item))
           .toList();
     }
+
     List<Map<String, dynamic>> listaSalva = await recuperarLista();
     print(listaSalva);
 

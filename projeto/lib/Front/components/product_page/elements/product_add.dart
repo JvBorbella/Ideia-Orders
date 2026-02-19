@@ -95,89 +95,128 @@ class _ProductAddState extends State<ProductAdd> {
       builder: (BuildContext context) {
         return StatefulBuilder(builder: (context, setModalState) {
           return Center(
-              child: SingleChildScrollView(
-                  child: AlertDialog(
-                      backgroundColor: Style.defaultColor,
-                      alignment: Alignment.center,
-                      content: Container(
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                        Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            widget.nomeproduto.toString(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: Style.height_12(context),
-                              color: Style.primaryColor,
-                              fontWeight: FontWeight.w900,
-                            ),
+            child: SingleChildScrollView(
+              child: AlertDialog(
+                backgroundColor: Style.defaultColor,
+                alignment: Alignment.center,
+                content: Container(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.nomeproduto.toString(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: Style.height_12(context),
+                            color: Style.primaryColor,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                        SizedBox(
-                          height: Style.height_5(context),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  'Código',
-                                  style: TextStyle(
-                                      fontSize: Style.height_8(context),
-                                      color: Style.quarantineColor),
+                      ),
+                      SizedBox(
+                        height: Style.height_5(context),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                'Código',
+                                style: TextStyle(
+                                    fontSize: Style.height_8(context),
+                                    color: Style.quarantineColor),
+                              ),
+                              Text(
+                                widget.codigoproduto,
+                                style: TextStyle(
+                                    fontSize: Style.height_12(context),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                'Pr. Tabela',
+                                style: TextStyle(
+                                    fontSize: Style.height_8(context),
+                                    color: Style.quarantineColor),
+                              ),
+                              Text(
+                                currencyFormat
+                                    .format(widget.precotabela)
+                                    .toString(),
+                                style: TextStyle(
+                                    fontSize: Style.height_12(context),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                'Unidade',
+                                style: TextStyle(
+                                    fontSize: Style.height_8(context),
+                                    color: Style.quarantineColor),
+                              ),
+                              Text(
+                                widget.unidade ?? '',
+                                style: TextStyle(
+                                    fontSize: Style.height_12(context),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: Style.height_10(context),
+                      ),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Qtde a adicionar',
+                                style: TextStyle(
+                                    fontSize: Style.height_12(context),
+                                    color: Style.primaryColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: Style.width_130(context),
+                                child: Input(
+                                  controller: _quantidadecontroller,
+                                  text: 'Informe a quantidade',
+                                  type: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  onTap: () => _quantidadecontroller.clear(),
                                 ),
-                                Text(
-                                  widget.codigoproduto,
-                                  style: TextStyle(
-                                      fontSize: Style.height_12(context),
-                                      color: Style.primaryColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  'Pr. Tabela',
-                                  style: TextStyle(
-                                      fontSize: Style.height_8(context),
-                                      color: Style.quarantineColor),
-                                ),
-                                Text(
-                                  currencyFormat
-                                      .format(widget.precotabela)
-                                      .toString(),
-                                  style: TextStyle(
-                                      fontSize: Style.height_12(context),
-                                      color: Style.primaryColor,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  'Unidade',
-                                  style: TextStyle(
-                                      fontSize: Style.height_8(context),
-                                      color: Style.quarantineColor),
-                                ),
-                                Text(
-                                  widget.unidade ?? '',
-                                  style: TextStyle(
-                                      fontSize: Style.height_12(context),
-                                      color: Style.primaryColor,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: Style.height_10(context),
-                        ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: Style.height_10(context),
+                      ),
+                      if (flagGerarPedido)
                         Column(
                           children: [
                             Row(
@@ -185,7 +224,7 @@ class _ProductAddState extends State<ProductAdd> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Qtde a adicionar',
+                                  'Expedição',
                                   style: TextStyle(
                                       fontSize: Style.height_12(context),
                                       color: Style.primaryColor,
@@ -195,46 +234,8 @@ class _ProductAddState extends State<ProductAdd> {
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                SizedBox(
-                                  width: Style.width_130(context),
-                                  child: Input(
-                                    controller: _quantidadecontroller,
-                                    text: 'Informe a quantidade',
-                                    type: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    onTap: () => _quantidadecontroller.clear(),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: Style.height_10(context),
-                        ),
-                        if (flagGerarPedido)
-                          Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Expedição',
-                                    style: TextStyle(
-                                        fontSize: Style.height_12(context),
-                                        color: Style.primaryColor,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
+                                Container(
                                     height: Style.height_30(context),
                                     child: PopupMenuButton<String>(
                                       itemBuilder: (BuildContext context) =>
@@ -269,158 +270,162 @@ class _ProductAddState extends State<ProductAdd> {
                                           });
                                         }
                                       },
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.arrow_drop_down_rounded,
-                                              color: Style.secondaryColor,
-                                              size: Style.height_20(context),
-                                            ),
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                border: Border(
-                                                  bottom: BorderSide(
-                                                    color: Style
-                                                        .secondaryColor, // Color of the bottom border
-                                                    width: Style.height_2(
-                                                        context), // Thickness of the bottom border
-                                                    style: BorderStyle
-                                                        .solid, // Style of the border (solid, dashed, etc.)
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Style
+                                                .secondaryColor, // Color of the bottom border
+                                            width: Style.height_2(
+                                                context), // Thickness of the bottom border
+                                            style: BorderStyle
+                                                .solid, // Style of the border (solid, dashed, etc.)
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                              Style.height_20(context)),
+                                        ),
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.arrow_drop_down_rounded,
+                                                color: Style.secondaryColor,
+                                                size: Style.height_20(context),
+                                              ),
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  // border: Border(
+                                                  //   bottom: BorderSide(
+                                                  //     color: Style
+                                                  //         .secondaryColor, // Color of the bottom border
+                                                  //     width: Style.height_2(
+                                                  //         context), // Thickness of the bottom border
+                                                  //     style: BorderStyle
+                                                  //         .solid, // Style of the border (solid, dashed, etc.)
+                                                  //   ),
+                                                  // ),
+                                                ),
+                                                width: Style.width_150(context),
+                                                child: Text(
+                                                  expedicaoNome.isEmpty
+                                                      ? 'Selecione a expedição'
+                                                      : '${expedicaoCodigo} - ${expedicaoNome}',
+                                                  style: TextStyle(
+                                                    color: Style.secondaryColor,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: Style.height_12(
+                                                        context),
                                                   ),
+                                                  textAlign: TextAlign.center,
+                                                  overflow: TextOverflow
+                                                      .ellipsis, // corta o texto no limite da largura
+                                                  softWrap:
+                                                      true, // permite a quebra de linha conforme necessário
                                                 ),
-                                              ),
-                                              width: Style.width_150(context),
-                                              child: Text(
-                                                expedicaoNome.isEmpty
-                                                    ? 'Selecione a expedição'
-                                                    : '${expedicaoCodigo} - ${expedicaoNome}',
-                                                style: TextStyle(
-                                                  color: Style.secondaryColor,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize:
-                                                      Style.height_12(context),
-                                                ),
-                                                textAlign: TextAlign.center,
-                                                overflow: TextOverflow
-                                                    .ellipsis, // corta o texto no limite da largura
-                                                softWrap:
-                                                    true, // permite a quebra de linha conforme necessário
-                                              ),
-                                            )
-                                          ]),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        SizedBox(
-                          height: Style.height_10(context),
-                        ),
-                        SizedBox(
-                          height: Style.height_20(context),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              children: [
-                                RegisterButton(
-                                  text: 'Adicionar produto',
-                                  color: Style.primaryColor,
-                                  width: Style.width_100(context),
-                                  isLoadingButton: isLoadingButton,
-                                  onPressed: () async {
-                                    setState(() {
-                                      isLoadingButton = true;
-                                    });
-                                    // Adiciona o produto ao pedido
-                                    if (flagService == true) {
-                                      bool success = await DataServiceAddProduct
-                                          .sendDataOrder(
-                                              context,
-                                              urlBasic,
-                                              token,
-                                              widget.prevendaid,
-                                              widget.empresaid,
-                                              widget.produtoid,
-                                              _complementocontroller.text,
-                                              _quantidadecontroller.text,
-                                              widget.flagunidadefracionada ?? 0,
-                                              1,
-                                              expedicaoId);
-
-                                      // Só chama o callback se o produto foi adicionado com sucesso
-                                      if (success &&
-                                          widget.onProductAdded != null) {
-                                        widget.onProductAdded!();
-                                      }
-
-                                      // Verifica se o widget ainda está montado antes de fechar o modal
-                                      if (mounted) {
-                                        _closeModal();
-                                        // Limpa os campos após adicionar o produto
-                                        _quantidadecontroller.clear();
-                                        _complementocontroller.clear();
-                                      }
-                                    } else {
-                                      bool success = await DataServiceAddProduct
-                                          .sendDataOrder(
-                                              context,
-                                              urlBasic,
-                                              token,
-                                              widget.prevendaid,
-                                              widget.empresaid,
-                                              widget.produtoid,
-                                              _complementocontroller.text,
-                                              _quantidadecontroller.text,
-                                              widget.flagunidadefracionada ?? 0,
-                                              0,
-                                              expedicaoId);
-
-                                      // Só chama o callback se o produto foi adicionado com sucesso
-                                      if (success &&
-                                          widget.onProductAdded != null) {
-                                        widget.onProductAdded!();
-                                      }
-
-                                      // Verifica se o widget ainda está montado antes de fechar o modal
-                                      if (mounted) {
-                                        _closeModal();
-                                        // Limpa os campos após adicionar o produto
-                                        _quantidadecontroller.clear();
-                                        _complementocontroller.clear();
-                                        expedicaoId = '';
-                                        expedicaoNome = '';
-                                        expedicaoCodigo = '';
-                                      }
-                                      setState(() {
-                                        isLoadingButton = false;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                RegisterButton(
-                                  text: 'Fechar',
-                                  color: Style.errorColor,
-                                  width: Style.width_100(context),
-                                  onPressed: () {
-                                    _closeModal();
-                                  },
-                                )
+                                              )
+                                            ]),
+                                      ),
+                                    )),
                               ],
                             )
                           ],
-                        )
-                      ])))));
+                        ),
+                      SizedBox(
+                        height: Style.height_10(context),
+                      ),
+                      Column(
+                        children: [
+                          RegisterButton(
+                            text: 'Adicionar produto',
+                            color: Style.primaryColor,
+                            width: double.infinity,
+                            isLoadingButton: isLoadingButton,
+                            onPressed: () async {
+                              setState(() {
+                                isLoadingButton = true;
+                              });
+                              // Adiciona o produto ao pedido
+                              if (flagService == true) {
+                                bool success =
+                                    await DataServiceAddProduct.sendDataOrder(
+                                        context,
+                                        urlBasic,
+                                        token,
+                                        widget.prevendaid,
+                                        widget.empresaid,
+                                        widget.produtoid,
+                                        _complementocontroller.text,
+                                        _quantidadecontroller.text,
+                                        widget.flagunidadefracionada ?? 0,
+                                        1,
+                                        expedicaoId);
+
+                                // Só chama o callback se o produto foi adicionado com sucesso
+                                if (success && widget.onProductAdded != null) {
+                                  widget.onProductAdded!();
+                                }
+
+                                // Verifica se o widget ainda está montado antes de fechar o modal
+                                if (mounted) {
+                                  _closeModal();
+                                  // Limpa os campos após adicionar o produto
+                                  _quantidadecontroller.clear();
+                                  _complementocontroller.clear();
+                                }
+                              } else {
+                                bool success =
+                                    await DataServiceAddProduct.sendDataOrder(
+                                        context,
+                                        urlBasic,
+                                        token,
+                                        widget.prevendaid,
+                                        widget.empresaid,
+                                        widget.produtoid,
+                                        _complementocontroller.text,
+                                        _quantidadecontroller.text,
+                                        widget.flagunidadefracionada ?? 0,
+                                        0,
+                                        expedicaoId);
+
+                                // Só chama o callback se o produto foi adicionado com sucesso
+                                if (success && widget.onProductAdded != null) {
+                                  widget.onProductAdded!();
+                                }
+
+                                // Verifica se o widget ainda está montado antes de fechar o modal
+                                if (mounted) {
+                                  _closeModal();
+                                  // Limpa os campos após adicionar o produto
+                                  _quantidadecontroller.clear();
+                                  _complementocontroller.clear();
+                                  expedicaoId = '';
+                                  expedicaoNome = '';
+                                  expedicaoCodigo = '';
+                                }
+                                setState(() {
+                                  isLoadingButton = false;
+                                });
+                              }
+                            },
+                          ),
+                          RegisterButton(
+                            text: 'Fechar',
+                            color: Style.errorColor,
+                            width: double.infinity,
+                            onPressed: () {
+                              _closeModal();
+                            },
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
         });
       },
     );

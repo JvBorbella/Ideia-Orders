@@ -61,6 +61,7 @@ class HomeState extends State<Home> {
 
   bool isLoading = true, permNovaPrevenda = false, permEditarPrevenda = false;
   //permNovoPedido = false;
+  int flagPrivilegiado = 0;
 
   NumberFormat currencyFormat =
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
@@ -134,28 +135,22 @@ class HomeState extends State<Home> {
   }
 
   Future<void> sendOrdersOffline(BuildContext context) async {
-    Timer(const Duration(seconds: 5), () async {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
+      // // Limoar Pedidos
+      // final clear = await recuperarListaPedido();
+      // clear.clear();
+      // salvarListaPedido(clear.map((e) => e.toJson()).toList());
+
       final checkInternet = await hasInternetConnection();
       final allOrders = await recuperarListaPedido();
       final ordersOffline = allOrders.where((e) => e.flagSync == 0).toList();
-      // allOrders
-      //     .where((e) => e.flagSync == 0)
-      //     .map((e) => e.toJson())
-      //     .toList();
-      if (checkInternet == true && ordersOffline.isNotEmpty) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const AlertDialog(
-            title: Text('Sincronizando pedidos offline'),
-            content: Text('Enviando pedidos para o servidor...'),
-          ),
-        );
-        
-        final token = await GetToken.getToken(context);
 
+      if (checkInternet == true && ordersOffline.isNotEmpty) {
         try {
+          final token = await GetToken.getToken(context);
+
           for (final order in ordersOffline) {
+            print(order.localId);
             await DataServiceNewOrder.sendDataOrder(
               context,
               urlBasic,
@@ -164,25 +159,83 @@ class HomeState extends State<Home> {
               order.telefone ?? '',
               order.nomepessoa ?? '',
               '',
-              '',
+              order.tabelaprecoId ?? '',
               order.empresaId ?? '',
+              order.localId ?? '',
             );
 
-            await removerPedido(order.local_id.toString());
-          }
+            final listaPedidos = await recuperarListaPedido();
+            await removerPedido(order.localId.toString());
 
+            // final index = listaPedidos.indexWhere(
+            //   (e) => e.localId == order.localId,
+            // );
+
+            // listaPedidos[index].flagSync = 1;
+            // listaPedidos[index].prevendaId = order.prevendaId; // Atualiza o prevendaId retornado
+
+            // await salvarListaPedido(
+            //   listaPedidos.map((e) => e.toJson()).toList(),
+            // );
+          }
           await fetchDataOrders();
         } catch (e) {
           print("Erro ao enviar pedidos offline: $e");
-        } finally {
-          Navigator.of(context).pop();
-          sendOrdersOffline(context);
         }
-        sendOrdersOffline(context);
-      } else {
-        sendOrdersOffline(context);
       }
     });
+
+    // Timer(const Duration(seconds: 5), () async {
+    //   // Limoar Pedidos
+    //   // final clear = await recuperarListaPedido();
+    //   // clear.clear();
+    //   // salvarListaPedido( clear.map((e) => e.toJson()).toList());
+
+    //   final checkInternet = await hasInternetConnection();
+    //   final allOrders = await recuperarListaPedido();
+    //   final ordersOffline = allOrders.where((e) => e.flagSync == 0).toList();
+    //   if (checkInternet == true && ordersOffline.isNotEmpty) {
+    //     showDialog(
+    //       context: context,
+    //       barrierDismissible: false,
+    //       builder: (context) => const AlertDialog(
+    //         title: Text('Sincronizando pedidos offline'),
+    //         content: Text('Enviando pedidos para o servidor...'),
+    //       ),
+    //     );
+
+    //     final token = await GetToken.getToken(context);
+
+    //     try {
+    //       for (final order in ordersOffline) {
+    //         await DataServiceNewOrder.sendDataOrder(
+    //           context,
+    //           urlBasic,
+    //           token,
+    //           order.cpfcnpj ?? '',
+    //           order.telefone ?? '',
+    //           order.nomepessoa ?? '',
+    //           '',
+    //           order.tabelaprecoId ?? '',
+    //           order.empresaId ?? '',
+    //           order.localId ?? '',
+    //         );
+
+    //         await removerPedido(order.localId.toString());
+    //         await Future.delayed(const Duration(seconds: 1)); // Pequena pausa entre os envios
+    //       }
+    //       await fetchDataOrders();
+    //     } catch (e) {
+    //       print("Erro ao enviar pedidos offline: $e");
+    //     } finally {
+    //       Navigator.of(context).pop();
+    //       sendOrdersOffline(context);
+    //     }
+    //     sendOrdersOffline(context);
+    //   } else {
+    //     sendOrdersOffline(context);
+    //   }
+    // });
   }
 
   void _openModal(BuildContext context) {
@@ -230,7 +283,7 @@ class HomeState extends State<Home> {
                             });
                           } else {
                             setState(() {
-                              empresaid = '';
+                              empresa_id = '';
                               empresa_nome = '';
                               empresa_codigo = '';
                             });
@@ -454,6 +507,7 @@ class HomeState extends State<Home> {
                     'usuario_id': usuario_id,
                     'vendedor_pessoa_id': '',
                     'empresa_id': empresa_id,
+                    'tabelapreco_id': tabelapreco_id,
                     'prevenda_id': '',
                     'numero': '', //(listaPedidoOff.last.numero + 1),
                     'valortotal': 0.0,
@@ -501,7 +555,8 @@ class HomeState extends State<Home> {
                           _nomecontroller.text,
                           pessoa_id,
                           tabelapreco_id,
-                          empresa_id);
+                          empresa_id,
+                          uuid);
                     } else {
                       await DataServiceNewOrder.sendDataOrder(
                           context,
@@ -512,7 +567,8 @@ class HomeState extends State<Home> {
                           _nomecontroller.text,
                           pessoa_id,
                           tabelapreco_id_company,
-                          empresa_id);
+                          empresa_id,
+                          uuid);
                     }
                     fetchDataOrders(ascending: true, flagFilter: flagFilter);
                     setState(() {
@@ -770,10 +826,7 @@ class HomeState extends State<Home> {
                               await fetchDataOrdersDetails2(
                                 orders[index].prevendaId,
                               );
-                              if (orders[index]
-                                      .flagpermitefaturar
-                                      ?.toString() ==
-                                  '1') {
+                              if (orders[index].flagpermitefaturar ==1) {
                                 Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
                                         builder: (context) => OrderPage(
@@ -815,7 +868,14 @@ class HomeState extends State<Home> {
                                         operador: orders[index].operador,
                                         empresa_id:
                                             orders[index].empresaId.toString(),
-                                        local_id: orders[index].local_id,
+                                        empresa_codigo:
+                                            empresa_codigo.toString(),
+                                        empresa_nome: empresa_nome.toString(),
+                                        tabelapreco_id: orders[index]
+                                            .tabelaprecoId
+                                            .toString(),
+                                        tabelapreco: tableprice.toString(),
+                                        local_id: orders[index].localId,
                                         valordesconto: orders[index]
                                             .valordesconto
                                             .toString()),
@@ -1005,7 +1065,7 @@ class HomeState extends State<Home> {
         final mergedList = mergeListsByKey(
           onlineMap,
           offlineMap,
-          'numero', // ou 'pedido_id'
+          'prevenda_id', // ou 'pedido_id'
         );
 
         await salvarListaPedido(mergedList);
@@ -1013,6 +1073,7 @@ class HomeState extends State<Home> {
         setState(() {
           orders = mergedList.map((e) => OrdersEndpoint.fromJson(e)).toList();
         });
+        debugPrint('Pedidos carregados: ${orders}');
       }
 
       setState(() {
@@ -1278,7 +1339,12 @@ class HomeState extends State<Home> {
     List<PopupMenuItem<String>> dynamicItems = tablesPrice.map((tables) {
       return PopupMenuItem<String>(
         value: tables.nome,
-        child: Text((tables.nome).toString()),
+        child: Text(
+          (tables.nome).toString(),
+          style: TextStyle(
+            fontSize: Style.height_10(context),
+          ),
+        ),
       );
     }).toList();
 
@@ -1318,8 +1384,12 @@ class HomeState extends State<Home> {
     List<PopupMenuItem<String>> dynamicItems = companyList.map((companys) {
       return PopupMenuItem<String>(
         value: companys.empresa_id,
-        child: Text(('${companys.empresa_codigo} - ${companys.empresa_nome}')
-            .toString()),
+        child: Text(
+          ('${companys.empresa_codigo} - ${companys.empresa_nome}').toString(),
+          style: TextStyle(
+            fontSize: Style.height_10(context),
+          ),
+        ),
         key: Key(companys.empresa_nome.toString()),
       );
     }).toList();
@@ -1392,10 +1462,15 @@ class HomeState extends State<Home> {
           if (userList.isNotEmpty) {
             var user = userList.first;
             var perfil_id = user['perfil_id']?.toString();
+            var flagprivilegiado = user['flagprivilegiado'];
             setState(() {
               perfilId = perfil_id ?? usuario_id;
+              flagPrivilegiado = flagprivilegiado ?? 0;
             });
-            print(perfilId);
+            SharedPreferences sharedPreferences =
+                await SharedPreferences.getInstance();
+            await sharedPreferences.setInt(
+                'flagprivilegiado', flagPrivilegiado);
           } else {
             print('Nenhum item encontrado na lista.');
           }

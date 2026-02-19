@@ -92,6 +92,22 @@ class DataServiceProducts {
           } else {
             print('A chave dinâmica não contém uma lista válida.');
           }
+        } else if (tabelapreco_id.isEmpty && response.statusCode != 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+              content: Text(
+                'Tabela de preço não encontrada',
+                style: TextStyle(
+                  fontSize: Style.SaveUrlMessageSize(context),
+                  color: Style.tertiaryColor,
+                ),
+              ),
+              backgroundColor: Style.errorColor,
+            ),
+          );
+          print('Tabela de preço não encontrada - ${response.statusCode} ${response.body}');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

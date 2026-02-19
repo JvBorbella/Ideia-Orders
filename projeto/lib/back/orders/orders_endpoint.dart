@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:projeto/back/saveList.dart';
 import 'package:projeto/front/components/style.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,8 +19,9 @@ class OrdersEndpoint {
   late int flagprocessado;
   late int flagpermitefaturar;
   // Offline
-  final String? local_id;
-  final int? flagSync; // 0 = local | 1 = sincronizado
+  final String? tabelaprecoId;
+  String? localId;
+  int? flagSync; // 0 = local | 1 = sincronizado
   final String? cpfcnpj;
   final String? telefone;
 
@@ -37,13 +39,15 @@ class OrdersEndpoint {
     required this.flagprocessado,
     required this.flagpermitefaturar,
     // Offline
-    this.local_id,
+    this.tabelaprecoId,
+    this.localId,
     this.flagSync,
     this.cpfcnpj,
     this.telefone,
   });
 
   factory OrdersEndpoint.fromJson(Map<String, dynamic> json) {
+    final uuid = const Uuid().v4();
     return OrdersEndpoint(
       usuarioId: json['usuario_id'] ?? '',
       vendedorId: json['vendedor_pessoa_id'] ?? '',
@@ -58,7 +62,8 @@ class OrdersEndpoint {
       flagprocessado: json['flagprocessado'] ?? 0,
       flagpermitefaturar: json['flagPermiteFaturar'] ?? 0,
       // Offline
-      local_id: json['local_id'] ?? '',
+      tabelaprecoId: json['tabelapreco_id'] ?? '',
+      localId: json['local_id'],
       flagSync: json['flag_sync'] ?? 1,
       cpfcnpj: json['cpfcnpj'] ?? '',
       telefone: json['telefone'] ?? '',
@@ -66,7 +71,6 @@ class OrdersEndpoint {
   }
 
   Map<String, dynamic> toJson() {
-    final uuid = const Uuid().v4();
     return {
       'usuario_id': usuarioId,
       'vendedor_pessoa_id': vendedorId,
@@ -79,9 +83,10 @@ class OrdersEndpoint {
       'nomepessoa': nomepessoa,
       'operador': operador,
       'flagprocessado': flagprocessado,
-      'flagpermitefaturar': flagpermitefaturar.toString(),
+      'flagpermitefaturar': flagpermitefaturar,
       // Offline
-      'local_id': local_id,
+      'tabelapreco_id': tabelaprecoId,
+      'local_id': localId,
       'flag_sync': flagSync,
       'cpfcnpj': cpfcnpj,
       'telefone': telefone,
@@ -94,6 +99,94 @@ class OrdersEndpoint {
 }
 
 class DataServiceOrders {
+//   static Future<List<OrdersEndpoint>?> fetchDataOrders(
+//     BuildContext context,
+//     String urlBasic,
+//     String usuario_id,
+//     String token,
+//     {bool? ascending}) async {
+
+//   try {
+//     final pedidosLocais = await recuperarListaPedido();
+
+//     var rawQuery =
+//         '''prevenda%20p%20LEFT%20JOIN%20usuario%20u%20ON%20u.usuario_id%20=%20p.usuario_id%20WHERE%20p.usuario_id%20=%20'$usuario_id'AND%20COALESCE(p.flagcancelado,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagexcluido,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagprocessado,%200)%20%3C%3E%201/''';
+
+//     var urlPost = Uri.parse('$urlBasic/ideia/core/getdata/$rawQuery');
+
+//     var response = await http.get(urlPost, headers: {
+//       'Accept': 'text/html'
+//     });
+
+//     if (response.statusCode != 200) {
+//       return pedidosLocais; // 🔥 Se falhar, mantém local
+//     }
+
+//     var jsonData = json.decode(response.body);
+//     var dynamicKey = jsonData['data'].keys.first;
+
+//     List<OrdersEndpoint> pedidosOnline =
+//         (jsonData['data'][dynamicKey] as List)
+//             .map((e) => OrdersEndpoint.fromJson(e))
+//             .toList();
+
+//     /// 🔥 MAPA FINAL (baseado no local)
+//     final Map<String, OrdersEndpoint> mapaFinal = {};
+
+//     /// 1️⃣ Primeiro adiciona TODOS os pedidos locais
+//     for (var local in pedidosLocais) {
+//       if (local.localId != null) {
+//         mapaFinal[local.localId!] = local;
+//       }
+//     }
+
+//     /// 2️⃣ Agora processa os online
+//     for (var online in pedidosOnline) {
+
+//       // tenta encontrar correspondente local pelo prevendaId
+//       final matchLocal = pedidosLocais.where(
+//         (local) =>
+//             local.prevendaId.isNotEmpty &&
+//             local.prevendaId == online.prevendaId,
+//       ).toList();
+
+//       if (matchLocal.isNotEmpty) {
+//         final local = matchLocal.first;
+
+//         // 🔥 PRESERVA DADOS LOCAIS IMPORTANTES
+//         online.localId = local.localId;
+//         online.flagSync = 1;
+//       } else {
+//         // pedido 100% online
+//         online.localId ??= const Uuid().v4();
+//         online.flagSync = 1;
+//       }
+
+//       mapaFinal[online.localId!] = online;
+//     }
+
+//     /// 🔥 Converte para lista
+//     final listaFinal = mapaFinal.values.toList();
+
+//     /// 🔥 Salva local atualizado
+//     await salvarListaPedido(
+//       listaFinal.map((e) => e.toJson()).toList(),
+//     );
+
+//     /// 🔥 Filtro de data
+//     DateTime daysAgo = DateTime.now().subtract(const Duration(days: 7));
+//     listaFinal.removeWhere((o) => o.datahora.isBefore(daysAgo));
+
+//     listaFinal.sort((a, b) => b.datahora.compareTo(a.datahora));
+
+//     return listaFinal;
+
+//   } catch (e) {
+//     print('Erro durante fetchDataOrders: $e');
+//     return await recuperarListaPedido(); // 🔥 fallback seguro
+//   }
+// }
+
   static Future<List<OrdersEndpoint>?> fetchDataOrders(
       BuildContext context, String urlBasic, String usuario_id, String token,
       {bool? ascending}) async {
@@ -103,7 +196,7 @@ class DataServiceOrders {
 
     try {
       var rawQuery =
-          '''prevenda%20p%20LEFT%20JOIN%20usuario%20u%20ON%20u.usuario_id%20=%20p.usuario_id%20WHERE%20p.usuario_id%20=%20'$usuario_id'AND%20COALESCE(p.flagcancelado,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagexcluido,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagprocessado,%200)%20%3C%3E%201/''';
+          '''prevenda%20p%20LEFT%20JOIN%20usuario%20u%20ON%20u.usuario_id%20=%20p.usuario_id%20WHERE%20p.usuario_id%20=%20'$usuario_id'AND%20COALESCE(p.flagcancelado,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagexcluido,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagprocessado,%200)%20%3C%3E%201%20AND%20p.`data`%20>=%20DATE_SUB(CURDATE(),%20INTERVAL%207%20DAY)/''';
       var urlPost = Uri.parse('$urlBasic/ideia/core/getdata/$rawQuery');
       print(urlPost);
       var response = await http.get(urlPost, headers: {
@@ -138,6 +231,7 @@ class DataServiceOrders {
         // } else {
         //   print('Dados não encontrados - orders');
         // }
+
         var dynamicKey = jsonData['data'].keys.first;
         print('Chave dinâmica encontrada: $dynamicKey');
 
@@ -149,9 +243,31 @@ class DataServiceOrders {
             .map((e) => OrdersEndpoint.fromJson(e))
             .toList();
 
-        DateTime daysAgo = DateTime.now().subtract(const Duration(days: 7));
-        orders =
-            orders.where((order) => order.datahora.isAfter(daysAgo)).toList();
+        print(orders.last);
+
+        final pedidosLocais = await recuperarListaPedido();
+
+        print(pedidosLocais);
+
+        for (var online in orders) {
+          final localMatchList = pedidosLocais
+              .where(
+                (local) =>
+                    local.prevendaId.isNotEmpty &&
+                    local.prevendaId == online.prevendaId,
+              )
+              .toList();
+
+          if (localMatchList.isNotEmpty) {
+            final localMatch = localMatchList.first;
+            online.localId = localMatch.localId;
+            online.flagSync = localMatch.flagSync;
+          }
+        }
+
+        // DateTime daysAgo = DateTime.now().subtract(const Duration(days: 7));
+        // orders =
+        //     orders.where((order) => order.datahora.isAfter(daysAgo)).toList();
 
         orders.sort((a, b) => b.datahora.compareTo(a.datahora));
       } else {

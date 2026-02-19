@@ -41,6 +41,7 @@ class ProductSession extends StatefulWidget {
   final quantidade;
   final imagemurl;
   final empresa_id;
+  final tabelapreco_id;
   final valordesconto;
   final local_id;
 
@@ -70,6 +71,7 @@ class ProductSession extends StatefulWidget {
       this.imagemurl,
       this.onProductRemoved,
       this.empresa_id,
+      this.tabelapreco_id,
       this.valordesconto,
       this.local_id});
 
@@ -106,7 +108,7 @@ class _ProductSessionState extends State<ProductSession> {
   void initState() {
     super.initState();
     loadData();
-    print(widget.cpfcnpj);
+    print(widget.local_id);
     totalValue = widget.valortotal; // Inicializa com o valor total original
   }
 
@@ -651,8 +653,7 @@ class _ProductSessionState extends State<ProductSession> {
                                         'nome': expedicaoNome,
                                         'expedicao_id': expedicaoId,
                                         'valorunitario': 0.0,
-                                        'quantidade': double.parse(
-                                            quantidadeController.text),
+                                        'quantidade': double.parse(quantidadeController.text),
                                         'valortotal': 0.0,
                                         'ean': eanController.text,
                                       };
@@ -679,6 +680,7 @@ class _ProductSessionState extends State<ProductSession> {
                         endereco: widget.endereco.toString(),
                         complemento: widget.complemento.toString(),
                         empresa_id: widget.empresa_id.toString(),
+                        tabelapreco_id: widget.tabelapreco_id.toString(),
                         valordesconto: widget.valordesconto)));
               }
             }),
@@ -755,7 +757,7 @@ class _ProductSessionState extends State<ProductSession> {
         final mergedCurrent = mergeListsByKey(
           onlineMap,
           currentOrderOffline,
-          'prevendaproduto_id',
+          'local_id',
         );
 
         // 🔵 remove o pedido atual da lista completa

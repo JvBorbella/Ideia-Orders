@@ -67,8 +67,6 @@ Future<void> salvarListaExpedicao(List<dynamic> lista) async {
   String listaJson = jsonEncode(lista);
 
   await prefs.setString('expedition', listaJson);
-
-  print(listaJson);
 }
 
 Future<List<Map<String, dynamic>>> recuperarListaExpedicao() async {
@@ -131,7 +129,7 @@ Future<List<OrdersEndpoint>> removerPedido(String localId) async {
   final lista = await recuperarListaPedido();
 
   lista.removeWhere(
-    (item) => item.local_id == localId,
+    (item) => item.localId == localId,
   );
 
   await prefs.setString('orders', jsonEncode(lista));
@@ -176,6 +174,7 @@ Future<void> adicionarItemProduto(Map<String, dynamic> novoItem) async {
 
   // 2. Adiciona o novo item
   listaDecodificada.add(novoItem);
+  print(novoItem);
 
   // 3. Salva tudo novamente
   await prefs.setString('products_order', jsonEncode(listaDecodificada));

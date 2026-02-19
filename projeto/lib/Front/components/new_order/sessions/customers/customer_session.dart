@@ -8,6 +8,8 @@ import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:projeto/back/checK_internet.dart';
 import 'package:projeto/back/company/company_list.dart';
+import 'package:projeto/back/company/list_table_prices.dart';
+import 'package:projeto/back/company/table_price.dart';
 import 'package:projeto/back/orders/finish_order.dart';
 import 'package:projeto/back/customer/get_cep.dart';
 import 'package:projeto/back/customer/get_cliente.dart';
@@ -17,14 +19,12 @@ import 'package:projeto/back/saveList.dart';
 import 'package:projeto/front/components/Global/Elements/text_title.dart';
 import 'package:projeto/front/components/global/elements/alert_dialog.dart';
 import 'package:projeto/front/components/global/elements/modal.dart';
-import 'package:projeto/front/components/login_config/elements/config_button.dart';
 import 'package:projeto/front/components/login_config/elements/input.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/front/components/new_order/elements/register_button.dart';
 import 'package:projeto/front/components/new_order/elements/register_icon_button.dart';
 import 'package:projeto/front/components/order_page/elements/input_blocked.dart';
 import 'package:projeto/front/components/style.dart';
-import 'package:projeto/front/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -51,6 +51,10 @@ class CustomerSession extends StatefulWidget {
   final noProduct;
   final valordesconto;
   final empresa_id;
+  final empresa_codigo;
+  final empresa_nome;
+  final tabelapreco_id;
+  final tabelapreco;
   final local_id;
   final Function(String) onCpfAtualizado;
   final Function(String) onTelAtualizado;
@@ -77,6 +81,10 @@ class CustomerSession extends StatefulWidget {
     this.email,
     this.valordesconto,
     this.empresa_id,
+    this.empresa_codigo,
+    this.empresa_nome,
+    this.tabelapreco_id,
+    this.tabelapreco,
     this.local_id,
     required this.onCpfAtualizado,
     required this.onTelAtualizado,
@@ -100,7 +108,9 @@ class CustomerSessionState extends State<CustomerSession> {
         widget.pessoaid,
         vendedorId,
         double.parse(substituirVirgulaPorPonto(valordescontoController.text)) ??
-            0.0);
+            0.0,
+        empresaid,
+        tabelapreco_id);
   }
 
   late BuildContext modalContext;
@@ -114,7 +124,10 @@ class CustomerSessionState extends State<CustomerSession> {
       vendedorId = '',
       empresa_codigo = '',
       empresa_nome = '',
-      empresa_id = '';
+      empresa_id = '',
+      empresaid = '',
+      tableprice = '',
+      tabelapreco_id = '';
   //bool permNovoPedido = homeKey.currentState?.permNovoPedido ?? false;
   bool isCheckedCPF = true,
       isLoading = true,
@@ -129,6 +142,8 @@ class CustomerSessionState extends State<CustomerSession> {
       permEditarCliente = false,
       permAplicarDesconto = false,
       permNovoPedido = false;
+
+  int flagprivilegiado = 0, flagpermitiralterartabela = 0;
 
   final _cepcontroller = TextEditingController();
   final _complementocontroller = TextEditingController();
@@ -146,6 +161,7 @@ class CustomerSessionState extends State<CustomerSession> {
   final vendedorController = TextEditingController();
   final valordescontoController = TextEditingController();
   final empresaController = TextEditingController();
+  final tabelaController = TextEditingController();
 
   // final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
@@ -157,6 +173,7 @@ class CustomerSessionState extends State<CustomerSession> {
 
   List<OrdersDetailsEndpoint> orders = [];
   List<CompanyList> company = [];
+  List<ListTablePrices> tables_price = [];
   List<Map<String, dynamic>> clienteFiltrado = [];
 
   String substituirVirgulaPorPonto(String texto) {
@@ -226,6 +243,229 @@ class CustomerSessionState extends State<CustomerSession> {
             padding: EdgeInsets.all(Style.height_15(context)),
             child: Column(
               children: [
+                // Em COnstrução 🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // if (widget.empresa_id.isEmpty)
+                    //   Container(
+                    //     child: PopupMenuButton<String>(
+                    //       itemBuilder: (BuildContext context) =>
+                    //           buildMenuItemsCompany(company),
+                    //       onSelected: (value) async {
+                    //         if (value != '') {
+                    //           setState(() {
+                    //             empresa_id = value;
+                    //             // Busca o nome da empresa correspondente ao ID selecionado
+                    //             final selectedCompany = company.firstWhere(
+                    //               (company) => company.empresa_id == value,
+                    //             );
+                    //             empresa_nome = selectedCompany?.empresa_nome ??
+                    //                 ''; // Atualiza o nome
+                    //             empresa_codigo = selectedCompany?.empresa_codigo ??
+                    //                 ''; // Atualiza o nome
+                    //           });
+                    //           setState(() {
+                    //             empresa_id = value;
+                    //           });
+                    //         } else {
+                    //           setState(() {
+                    //             empresa_id = '';
+                    //             empresa_nome = '';
+                    //             empresa_codigo = '';
+                    //           });
+                    //         }
+                    //       },
+                    //       child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.start,
+                    //           crossAxisAlignment: CrossAxisAlignment.center,
+                    //           children: [
+                    //             Icon(
+                    //               Icons.arrow_drop_down_rounded,
+                    //               color: Theme.of(context).colorScheme.primary,
+                    //               size: Style.height_20(context),
+                    //             ),
+                    //             SizedBox(
+                    //               width: Style.height_2(context),
+                    //             ),
+                    //             Container(
+                    //               width: Style.width_180(context),
+                    //               child: Text(
+                    //                 empresa_nome.isEmpty
+                    //                     ? 'Selecione a empresa'
+                    //                     : '${empresa_codigo} - ${empresa_nome}',
+                    //                 style: TextStyle(
+                    //                   color: Style.primaryColor,
+                    //                   fontWeight: FontWeight.bold,
+                    //                   fontSize: Style.height_12(context),
+                    //                 ),
+                    //                 //textAlign: TextAlign.center,
+                    //                 overflow: TextOverflow
+                    //                     .clip, // corta o texto no limite da largura
+                    //                 softWrap:
+                    //                     true, // permite a quebra de linha conforme necessário
+                    //               ),
+                    //             )
+                    //           ]),
+                    //     ),
+                    //   )
+                    // else
+                    //   Container(
+                    //     width: Style.width_180(context),
+                    //     child: Text(
+                    //       '${empresa_codigo} - ${empresa_nome}',
+                    //       style: TextStyle(
+                    //         color: Style.primaryColor,
+                    //         fontWeight: FontWeight.bold,
+                    //         fontSize: Style.height_12(context),
+                    //       ),
+                    //       //textAlign: TextAlign.center,
+                    //       overflow:
+                    //           TextOverflow.clip, // corta o texto no limite da largura
+                    //       softWrap:
+                    //           true, // permite a quebra de linha conforme necessário
+                    //     ),
+                    //   ),
+                    // if (flagpermitiralterartabela == '1')
+                    //   Row(
+                    //     children: [
+                    //       SizedBox(
+                    //         height: Style.height_30(context),
+                    //         child: PopupMenuButton<String>(
+                    //           itemBuilder: (BuildContext context) =>
+                    //               buildMenuItemsTPrice(tables_price),
+                    //           onSelected: (value) async {
+                    //             setState(() {
+                    //               tableprice = value;
+                    //             });
+                    //             await DataServiceTablePriceId.fetchDataTablePriceId(
+                    //                 context, urlBasic, tableprice);
+                    //             setState(() {
+                    //               tableprice = value;
+                    //               fetchDataTablePriceId();
+                    //             });
+                    //           },
+                    //           child: Row(children: [
+                    //             Icon(
+                    //               Icons.arrow_drop_down_rounded,
+                    //               color: Style.primaryColor,
+                    //               size: Style.height_20(context),
+                    //             ),
+                    //             SizedBox(
+                    //               width: Style.height_2(context),
+                    //             ),
+                    //             Container(
+                    //               width: Style.width_150(context),
+                    //               child: Text(
+                    //                 tableprice.isEmpty
+                    //                     ? 'Tabela de Preço'
+                    //                     : tableprice,
+                    //                 style: TextStyle(
+                    //                   color: Style.primaryColor,
+                    //                   fontWeight: FontWeight.bold,
+                    //                   fontSize: Style.height_12(context),
+                    //                 ),
+                    //                 //textAlign: TextAlign.center,
+                    //                 overflow: TextOverflow
+                    //                     .clip, // corta o texto no limite da largura
+                    //                 softWrap:
+                    //                     true, // permite a quebra de linha conforme necessário
+                    //               ),
+                    //             ),
+                    //           ]),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   )
+                    // else
+                    //   Row(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     children: [
+                    //       Container(
+                    //         // width: 150,
+                    //         child: Text(
+                    //           tableprice,
+                    //           style: TextStyle(
+                    //             color: Style.quarantineColor,
+                    //             fontWeight: FontWeight.bold,
+                    //             fontSize: Style.height_12(context),
+                    //           ),
+                    //           textAlign: TextAlign.center,
+                    //           overflow: TextOverflow
+                    //               .clip, // corta o texto no limite da largura
+                    //           softWrap:
+                    //               true, // permite a quebra de linha conforme necessário
+                    //         ),
+                    //       )
+                    //     ],
+                    //   ),
+
+                    if (empresaid != '')
+                      Container(
+                          width: Style.width_150(context),
+                          child: InputBlocked(
+                            value:
+                                '${widget.empresa_codigo} - ${widget.empresa_nome}',
+                          ))
+                    else
+                      Container(
+                        width: Style.width_150(context),
+                        child: Input(
+                          controller: empresaController,
+                          text: 'Empresa',
+                          type: TextInputType.text,
+                          textAlign: TextAlign.left,
+                          IconButton: IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                isLoadingIconButton = true;
+                              });
+                              await searchCompany(empresaController.text);
+                              setState(() {
+                                isLoadingIconButton = false;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.search,
+                              color: Style.primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    if (flagpermitiralterartabela != 1)
+                      Container(
+                          width: Style.width_150(context),
+                          child: InputBlocked(
+                            value: tabelaController.text,
+                          ))
+                    else
+                      Container(
+                        width: Style.width_150(context),
+                        child: Input(
+                          controller: tabelaController,
+                          text: 'Tabela de Preço',
+                          type: TextInputType.text,
+                          textAlign: TextAlign.left,
+                          IconButton: IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                isLoadingIconButton = true;
+                              });
+                              await searchTablePrice('');
+                              setState(() {
+                                isLoadingIconButton = false;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.search,
+                              color: Style.primaryColor,
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
+                ),
                 Input(
                   text: 'CPF / CNPJ do Cliente',
                   type: TextInputType.text,
@@ -584,6 +824,8 @@ class CustomerSessionState extends State<CustomerSession> {
                                     ibge,
                                     _emailcontroller.text,
                                     _ufcontroller.text,
+                                    widget.empresa_id,
+                                    widget.tabelapreco_id,
                                     double.parse(substituirVirgulaPorPonto(
                                             valordescontoController.text)) ??
                                         0.0,
@@ -903,10 +1145,19 @@ class CustomerSessionState extends State<CustomerSession> {
     });
   }
 
+  Future<void> _loadSavedEmpresaID() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String savedEmpresaID = sharedPreferences.getString('empresa_id') ?? '';
+    setState(() {
+      empresaid = savedEmpresaID;
+    });
+  }
+
   Future<void> loadData() async {
     await Future.wait([
       _loadSavedUrlBasic(),
       _loadSavedToken(),
+      _loadSavedEmpresaID(),
       _loadSavedIbge(),
       _loadSavedCheckCPF(),
       _loadSavedFlagGerarPedido(),
@@ -917,61 +1168,41 @@ class CustomerSessionState extends State<CustomerSession> {
       _loadSavedPermNovoPedido(),
     ]);
 
+    print(empresaid);
+    print(widget.tabelapreco_id);
+
     final hasInternet = await hasInternetConnection();
     final dataCustomer = await recuperarDadosCliente();
     clienteFiltrado = dataCustomer
-            .where(
-                (dataCustomer) => dataCustomer['local_id'] == widget.local_id)
-            .toList();
-        if (clienteFiltrado.isNotEmpty) {
-          setState(() {
-            cpfcontroller.text = clienteFiltrado.first['cpfcnpj'] ?? '';
-            _telefonecontatocontroller.text = clienteFiltrado.first['telefone'] ?? '';
-            _nomecontroller.text = clienteFiltrado.first['nome'] ?? '';
-            _emailcontroller.text = clienteFiltrado.first['email'] ?? '';
-            vendedorController.text = clienteFiltrado.first['vendedor_codigo'] ?? '';
-            _cepcontroller.text = clienteFiltrado.first['cep'] ?? '';
-            _logradourocontroller.text = clienteFiltrado.first['endereco'] ?? '';
-            _ufcontroller.text = clienteFiltrado.first['uf'] ?? '';
-            _bairrocontroller.text = clienteFiltrado.first['bairro'] ?? '';
-            _cidadecontroller.text = clienteFiltrado.first['cidade'] ?? '';
-            _numerocontroller.text = clienteFiltrado.first['numero'] ?? '';
-            _complementocontroller.text = clienteFiltrado.first['complemento'] ?? '';
-          });
-        }
-
-    // if (!hasInternet) {
-    //   final dataCustomer = await recuperarDadosCliente();
-    //   if (widget.local_id.isNotEmpty) {
-    //     clienteFiltrado = dataCustomer
-    //         .where(
-    //             (dataCustomer) => dataCustomer['local_id'] == widget.local_id)
-    //         .toList();
-    //     if (clienteFiltrado.isNotEmpty) {
-    //       setState(() {
-    //         cpfcontroller.text = clienteFiltrado.first['cpfcnpj'] ?? '';
-    //         _telefonecontatocontroller.text = clienteFiltrado.first['telefone'] ?? '';
-    //         _nomecontroller.text = clienteFiltrado.first['nome'] ?? '';
-    //         _emailcontroller.text = clienteFiltrado.first['email'] ?? '';
-    //         vendedorController.text = clienteFiltrado.first['vendedor_codigo'] ?? '';
-    //         _cepcontroller.text = clienteFiltrado.first['cep'] ?? '';
-    //         _logradourocontroller.text = clienteFiltrado.first['endereco'] ?? '';
-    //         _ufcontroller.text = clienteFiltrado.first['uf'] ?? '';
-    //         _bairrocontroller.text = clienteFiltrado.first['bairro'] ?? '';
-    //         _cidadecontroller.text = clienteFiltrado.first['cidade'] ?? '';
-    //         _numerocontroller.text = clienteFiltrado.first['numero'] ?? '';
-    //         _complementocontroller.text = clienteFiltrado.first['complemento'] ?? '';
-    //       });
-    //     }
-    //   } else {}
-    //   setState(() {
-    //     // _emailcontroller.text = dataCustomer['email'];
-    //   });
-    // } else {
-      await Future.wait([fetchDataOrders(), searchCompany()]);
-      await Future.wait([
-        fetchDataSeller(),
-      ]);
+        .where((dataCustomer) => dataCustomer['local_id'] == widget.local_id)
+        .toList();
+    if (clienteFiltrado.isNotEmpty) {
+      setState(() {
+        cpfcontroller.text = clienteFiltrado.first['cpfcnpj'] ?? '';
+        _telefonecontatocontroller.text =
+            clienteFiltrado.first['telefone'] ?? '';
+        _nomecontroller.text = clienteFiltrado.first['nome'] ?? '';
+        _emailcontroller.text = clienteFiltrado.first['email'] ?? '';
+        vendedorController.text =
+            clienteFiltrado.first['vendedor_codigo'] ?? '';
+        _cepcontroller.text = clienteFiltrado.first['cep'] ?? '';
+        _logradourocontroller.text = clienteFiltrado.first['endereco'] ?? '';
+        _ufcontroller.text = clienteFiltrado.first['uf'] ?? '';
+        _bairrocontroller.text = clienteFiltrado.first['bairro'] ?? '';
+        _cidadecontroller.text = clienteFiltrado.first['cidade'] ?? '';
+        _numerocontroller.text = clienteFiltrado.first['numero'] ?? '';
+        _complementocontroller.text =
+            clienteFiltrado.first['complemento'] ?? '';
+      });
+    }
+    await Future.wait([
+      fetchDataOrders(),
+      searchCompany(widget.empresa_id),
+      searchTablePrice(widget.tabelapreco_id)
+    ]);
+    await Future.wait([
+      fetchDataSeller(),
+    ]);
     //}
   }
 
@@ -1033,10 +1264,10 @@ class CustomerSessionState extends State<CustomerSession> {
     }
   }
 
-  Future<void> searchCompany() async {
+  Future<void> searchCompany(String empresa_id) async {
     try {
       var urlGetCompany = Uri.parse(
-          '''$urlBasic/ideia/core/getdata/empresa%20e%20WHERE%20(e.empresa_id%20=%20'${widget.empresa_id}'%20OR%20e.empresa_codigo%20=%20'${empresaController.text}'%20OR%20e.empresa_nome%20LIKE%20'${empresaController.text}')/''');
+          '''$urlBasic/ideia/core/getdata/empresa%20e%20WHERE%20(e.empresa_id%20=%20'${empresa_id}'%20OR%20e.empresa_codigo%20=%20'${empresaController.text}'%20OR%20e.empresa_nome%20LIKE%20'${empresaController.text}')/''');
       var response =
           await http.get(urlGetCompany, headers: {'Accept': 'text/html'});
 
@@ -1051,9 +1282,43 @@ class CustomerSessionState extends State<CustomerSession> {
           setState(() {
             empresaController.text =
                 '${company['empresa_codigo']} - ${company['empresa_nome']}';
-            empresa_id = company['empresa_id'];
+            flagpermitiralterartabela = company['flagpermitiralterartabela'] ??
+                flagpermitiralterartabela;
+            // empresaid = company['empresa_id'];
           });
-          print(empresaController.text);
+          print(flagpermitiralterartabela);
+        } else {
+          print('Lista vazia: ${response.body}');
+        }
+      } else {
+        print('${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Erro na requisição searchCompany: $e');
+    }
+  }
+
+  Future<void> searchTablePrice(String tabPrecoId) async {
+    try {
+      var urlGetCompany = Uri.parse(
+          '''$urlBasic/ideia/core/getdata/tabelapreco%20t%20WHERE%20(t.tabelapreco_id%20=%20'${tabPrecoId}'%20OR%20t.codigo%20=%20'${tabelaController.text}'%20OR%20t.nome%20LIKE%20'${tabelaController.text}')/''');
+      var response =
+          await http.get(urlGetCompany, headers: {'Accept': 'text/html'});
+
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        var dataList = jsonData['data'].keys.first;
+        var dataMap = jsonData['data'] as Map<String, dynamic>;
+
+        if (dataMap.isNotEmpty) {
+          var tabPriceList = dataMap[dataList] as List;
+          var tabPrice = tabPriceList.first;
+          setState(() {
+            tabelaController.text =
+                '${tabPrice['codigo']} - ${tabPrice['nome']}';
+            //tabelapreco_id = tabPrice['tabelapreco_id'];
+          });
+          print(tabelaController.text);
         } else {
           print('Lista vazia: ${response.body}');
         }
@@ -1066,6 +1331,26 @@ class CustomerSessionState extends State<CustomerSession> {
   }
 
   Future<void> finishOrder() async {
+    if (empresaController.text.isEmpty && tabelaController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.all(Style.SaveUrlMessagePadding(context)),
+          content: Text(
+            'Por favor, selecione a empresa e a tabela de preço para finalizar o pedido.',
+            style: TextStyle(
+              fontSize: Style.SaveUrlMessageSize(context),
+              color: Style.tertiaryColor,
+            ),
+          ),
+          backgroundColor: Style.errorColor,
+        ),
+      );
+      setState(() {
+        isLoadingIconButton = false;
+      });
+      return;
+    }
     if (isCheckedCPF == true) {
       if (cpfcontroller.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1183,7 +1468,9 @@ class CustomerSessionState extends State<CustomerSession> {
             vendedorId,
             double.parse(
                     substituirVirgulaPorPonto(valordescontoController.text)) ??
-                0.0);
+                0.0,
+            widget.empresa_id,
+            widget.tabelapreco_id);
         _openModal(context);
         setState(() {
           isLoadingIconButton = false;
@@ -1229,7 +1516,7 @@ class CustomerSessionState extends State<CustomerSession> {
           width: Style.height_150(context),
           icon: Icons.money_off_csred_rounded,
           onPressed: () async {
-            if (permAplicarDesconto == false) {
+            if (permAplicarDesconto == false && flagprivilegiado == 0) {
               showDialog(
                   context: context, builder: (_) => AlertDialogDefault());
             } else {
@@ -1245,12 +1532,171 @@ class CustomerSessionState extends State<CustomerSession> {
                   vendedorId,
                   double.parse(substituirVirgulaPorPonto(
                           valordescontoController.text)) ??
-                      0.0);
+                      0.0,
+                  widget.empresa_id,
+                  widget.tabelapreco_id);
               Navigator.of(context).pop();
             }
           },
         ),
       ]),
     );
+  }
+
+  Future<void> _loadSavedFlagPrivilegiado() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    int savedFlagPrivilegiado =
+        sharedPreferences.getInt('flagprivilegiado') ?? 0;
+    setState(() {
+      flagprivilegiado = savedFlagPrivilegiado;
+    });
+  }
+
+  Future<void> fetchDataListTablesPrice(String empresa_id) async {
+    final hasInternet = await hasInternetConnection();
+    if (!hasInternet) {
+      final listTablePricesOff = await recuperarListaTabPreco();
+      setState(() {
+        flagpermitiralterartabela = 1;
+        tables_price = listTablePricesOff;
+      });
+    } else {
+      List<ListTablePrices>? fetchedData =
+          await DataServiceListTablePrices.fetchDataListTablePrices(
+              context, urlBasic, empresa_id, token);
+      if (fetchedData != null) {
+        final listaMap = fetchedData.map((e) => e.toJson()).toList();
+        await salvarListaTabPreco(listaMap);
+        setState(() {
+          tables_price = fetchedData;
+        });
+      }
+    }
+  }
+
+  List<PopupMenuItem<String>> buildMenuItemsTPrice(
+      List<ListTablePrices> tablesPrice) {
+    List<PopupMenuItem<String>> staticItems = [
+      PopupMenuItem(
+          enabled: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Tab. Preço'),
+              Container(
+                margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Style.height_5(context)),
+                    color: Style.errorColor),
+                child: IconButton(
+                  onPressed: () {
+                    _closeModal();
+                  },
+                  icon:
+                      Image.asset('assets/images/icon_remove/icon_remove.png'),
+                  style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor)),
+                ),
+              ),
+            ],
+          )),
+    ];
+    const PopupMenuDivider();
+
+    List<PopupMenuItem<String>> dynamicItems = tablesPrice.map((tables) {
+      return PopupMenuItem<String>(
+        value: tables.nome,
+        child: Text((tables.nome).toString()),
+      );
+    }).toList();
+
+    return staticItems + dynamicItems;
+  }
+
+  List<PopupMenuItem<String>> buildMenuItemsCompany(
+      List<CompanyList> companyList) {
+    List<PopupMenuItem<String>> staticItems = [
+      PopupMenuItem(
+          enabled: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Empresa'),
+              Container(
+                margin: EdgeInsets.only(bottom: Style.height_5(context)),
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Style.height_5(context)),
+                    color: Style.errorColor),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon:
+                      Image.asset('assets/images/icon_remove/icon_remove.png'),
+                  style: ButtonStyle(
+                      iconColor: WidgetStatePropertyAll(Style.tertiaryColor)),
+                ),
+              ),
+            ],
+          )),
+    ];
+    const PopupMenuDivider();
+
+    List<PopupMenuItem<String>> dynamicItems = companyList.map((companys) {
+      return PopupMenuItem<String>(
+        value: companys.empresa_id,
+        child: Text(('${companys.empresa_codigo} - ${companys.empresa_nome}')
+            .toString()),
+        key: Key(companys.empresa_nome.toString()),
+      );
+    }).toList();
+
+    const PopupMenuDivider();
+
+    return staticItems + dynamicItems;
+  }
+
+  Future<void> fetchDataTablePriceId() async {
+    Map<String, dynamic>? fetchedDataTablePriceId =
+        await DataServiceTablePriceId.fetchDataTablePriceId(
+            context, urlBasic, tableprice);
+    if (fetchedDataTablePriceId != null) {
+      setState(() {
+        tabelapreco_id = fetchedDataTablePriceId['tabelapreco_id'] ?? '';
+      });
+    }
+  }
+
+  Future<void> fetchDataCompany({bool? ascending}) async {
+    final hasInternet = await hasInternetConnection();
+    if (!hasInternet) {
+      final listCompanyOff = await recuperarListaEmpresa();
+      setState(() {
+        company = listCompanyOff;
+      });
+    } else {
+      List<CompanyList>? fetchedData =
+          await DataServiceCompany.fetchDataCompany(
+        context,
+        urlBasic,
+        empresaid,
+      );
+
+      if (fetchedData != null) {
+        final listaMap = fetchedData.map((e) => e.toJson()).toList();
+        await salvarListaEmpresa(listaMap);
+        setState(() {
+          company = fetchedData;
+        });
+        if (empresaid.isNotEmpty) {
+          setState(() {
+            empresa_nome = company.first.empresa_nome.toString();
+            empresa_codigo = company.first.empresa_codigo.toString();
+          });
+        }
+      }
+    }
   }
 }

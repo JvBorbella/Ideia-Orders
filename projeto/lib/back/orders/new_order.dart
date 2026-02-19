@@ -46,6 +46,7 @@ class DataServiceNewOrder {
     String pessoaid,
     String tabelapreco_id,
     String empresa_id,
+    String local_id,
   ) async {
     String getUnmaskedText(String maskedText) {
       // Remove todos os caracteres não numéricos
@@ -66,9 +67,12 @@ class DataServiceNewOrder {
       'cpf': cpfDefault,
       'nome': nomeController,
       'telefone': telDefault,
-      'tabelapreco_id' : tabelapreco_id,
-      'empresa_id': empresa_id
+      'tabelapreco_id': tabelapreco_id,
+      'empresa_id': empresa_id,
+      'local_id': local_id,
     });
+
+    print(body);
 
     try {
       var response = await http.post(
@@ -79,6 +83,9 @@ class DataServiceNewOrder {
 
       if (response.statusCode == 200) {
         print('Dados enviados com sucesso');
+        final data = jsonDecode(response.body);
+        print('Dados recebidos: $data');
+        print(data['prevenda_id']);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

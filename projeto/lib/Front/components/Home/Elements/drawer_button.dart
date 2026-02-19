@@ -8,8 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CustomDrawer extends StatefulWidget {
   final empresa_nome;
   final empresa_codigo;
+  final flagprivilegiado;
 
-  const CustomDrawer({Key? key, this.empresa_nome, this.empresa_codigo});
+  const CustomDrawer({Key? key, this.empresa_nome, this.empresa_codigo, this.flagprivilegiado});
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -291,7 +292,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   children: [
                     Checkbox(
                       value: flagGerarPedido,
-                      onChanged: permCriarPedido == false
+                      onChanged: permCriarPedido == false && widget.flagprivilegiado == 0
                           ? null
                           : (value) async {
                               setState(() {
@@ -308,7 +309,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       child: Text(
                         'Gerar pedido de venda ao finalizar pré-venda',
                         style: TextStyle(
-                            color: permCriarPedido == false
+                            color: permCriarPedido == false && widget.flagprivilegiado == 0
                                 ? Style.quarantineColor
                                 : Style.primaryColor,
                             fontSize: Style.height_12(context)),
