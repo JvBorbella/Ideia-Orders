@@ -1,0 +1,78 @@
+name: projeto
+description: A new Flutter project.
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 7.5.2+35
+
+environment:
+  sdk: ">=3.1.5 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  styles:
+    git:
+      url: https://github.com/JvBorbella/styles.git
+  intl: ^0.20.2
+  flutter_svg: ^2.0.10
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  crypto: ^3.0.5
+  provider: ^6.1.2
+  item_count_number_button: ^1.9.2
+  brasil_fields: ^1.15.0
+  mask_text_input_formatter: ^2.0.0
+  flutter_multi_formatter: ^2.3.0
+  cupertino_icons: ^1.0.8
+  sunmi_printer_plus: ^4.1.0
+  path_provider: ^2.1.5
+  flutter_pdfview: ^1.4.2-beta.1
+  pdf: ^3.11.3
+  share_plus: ^7.2.1
+  barcode: ^2.2.8
+  google_fonts: ^7.0.0
+  cnpj_cpf_formatter_nullsafety: ^1.1.1
+  printing: ^5.14.2
+  device_info_plus: ^11.5.0
+  in_app_update: ^4.2.5
+  mobile_scanner: ^7.1.2
+  connectivity_plus: ^7.0.0
+  internet_connection_checker_plus: ^2.9.1+1
+  uuid: ^4.5.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  package_info_plus: ^9.0.0
+  adaptive_theme: ^3.7.2
+  brasil_datetime: ^0.4.0
+  material_symbols: ^0.0.0
+  material_symbols_icons: ^4.2928.1
+  webview_flutter: ^4.13.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.6
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/logo1.jpg
+    - assets/images/logo2.png
+    - assets/images/finish_order.png
+    - assets/images/finish_local.png
+    - assets/images/finish_network.png
+    - assets/images/icon_person/icon_person.png
+    - assets/images/icon_remove/icon_remove.png
+    - assets/images/image_card/image_card.png
+    - assets/images/image_product/Barcode.png
+    - assets/fonts/Poppins-Regular.ttf
+    - assets/fonts/RobotoMono-Regular.ttf
+    - assets/fonts/RobotoMono-Bold.ttf
+    - assets/fonts/NotoSansMono-Regular.ttf
+    - assets/fonts/SpaceMono-Regular.ttf
