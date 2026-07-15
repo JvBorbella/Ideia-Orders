@@ -7,9 +7,15 @@ class NavbarButton extends StatefulWidget {
   final IconData? icons;
   final bool? back;
   final int? returnPageQnt;
+  final VoidCallback? onPressed;
 
   const NavbarButton(
-      {super.key, this.destination, required this.icons, this.back = false, this.returnPageQnt});
+      {super.key,
+      this.destination,
+      required this.icons,
+      this.back = false,
+      this.returnPageQnt,
+      this.onPressed});
 
   @override
   State<NavbarButton> createState() => _NavbarButtonState();
@@ -34,6 +40,10 @@ class _NavbarButtonState extends State<NavbarButton> {
             GestureDetector(
               //Função que está sendo definida na página em que este código está sendo chamado
               onTap: () {
+                if (widget.onPressed != null) {
+                  widget.onPressed!();
+                  return;
+                }
                 widget.back == false
                     ? Navigator.of(context).pushReplacement(
                         MaterialPageRoute(

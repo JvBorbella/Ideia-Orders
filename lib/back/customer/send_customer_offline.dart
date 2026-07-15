@@ -80,6 +80,8 @@ class DataServiceSendCustomer {
             '',
             customerOrder[0]['email'],
             customerOrder[0]['uf'],
+            customerOrder[0]['ie'],
+            customerOrder[0]['im'],
             empresaId,
             tabelaprecoId,
             customerOrder[0]['valordesconto'],
@@ -116,8 +118,7 @@ class DataServiceSendCustomer {
                 empresaId,
                 tabelaprecoId);
 
-                await atualizarStatusCliente(localId);
-
+            await atualizarStatusCliente(localId);
           } else {
             log('Erro busca pessoa: ${responseCustomer.statusCode} - ${responseCustomer.body}');
           }
@@ -125,7 +126,7 @@ class DataServiceSendCustomer {
           log('$e');
         }
         await atualizarStatusCliente(localId);
-       // customerOrder.removeWhere((item) => item['local_id'] == localId);
+        // customerOrder.removeWhere((item) => item['local_id'] == localId);
       } catch (e) {
         log('$e');
       }

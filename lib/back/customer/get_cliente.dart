@@ -188,6 +188,8 @@ class DataServiceCliente2 {
     String endereconumero = '';
     String enderecocep = '';
     String email = '';
+    String iestadual = '';
+    String imunicipal = '';
 
     try {
       String getUnmaskedText(String maskedText) {
@@ -225,6 +227,8 @@ class DataServiceCliente2 {
               pessoaData['enderecocomplemento']?.toString() ?? '';
           uf = pessoaData['uf']?.toString() ?? '';
           email = pessoaData['emailcontato']?.toString() ?? '';
+          iestadual = pessoaData['inscricaoestadual']?.toString() ?? '';
+          imunicipal = pessoaData['inscricaomunicipal']?.toString() ?? '';
         } else {
           log('Dados não encontrados');
         }
@@ -248,7 +252,9 @@ class DataServiceCliente2 {
       'endereconumero': endereconumero,
       'enderecocomplemento': enderecocomplemento,
       'uf': uf,
-      'emailcontato': email
+      'emailcontato': email,
+      'inscricaoestadual': iestadual,
+      'inscricaomunicipal': imunicipal,
     };
   }
 }

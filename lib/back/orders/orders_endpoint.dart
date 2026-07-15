@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto/back/save_list.dart';
 import 'package:projeto/front/components/global/elements/message.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:styles/colors.dart';
 
 class OrdersEndpoint {
@@ -132,9 +133,12 @@ class DataServiceOrders {
       {bool? ascending}) async {
     List<OrdersEndpoint>? orders;
 
+    final prefs = await SharedPreferences.getInstance();
+    bool permAcessarPedidosUsuarios = prefs.getBool("actAcessarPedidosUsuarios") ?? false;
+
     try {
       var rawQuery =
-          '''prevenda%20p%20LEFT%20JOIN%20usuario%20u%20ON%20u.usuario_id%20=%20p.usuario_id%20LEFT%20JOIN%20empresa%20e%20ON%20e.empresa_id%20=%20p.empresa_id%20LEFT%20JOIN%20tabelapreco%20t%20ON%20t.tabelapreco_id%20=%20p.tabelapreco_id%20%20WHERE%20p.usuario_id%20=%20'$usuarioId'AND%20COALESCE(p.flagcancelado,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagexcluido,%200)%20%3C%3E%201%20AND%20p.`data`%20>=%20DATE_SUB(CURDATE(),%20INTERVAL%207%20DAY)/''';
+          '''prevenda%20p%20LEFT%20JOIN%20usuario%20u%20ON%20u.usuario_id%20=%20p.usuario_id%20LEFT%20JOIN%20empresa%20e%20ON%20e.empresa_id%20=%20p.empresa_id%20LEFT%20JOIN%20tabelapreco%20t%20ON%20t.tabelapreco_id%20=%20p.tabelapreco_id%20%20WHERE${permAcessarPedidosUsuarios == false ? "%20p.usuario_id%20=%20'$usuarioId'AND%20" : '%20'}COALESCE(p.flagcancelado,%200)%20%3C%3E%201%20AND%20COALESCE(p.flagexcluido,%200)%20%3C%3E%201%20AND%20p.`data`%20>=%20DATE_SUB(CURDATE(),%20INTERVAL%207%20DAY)/''';
       var urlPost = Uri.parse('$urlBasic/ideia/core/getdata/$rawQuery');
 
       var response = await http.get(urlPost, headers: {

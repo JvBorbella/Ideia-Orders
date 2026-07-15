@@ -739,7 +739,8 @@ class HomeState extends State<Home> {
                   children: [
                     DrawerButton(
                       style: ButtonStyle(
-                        iconSize: WidgetStatePropertyAll(Responsive.h(context, 25)),
+                        iconSize:
+                            WidgetStatePropertyAll(Responsive.h(context, 25)),
                         iconColor: const WidgetStatePropertyAll(
                             ColorsApp.tertiaryColor),
                         padding: WidgetStatePropertyAll(
@@ -1741,6 +1742,12 @@ class HomeState extends State<Home> {
                           'actFaturarPedidoEstoqueNegativo' &&
                       item['flag'] == 1;
                 });
+                bool acessarPedidosUsuarios = listPermissoes.any((item) {
+                  return item['formname']?.toString() == '4002' &&
+                      item['compname']?.toString() ==
+                          'actAcessarPedidosUsuarios' &&
+                      item['flag'] == 1;
+                });
                 SharedPreferences sharedPreferences =
                     await SharedPreferences.getInstance();
                 // if (criarPrevenda) {
@@ -1782,6 +1789,13 @@ class HomeState extends State<Home> {
                   await sharedPreferences.setBool(
                       'faturarPedidoEstoqueNegativo',
                       faturarPedidoEstoqueNegativo);
+                }
+                if (acessarPedidosUsuarios) {
+                  await sharedPreferences.setBool(
+                      'actAcessarPedidosUsuarios', acessarPedidosUsuarios);
+                } else {
+                  await sharedPreferences.setBool(
+                      'actAcessarPedidosUsuarios', acessarPedidosUsuarios);
                 }
               }
             }

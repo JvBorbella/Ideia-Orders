@@ -79,9 +79,6 @@ class NewOrderPage extends StatefulWidget {
 class _NewOrderPageState extends State<NewOrderPage> {
   String urlBasic = '', token = '', ibge = '', cidade = '';
 
-  final GlobalKey<CustomerSessionState> customerKey =
-      GlobalKey<CustomerSessionState>();
-
   final GlobalKey<ProductSessionState> productKey =
       GlobalKey<ProductSessionState>();
 
@@ -109,6 +106,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
       cpfInformado = '',
       telInformado = '',
       nomeInformado = '',
+      iestadual = '',
+      imunicipal = '',
       noProduct = widget.noProduct ?? '0';
 
   String empresaId = '',
@@ -167,15 +166,84 @@ class _NewOrderPageState extends State<NewOrderPage> {
     return SafeArea(
         child: PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) => Navigator.of(context)
-          .pushReplacement(
-              MaterialPageRoute(builder: (context) => const Home())),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (customerKey.currentState?.isCustomerSaved == false) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Atenção'),
+              content: const Text('A pré-venda não foi salva'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => const Home()));
+                  },
+                  child: const Text('Sair mesmo assim'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await customerKey.currentState?.saveOrder();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => const Home()));
+                    }
+                  },
+                  child: const Text('Salvar'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const Home()));
+        }
+      },
       child: Scaffold(
           body: Column(
         children: [
           Navbar(text: 'Novo pedido #PV${widget.numero}', children: [
-            const NavbarButton(
-                destination: Home(), icons: Icons.arrow_back_ios_new),
+            NavbarButton(
+                onPressed: () {
+                  if (customerKey.currentState?.isCustomerSaved == false) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Atenção'),
+                        content: const Text('A pré-venda não foi salva'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => const Home()));
+                            },
+                            child: const Text('Sair mesmo assim'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await customerKey.currentState?.saveOrder();
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: (context) => const Home()));
+                              }
+                            },
+                            child: const Text('Salvar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => const Home()));
+                  }
+                },
+                icons: Icons.arrow_back_ios_new),
             Container(
               padding: EdgeInsets.only(right: Responsive.h(context, 5)),
               child: PopupMenuButton<String>(
@@ -205,7 +273,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
                             token: token,
                             vendedor: '',
                             valordesconto: widget.valordesconto ?? 0.0,
-                            empresa: '${widget.empresaCodigo} - ${widget.empresaNome}',
+                            empresa:
+                                '${widget.empresaCodigo} - ${widget.empresaNome}',
                             products: productKey.currentState?.orders,
                             valortotal: (widget.valortotal ?? 0.0) -
                                 (widget.valordesconto ?? 0.0),
@@ -296,6 +365,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
                   cidade: _localidadecontroller.text,
                   uf: uf,
                   email: email,
+                  iestadual: iestadual ?? '',
+                  imunicipal: imunicipal ?? '',
                   prevendaid: widget.prevendaId,
                   numpedido: widget.numero.toString(),
                   noProduct: noProduct,
@@ -437,6 +508,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
       uf = data['uf'].toString();
       codigo = data['codigo'].toString();
       email = data['emailcontato'].toString();
+      iestadual = data['inscricaoestadual'].toString();
+      imunicipal = data['inscricaomunicipal'].toString();
     });
   }
 

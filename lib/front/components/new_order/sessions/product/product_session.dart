@@ -1227,30 +1227,63 @@ class ProductSessionState extends State<ProductSession> {
                       Icons.error,
                       'Selecione e grave uma tabela de preço para adicionar produtos ao pedido.');
                 } else {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProductList(
-                            localId: widget.localId,
-                            prevendaid: widget.prevendaid.toString(),
-                            pessoaid: widget.pessoaid.toString(),
-                            numpedido: widget.numpedido.toString(),
-                            pessoanome: widget.pessoanome.toString(),
-                            cpfcnpj: widget.cpfcnpj.toString(),
-                            telefone: widget.telefone.toString(),
-                            cep: widget.cep.toString(),
-                            bairro: widget.bairro.toString(),
-                            endereco: widget.endereco.toString(),
-                            complemento: widget.complemento.toString(),
-                            empresaId: widget.empresaId ?? '',
-                            empresaCodigo: widget.empresaCodigo ?? '',
-                            empresaNome: widget.empresaNome ?? '',
-                            valortotal: widget.valortotal ?? 0.0,
-                            tabelaprecoId:
-                                widget.tabelaprecoId ?? ''.toString(),
-                            valordesconto: widget.valordesconto,
-                            flagObrigarVendedor: widget.flagObrigarVendedor,
-                            flagObrigarCliente: widget.flagObrigarCliente,
-                            flagObrigarExpedicao: widget.flagObrigarExpedicao,
-                          )));
+                  void navigateToProductList() {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ProductList(
+                              localId: widget.localId,
+                              prevendaid: widget.prevendaid.toString(),
+                              pessoaid: widget.pessoaid.toString(),
+                              numpedido: widget.numpedido.toString(),
+                              pessoanome: widget.pessoanome.toString(),
+                              cpfcnpj: widget.cpfcnpj.toString(),
+                              telefone: widget.telefone.toString(),
+                              cep: widget.cep.toString(),
+                              bairro: widget.bairro.toString(),
+                              endereco: widget.endereco.toString(),
+                              complemento: widget.complemento.toString(),
+                              empresaId: widget.empresaId ?? '',
+                              empresaCodigo: widget.empresaCodigo ?? '',
+                              empresaNome: widget.empresaNome ?? '',
+                              valortotal: widget.valortotal ?? 0.0,
+                              tabelaprecoId:
+                                  widget.tabelaprecoId ?? ''.toString(),
+                              valordesconto: widget.valordesconto,
+                              flagObrigarVendedor: widget.flagObrigarVendedor,
+                              flagObrigarCliente: widget.flagObrigarCliente,
+                              flagObrigarExpedicao: widget.flagObrigarExpedicao,
+                            )));
+                  }
+
+                  if (customerKey.currentState?.isCustomerSaved == false) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Atenção'),
+                        content: const Text('A pré-venda não foi salva'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              navigateToProductList();
+                            },
+                            child: const Text('Sair mesmo assim'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await customerKey.currentState?.saveOrder();
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                                navigateToProductList();
+                              }
+                            },
+                            child: const Text('Salvar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    navigateToProductList();
+                  }
                 }
               }
             }),

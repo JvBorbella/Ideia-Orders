@@ -147,11 +147,16 @@ class CustomerSessionState extends State<CustomerSession> {
         'cidade': _cidadecontroller.text,
         'numero': _numerocontroller.text,
         'complemento': _complementocontroller.text,
+        'iestadual': _ieController.text,
+        'imunicipal': _icController.text,
         'valordesconto': double.parse(
             substituirVirgulaPorPonto(valordescontoController.text))
       };
       if (!mounted) return;
       await adicionarDadosCliente(bodyMap, context);
+      setState(() {
+        isCustomerSaved = true;
+      });
     } else {
       if (!mounted) return;
       await NewCustomer.adjustOrder(
@@ -167,6 +172,9 @@ class CustomerSessionState extends State<CustomerSession> {
           double.parse(substituirVirgulaPorPonto(valordescontoController.text)),
           empresaid,
           tabelaprecoId);
+      setState(() {
+        isCustomerSaved = true;
+      });
     }
   }
 
@@ -202,6 +210,8 @@ class CustomerSessionState extends State<CustomerSession> {
       permAplicarDesconto = false,
       permNovoPedido = false,
       hasProduct = false,
+      isCustomerSaved = true,
+      _isListening = false,
       permFaturarPedidoEstoqueNegativo = false;
 
   double descontoMaximoPermitido = 0.0;
@@ -228,6 +238,28 @@ class CustomerSessionState extends State<CustomerSession> {
   final tabelaController = TextEditingController();
   final _ieController = TextEditingController();
   final _icController = TextEditingController();
+
+  List<TextEditingController> get allControllers => [
+        _cepcontroller,
+        _complementocontroller,
+        _bairrocontroller,
+        _cidadecontroller,
+        _numerocontroller,
+        _localidadecontroller,
+        _ibgecontroller,
+        _ufcontroller,
+        _logradourocontroller,
+        cpfcontroller,
+        _nomecontroller,
+        _telefonecontatocontroller,
+        _emailcontroller,
+        vendedorController,
+        valordescontoController,
+        empresaController,
+        tabelaController,
+        _ieController,
+        _icController,
+      ];
 
   // final _cpfMaskFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
   final _telMaskFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
@@ -311,6 +343,22 @@ class CustomerSessionState extends State<CustomerSession> {
     // Se a página foi aberta já marcando que não há produto, inicia como false,
     // senão assume que já existe ao menos um produto associado.
     hasProduct = widget.noProduct != '1';
+
+    for (var controller in allControllers) {
+      controller.addListener(() {
+        if (_isListening && isCustomerSaved) {
+          setState(() {
+            isCustomerSaved = false;
+          });
+        }
+      });
+    }
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _isListening = true;
+      }
+    });
   }
 
   String formatCPFCNPJ(String cpfcnpj) {
@@ -657,6 +705,7 @@ class CustomerSessionState extends State<CustomerSession> {
                                 textAlign: TextAlign.start,
                                 text: 'I. Estadual',
                                 textInputAction: TextInputAction.unspecified,
+                                inputFormatters: [],
                                 type: TextInputType.text),
                           )
                         ],
@@ -838,6 +887,8 @@ class CustomerSessionState extends State<CustomerSession> {
                                   'cep': _cepcontroller.text,
                                   'endereco': _logradourocontroller.text,
                                   'uf': _ufcontroller.text,
+                                  'ie': _ieController.text,
+                                  'im': _icController.text,
                                   'bairro': _bairrocontroller.text,
                                   'cidade': _cidadecontroller.text,
                                   'numero': _numerocontroller.text,
@@ -864,9 +915,11 @@ class CustomerSessionState extends State<CustomerSession> {
                                     _localidadecontroller.text,
                                     _complementocontroller.text,
                                     _numerocontroller.text,
-                                    ibge,
+                                    _ibgecontroller.text,
                                     _emailcontroller.text,
                                     _ufcontroller.text,
+                                    _ieController.text,
+                                    _icController.text,
                                     widget.empresaId ?? '',
                                     tabelaprecoId,
                                     double.parse(substituirVirgulaPorPonto(
@@ -877,6 +930,7 @@ class CustomerSessionState extends State<CustomerSession> {
                               }
                               setState(() {
                                 isLoadingButton = false;
+                                isCustomerSaved = true;
                               });
                             },
                           ),
@@ -1197,7 +1251,7 @@ class CustomerSessionState extends State<CustomerSession> {
       _loadSavedUrlBasic(),
       _loadSavedToken(),
       _loadSavedEmpresaID(),
-      _loadSavedIbge(),
+      // _loadSavedIbge(),
       _loadSavedCheckCPF(),
       _loadSavedflagGerarPedido(),
       _loadSavedPermEditarPrevenda(),
@@ -1232,6 +1286,9 @@ class CustomerSessionState extends State<CustomerSession> {
           _numerocontroller.text = clienteFiltrado.first['numero'] ?? '';
           _complementocontroller.text =
               clienteFiltrado.first['complemento'] ?? '';
+          _ieController.text = clienteFiltrado.first['inscricaoestadual'] ?? '';
+          _icController.text =
+              clienteFiltrado.first['inscricaomunicipal'] ?? '';
         });
       }
     }
@@ -1435,7 +1492,7 @@ class CustomerSessionState extends State<CustomerSession> {
     }
     try {
       var urlGet = Uri.parse(
-          "$urlBasic/ideia/core/getdata/(SELECT%20p.pessoa_id,%20p.nome,%20p.telefone,%20p.cpf,%20p.cnpj,%20p.endereco,%20p.enderecocep,%20p.uf,%20p.enderecobairro,%20p.endereconumero,%20p.enderecocomplemento,%20p.emailcontato,%20c.nome%20AS%20enderecocidade%20FROM%20pessoa%20p%20LEFT%20JOIN%20cidade%20c%20ON%20c.cidade_id%20=%20p.cidade_id%20WHERE%20(p.cpf%20LIKE%20'%25$searchText%25'%20OR%20p.cnpj%20LIKE%20'%25$searchText%25'%20OR%20p.nome%20like%20'%25$searchText%25'%20OR%20p.telefone%20like%20'%25$searchText%25'%20OR%20p.emailcontato%20like%20'%25$searchText%25'))%20as%20p/");
+          "$urlBasic/ideia/core/getdata/(SELECT%20p.pessoa_id,%20p.nome,%20p.telefone,%20p.cpf,%20p.cnpj,%20p.endereco,%20p.enderecocep,%20p.uf,%20p.enderecobairro,%20p.endereconumero,%20p.enderecocomplemento,%20p.emailcontato,%20p.inscricaomunicipal,%20p.inscricaoestadual,%20c.nome%20AS%20enderecocidade%20FROM%20pessoa%20p%20LEFT%20JOIN%20cidade%20c%20ON%20c.cidade_id%20=%20p.cidade_id%20WHERE%20(p.cpf%20LIKE%20'%25$searchText%25'%20OR%20p.cnpj%20LIKE%20'%25$searchText%25'%20OR%20p.nome%20like%20'%25$searchText%25'%20OR%20p.telefone%20like%20'%25$searchText%25'%20OR%20p.emailcontato%20like%20'%25$searchText%25'))%20as%20p/");
       var response = await http.get(urlGet, headers: {'Accept': 'text/html'});
 
       if (response.statusCode == 200) {
@@ -1509,8 +1566,9 @@ class CustomerSessionState extends State<CustomerSession> {
                     _numerocontroller.text = cliente['endereconumero'] ?? '';
                     _complementocontroller.text =
                         cliente['enderecocomplemento'] ?? '';
+                    _ieController.text = cliente['inscricaoestadual'] ?? '';
+                    _icController.text = cliente['inscricaomunicipal'] ?? '';
                   });
-                  log('${cliente['pessoa_id']}');
                   Navigator.of(context).pop();
                 },
                 shape: const Border(
@@ -1717,6 +1775,8 @@ class CustomerSessionState extends State<CustomerSession> {
                   'cidade': _cidadecontroller.text,
                   'numero': _numerocontroller.text,
                   'complemento': _complementocontroller.text,
+                  'iestadual': _ieController.text,
+                  'imunicipal': _icController.text,
                   'valordesconto': double.parse(
                       substituirVirgulaPorPonto(valordescontoController.text))
                 };

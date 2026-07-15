@@ -29,6 +29,8 @@ class NewCustomer {
       String ibge,
       String emailController,
       String uf,
+      String ie,
+      String im,
       String empresaId,
       String tabelaprecoId,
       double valordesconto,
@@ -135,6 +137,8 @@ class NewCustomer {
                                         ibge,
                                         emailController,
                                         uf,
+                                        ie,
+                                        im,
                                         prevendaid,
                                         pessoaid,
                                         vendedorId,
@@ -254,6 +258,8 @@ class NewCustomer {
               ibge,
               emailController,
               uf,
+              ie,
+              im,
               prevendaid,
               pessoaid,
               vendedorId,
@@ -345,6 +351,8 @@ class NewCustomer {
       String ibge,
       String emailController,
       String uf,
+      String ie,
+      String im,
       String prevendaId,
       String pessoaId,
       String vendedorId,
@@ -377,7 +385,10 @@ class NewCustomer {
       'codigocidade': ibge,
       'email': emailController,
       'uf': uf,
+      'inscricaoestadual': ie,
+      'inscricaomunicipal': im,
     });
+
     try {
       var response = await http.post(
         urlPost,
